@@ -2,7 +2,6 @@ class_name Sprite
 extends Sprite2D
 
 var gameView: GameView
-var startButton: ProjectStartButton
 var spriteScript: Dictionary[int, Dictionary] = {
 	0: {
 		&"block": &"event_start",
@@ -33,9 +32,20 @@ var spriteScript: Dictionary[int, Dictionary] = {
 # This holds all the ScriptBlocks under the block name
 # Ex: &"event_start": [ScriptBlock, ScriptBlock]
 var topLevelBlocks: Dictionary[StringName, Array] = {}
+var scriptsCompiled := false
 
 func _ready() -> void:
-	startButton.startProject.connect(startProject)
+	gameView.event.connect(receivedEvent)
+
+func receivedEvent(blockName: StringName) -> void:
+	if !scriptsCompiled: compileAll()
+	if !topLevelBlocks.has(blockName): return
+	for i: ScriptBlock in topLevelBlocks[blockName]:
+		runStack(i)
+
+# For block parsing
+
+func compileAll() -> void:
 	# Compile scripts and define top-level blocks
 	for i: int in spriteScript:
 		if !spriteScript[i][&"top"]: continue
@@ -45,12 +55,6 @@ func _ready() -> void:
 			topLevelBlocks[blockName] = []
 		# Top level block will be added to the category
 		topLevelBlocks[blockName].append(compileStack(i))
-
-func startProject() -> void:
-	for i: ScriptBlock in topLevelBlocks[&"event_start"]:
-		runStack(i)
-
-# For block parsing
 
 func compileStack(blockID: int) -> ScriptBlock:
 	var rawBlock: Dictionary = spriteScript[blockID]

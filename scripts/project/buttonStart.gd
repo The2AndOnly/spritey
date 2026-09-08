@@ -1,11 +1,9 @@
-class_name ProjectStartButton
 extends Button
 
-@warning_ignore("unused_signal")
-signal startProject()
+@export var gameView: GameView
 
 func _ready() -> void:
 	pressed.connect(onPress)
 
 func onPress() -> void:
-	startProject.emit()
+	gameView.event.emit(&"event_start")

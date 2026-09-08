@@ -3,6 +3,7 @@ extends Button
 
 var previewTexture: Texture2D
 var sprite: Sprite
+var editor: Editor
 
 @onready var textureMargin: MarginContainer = MarginContainer.new()
 @onready var texture: TextureRect = TextureRect.new()
@@ -24,4 +25,4 @@ func _ready() -> void:
 	pressed.connect(onPress)
 
 func onPress() -> void:
-	owner.selectedSprite = sprite
+	editor.selectedSprite = sprite
