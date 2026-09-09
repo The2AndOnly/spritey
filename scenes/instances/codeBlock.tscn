@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://pskgxv2e6pjo"]
+
+[ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/editor/blockShape.gd" id="1_gtp8a"]
+[ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/editor/blockTheme.gd" id="3_avub8"]
+[ext_resource type="Theme" uid="uid://bxh8j3gnclchu" path="res://themes/blockThemeDarkBlue.tres" id="3_cp11l"]
+
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305]
+anchors_preset = -1
+anchor_left = 0.22900002
+anchor_top = 0.21800001
+anchor_right = 0.354
+anchor_bottom = 0.296
+offset_left = 0.3199768
+offset_top = -0.4400177
+offset_right = -0.6799927
+offset_bottom = 0.32000732
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="shape" type="Control" parent="." unique_id=2067203640]
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("1_gtp8a")
+metadata/_edit_use_anchors_ = true
+
+[node name="content" type="MarginContainer" parent="." unique_id=588179317]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="theme" type="HBoxContainer" parent="content" unique_id=1261424088]
+layout_mode = 2
+theme = ExtResource("3_cp11l")
+script = ExtResource("3_avub8")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label3" type="Label" parent="content/theme" unique_id=2144761323]
+layout_mode = 2
+text = "glide"
+
+[node name="LineEdit" type="LineEdit" parent="content/theme" unique_id=514144403]
+layout_mode = 2
+text = "2"
+
+[node name="Label2" type="Label" parent="content/theme" unique_id=1627958743]
+layout_mode = 2
+text = "seconds to"
+
+[node name="OptionButton" type="OptionButton" parent="content/theme" unique_id=889064555]
+layout_mode = 2
+item_count = 3
+popup/item_0/text = "random position"
+popup/item_0/id = 0
+popup/item_1/text = "pointer"
+popup/item_1/id = 1
+popup/item_2/text = "Sprite1"
+popup/item_2/id = 2

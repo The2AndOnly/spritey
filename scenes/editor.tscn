@@ -67,6 +67,7 @@ editor = NodePath("..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -94,7 +95,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
 
 [node name="clear" type="ColorRect" parent="sprites/SubViewportContainer/GameView" unique_id=826513618]
@@ -173,7 +174,6 @@ gameView = NodePath("../SubViewportContainer/GameView")
 metadata/_edit_use_anchors_ = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -201,7 +201,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1354, 859)
-render_target_update_mode = 0
+render_target_update_mode = 4
 
 [node name="clear" type="ColorRect" parent="scripts/SubViewportContainer/ScriptView" unique_id=1757129253]
 anchors_preset = 15

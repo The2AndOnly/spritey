@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1gqrmg8dg477"
-path="res://.godot/imported/keyDouble.png-a65346ae017419e9f57e9a5afc015332.ctex"
+uid="uid://bwysmlv10sjeu"
+path="res://.godot/imported/dropdownSelection.png-0803c4dcc3dbc665bf22b3fb1bcf4248.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/keyDouble.png"
-dest_files=["res://.godot/imported/keyDouble.png-a65346ae017419e9f57e9a5afc015332.ctex"]
+source_file="res://textures/dropdownSelection.png"
+dest_files=["res://.godot/imported/dropdownSelection.png-0803c4dcc3dbc665bf22b3fb1bcf4248.ctex"]
 
 [params]
 
