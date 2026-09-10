@@ -5,10 +5,13 @@
 [ext_resource type="Script" uid="uid://jxs1kkb13lbb" path="res://scripts/editor/buttonNewSprite.gd" id="4_q68jb"]
 [ext_resource type="Script" uid="uid://b6lrotmsxgnnu" path="res://scripts/project/buttonStart.gd" id="4_xg7d5"]
 [ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/buttonEditorView.gd" id="5_xg7d5"]
-[ext_resource type="PackedScene" uid="uid://pskgxv2e6pjo" path="res://scenes/instances/codeBlock.tscn" id="6_eqbpn"]
+[ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
+bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
 [node name="editor" type="Control" unique_id=1205298598]
 layout_mode = 3
@@ -204,6 +207,7 @@ size = Vector2i(1354, 859)
 render_target_update_mode = 4
 
 [node name="clear" type="ColorRect" parent="scripts/SubViewportContainer/ScriptView" unique_id=1757129253]
+z_index = -999
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -212,12 +216,31 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
-[node name="CodeBlock" parent="scripts/SubViewportContainer/ScriptView" unique_id=114259305 instance=ExtResource("6_eqbpn")]
-anchor_left = 0.133
-anchor_top = 0.381
-anchor_right = 0.43988484
-anchor_bottom = 0.47800002
-offset_left = -0.08200073
-offset_top = -0.27905273
-offset_right = 0.39593506
-offset_bottom = 0.39794922
+[node name="blockSelector" type="ScrollContainer" parent="scripts" unique_id=1761487375]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.022395832
+anchor_top = 0.16111112
+anchor_right = 0.25052083
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+horizontal_scroll_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="scripts/blockSelector" unique_id=1017231571]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+script = ExtResource("6_eqbpn")

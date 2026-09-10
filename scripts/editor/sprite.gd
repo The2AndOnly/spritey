@@ -5,10 +5,8 @@ var gameView: GameView
 var spriteScript: Dictionary[int, Dictionary] = {
 	0: {
 		&"block": &"event_start",
-		&"parent": null,
 		&"top": true,
-		&"next": 1,
-		&"inputs": null
+		&"next": 1
 	},
 	1: {
 		&"block": &"trans_setX",
@@ -23,13 +21,12 @@ var spriteScript: Dictionary[int, Dictionary] = {
 		&"block": &"trans_setY",
 		&"parent": 1,
 		&"top": false,
-		&"next": null,
 		&"inputs": [
 			[1, [0, "-300"]]
 		]
 	}
 }
-# This holds all the CompiledBlocks under the block name
+# This holds all the CompiledBlocks with the block name
 # Ex: &"event_start": [CompiledBlock, CompiledBlock]
 var topLevelBlocks: Dictionary[StringName, Array] = {}
 var scriptsCompiled := false
@@ -60,9 +57,9 @@ func compileStack(blockID: int) -> CompiledBlock:
 	var rawBlock: Dictionary = spriteScript[blockID]
 	var compiledBlock: CompiledBlock = CompiledBlock.new()
 	compiledBlock.definition = Callable(self, rawBlock[&"block"])
-	if rawBlock[&"inputs"]: compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
+	if rawBlock.has(&"inputs"): compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
 	# Compile next block in stack
-	if rawBlock[&"next"]:
+	if rawBlock.has(&"next"):
 		compiledBlock.nextBlock = compileStack(rawBlock[&"next"])
 	return compiledBlock
 
@@ -95,6 +92,8 @@ func castType(type: int, value: String) -> Variant:
 			return value
 		3: # positive integer
 			return abs(int(value))
+		4: # positive float
+			return abs(float(value))
 	return null
 
 # Block definitions

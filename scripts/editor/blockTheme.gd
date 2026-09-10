@@ -1,8 +1,5 @@
 extends HBoxContainer
 
-func _ready() -> void:
-	configureProperties()
-
 func configureProperties() -> void:
 	for i: Control in get_children():
 		if i is LineEdit:
@@ -20,9 +17,10 @@ func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
 	lineEdit.clear_button_enabled = false
 	lineEdit.caret_blink = true
 	lineEdit.keep_editing_on_text_submit = false
+	lineEdit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if !searchBar:
 		lineEdit.expand_to_text_length = true
-		lineEdit.custom_minimum_size = Vector2(60.0, 0.0)
+		lineEdit.custom_minimum_size = Vector2(60.0, 55.0)
 		lineEdit.custom_maximum_size = Vector2(-1.0, 55.0)
 
 func setOptionButtonProperties(optionButton: OptionButton) -> void:
@@ -30,6 +28,8 @@ func setOptionButtonProperties(optionButton: OptionButton) -> void:
 	optionButton.selected = 0
 	optionButton.search_bar_enabled = true
 	optionButton.search_bar_fuzzy_search_enabled = false
+	optionButton.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	optionButton.custom_minimum_size = Vector2(60.0, 55.0)
 	optionButton.custom_maximum_size = Vector2(-1.0, 55.0)
 
 func optionsOpened(optionButton: OptionButton) -> void:

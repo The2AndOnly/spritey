@@ -18,7 +18,8 @@ func _input(event: InputEvent) -> void:
 			else:
 				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	# Grab blocks
-	if Input.is_action_just_pressed(&"leftMouse") and Input.get_current_cursor_shape() == Input.CURSOR_HELP:
-		Input.set_custom_mouse_cursor(GRABBING, Input.CURSOR_HELP, Vector2(16.0, 16.0))
-	if Input.is_action_just_released(&"leftMouse"):
-		Input.set_custom_mouse_cursor(GRAB, Input.CURSOR_HELP, Vector2(16.0, 16.0))
+	if Input.get_current_cursor_shape() == Input.CURSOR_HELP:
+		if Input.is_action_just_pressed(&"leftMouse"):
+			Input.set_custom_mouse_cursor(GRABBING, Input.CURSOR_HELP, Vector2(16.0, 16.0))
+		if Input.is_action_just_released(&"leftMouse"):
+			Input.set_custom_mouse_cursor(GRAB, Input.CURSOR_HELP, Vector2(16.0, 16.0))
