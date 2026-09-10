@@ -29,8 +29,8 @@ var spriteScript: Dictionary[int, Dictionary] = {
 		]
 	}
 }
-# This holds all the ScriptBlocks under the block name
-# Ex: &"event_start": [ScriptBlock, ScriptBlock]
+# This holds all the CompiledBlocks under the block name
+# Ex: &"event_start": [CompiledBlock, CompiledBlock]
 var topLevelBlocks: Dictionary[StringName, Array] = {}
 var scriptsCompiled := false
 
@@ -40,7 +40,7 @@ func _ready() -> void:
 func receivedEvent(blockName: StringName) -> void:
 	if !scriptsCompiled: compileAll()
 	if !topLevelBlocks.has(blockName): return
-	for i: ScriptBlock in topLevelBlocks[blockName]:
+	for i: CompiledBlock in topLevelBlocks[blockName]:
 		runStack(i)
 
 # For block parsing
@@ -56,9 +56,9 @@ func compileAll() -> void:
 		# Top level block will be added to the category
 		topLevelBlocks[blockName].append(compileStack(i))
 
-func compileStack(blockID: int) -> ScriptBlock:
+func compileStack(blockID: int) -> CompiledBlock:
 	var rawBlock: Dictionary = spriteScript[blockID]
-	var compiledBlock: ScriptBlock = ScriptBlock.new()
+	var compiledBlock: CompiledBlock = CompiledBlock.new()
 	compiledBlock.definition = Callable(self, rawBlock[&"block"])
 	if rawBlock[&"inputs"]: compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
 	# Compile next block in stack
@@ -66,8 +66,8 @@ func compileStack(blockID: int) -> ScriptBlock:
 		compiledBlock.nextBlock = compileStack(rawBlock[&"next"])
 	return compiledBlock
 
-func runStack(startBlock: ScriptBlock) -> void:
-	var block: ScriptBlock = startBlock
+func runStack(startBlock: CompiledBlock) -> void:
+	var block: CompiledBlock = startBlock
 	block = block.nextBlock # Skip the top-level block
 	# Stops once it reaches a block with nextBlock set to null
 	while block:
