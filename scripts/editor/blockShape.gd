@@ -2,68 +2,115 @@
 class_name BlockShape
 extends Control
 
-@export var block_color: Color = Color("0061cc"):
+enum blockShapes {
+	STACK,
+	EVENT
+}
+# The horizontal minimum size
+var minimumSizes: Dictionary[blockShapes, float] = {
+	blockShapes.STACK: 145.0,
+	blockShapes.EVENT: 250.0
+}
+# Determines which parts of the block can connect
+# [top connector, bottom connector]
+# Both false means the block is a reporter
+var connectors: Dictionary[blockShapes, Array] = {
+	blockShapes.STACK: [true, true],
+	blockShapes.EVENT: [false, true]
+}
+
+@export var blockColor: Color = Color("636363ff"):
 	set(value):
-			block_color = value
-			queue_redraw() # Forces editor update on change
-@export var corner_radius: float = 10.0:
-	set(value):
-			corner_radius = value
+			blockColor = value
 			queue_redraw()
-@export var notch_width: float = 60.0:
+@export var blockShape: blockShapes = blockShapes.STACK:
 	set(value):
-			notch_width = value
+			blockShape = value
 			queue_redraw()
-@export var notch_height: float = 15.0:
-	set(value):
-			notch_height = value
-			queue_redraw()
+var cr: float = 10.0 # Corner radius
+var notchWidth: float = 60.0
+var notchHeight: float = 15.0
+var notchDistance: float = 30.0 # Distance from left of block
+const angleRight: float = PI * 1.5
+const angleDown: float = PI * 2.0
+const angleLeft: float = PI * 0.5
+# Up angle is PI
 
 func _ready() -> void:
 	resized.connect(queue_redraw)
 
 func _draw() -> void:
-	var w: float = size.x
-	var h: float = size.y
-	var r: float = corner_radius
-	var pts: PackedVector2Array = PackedVector2Array()
+	match blockShape:
+		blockShapes.STACK:
+			shapeStack()
+		blockShapes.EVENT:
+			shapeEvent()
 
-	# 1. Top-Left Rounded Corner Arc (180° to 270°)
-	pts.append_array(_create_arc_points(Vector2(r, r), r, PI, 1.5 * PI))
-
-	# 2. Top Notch
-	pts.append(Vector2(30, 0))
-	pts.append(Vector2(30 + notch_width / 3, notch_height))
-	pts.append(Vector2(30 + ((notch_width / 3) * 2), notch_height))
-	pts.append(Vector2(30 + notch_width, 0))
-
-	# 3. Top-Right Corner Arc (270° to 360°)
-	pts.append_array(_create_arc_points(Vector2(w - r, r), r, 1.5 * PI, 2.0 * PI))
-
-	# 4. Bottom-Right Corner Arc (0° to 90°)
-	pts.append_array(_create_arc_points(Vector2(w - r, h - r), r, 0.0, 0.5 * PI))
-
-	# 5. Bottom Notch Indent
-	pts.append(Vector2(30 + notch_width, h))
-	pts.append(Vector2(30 + ((notch_width / 3) * 2), h + notch_height))
-	pts.append(Vector2(30 + notch_width / 3, h + notch_height))
-	pts.append(Vector2(30, h))
-
-	# 6. Bottom-Left Corner Arc (90° to 180°)
-	pts.append_array(_create_arc_points(Vector2(r, h - r), r, 0.5 * PI, PI))
-
-	# Fill geometry
-	draw_polygon(pts, PackedColorArray([block_color]))
-	
-	# Draw smooth outline
-	pts.append(pts[0]) # Close path loop
-	draw_polyline(pts, block_color.darkened(0.2), 2.0)
-
-# Helper function to generate arc points along a radius
-func _create_arc_points(center: Vector2, radius: float, start_angle: float, end_angle: float, segments: int = 4) -> PackedVector2Array:
+# For drawing curved lines
+func drawArc(center: Vector2, radius: float, angleStart: float, angleEnd: float, detail: int = 4) -> PackedVector2Array:
 	var arc: PackedVector2Array = PackedVector2Array()
-	for i in range(segments + 1):
-		var t: float = float(i) / float(segments)
-		var angle: float = lerp(start_angle, end_angle, t)
-		arc.append(center + Vector2(cos(angle), sin(angle)) * radius)
+	for i: int in range(detail + 1):
+		var angle: float = lerp(angleStart, angleEnd, i / float(detail))
+		arc.append(center + (Vector2(cos(angle), sin(angle)) * radius))
 	return arc
+
+func shapeStack() -> void:
+	var points: PackedVector2Array = PackedVector2Array()
+	
+	# Top left corner
+	points.append_array(drawArc(Vector2(cr, cr), cr, PI, angleRight))
+	
+	# Top notch (indent)
+	points.append(Vector2(notchDistance, 0.0))
+	points.append(Vector2(notchDistance + notchWidth / 3.0, notchHeight))
+	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), notchHeight))
+	points.append(Vector2(notchDistance + notchWidth, 0.0))
+	
+	# Top right corner
+	points.append_array(drawArc(Vector2(size.x - cr, cr), cr, angleRight, angleDown))
+	
+	# Bottom right corner
+	points.append_array(drawArc(Vector2(size.x - cr, size.y - cr), cr, 0.0, angleLeft))
+	
+	# Bottom notch (protrusion)
+	points.append(Vector2(notchDistance + notchWidth, size.y))
+	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), size.y + notchHeight))
+	points.append(Vector2(notchDistance + notchWidth / 3.0, size.y + notchHeight))
+	points.append(Vector2(notchDistance, size.y))
+	
+	# Bottom left corner
+	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
+	
+	# Fill and outline
+	points.append(points[0])
+	draw_polygon(points, PackedColorArray([blockColor]))
+	draw_polyline(points, blockColor.darkened(0.2), 2.0)
+
+func shapeEvent() -> void:
+	var points: PackedVector2Array = PackedVector2Array()
+	var roundedTopWidth: float = 100.0
+	
+	# Rounded top
+	points.append_array(drawArc(Vector2(50.0, 0.0), 50.0, PI, angleRight, 10))
+	points.append(Vector2(roundedTopWidth, -50.0))
+	points.append_array(drawArc(Vector2(roundedTopWidth + 50.0, 0.0), 50.0, angleRight, angleDown, 10))
+	
+	# Top right corner
+	points.append_array(drawArc(Vector2(size.x - cr, cr), cr, angleRight, angleDown))
+	
+	# Bottom right corner
+	points.append_array(drawArc(Vector2(size.x - cr, size.y - cr), cr, 0.0, angleLeft))
+	
+	# Bottom notch (protrusion)
+	points.append(Vector2(notchDistance + notchWidth, size.y))
+	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), size.y + notchHeight))
+	points.append(Vector2(notchDistance + notchWidth / 3.0, size.y + notchHeight))
+	points.append(Vector2(notchDistance, size.y))
+	
+	# Bottom left corner
+	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
+	
+	# Fill and outline
+	points.append(points[0])
+	draw_polygon(points, PackedColorArray([blockColor]))
+	draw_polyline(points, blockColor.darkened(0.2), 2.0)

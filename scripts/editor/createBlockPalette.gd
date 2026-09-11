@@ -5,12 +5,15 @@ const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 @export var scriptView: SubViewport
 
 var blockOrder: Array[StringName] = [
+	&"event_start",
 	&"trans_setPosition",
 	&"trans_setPositionOption",
 	&"trans_setX",
 	&"trans_setY",
 	&"trans_glideToPosition",
-	&"trans_glideToOption"
+	&"trans_glideToOption",
+	&"test_emptyStack",
+	&"test_emptyEvent"
 ]
 
 func _ready() -> void:
@@ -31,5 +34,4 @@ func blockGuiInput(event: InputEvent, blockName: StringName) -> void:
 		var block: CodeBlock = CODE_BLOCK.instantiate()
 		block.blockName = blockName
 		block.scriptView = scriptView
-		block.custom_minimum_size.y = randf_range(20.0, 200.0)
 		scriptView.add_child(block)

@@ -1,18 +1,21 @@
 class_name CodeBlock
 extends MarginContainer
 
-# These are only for the instance scene
+@export_group("for instance scene")
 @export var content: HBoxContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
+@export var shapeNode: BlockShape
+@export var bonusInputEvent: Control
 
 ## If true, the block acts as a preview in the block selector palette
 var preview := false
-## For layering
 var scriptView: SubViewport
 var blockName: StringName
 var mouseTouching := false
+## The offset from the mouse when started dragging
 var initialOffset: Vector2 = Vector2.ZERO
+## Prevents dragging if the inital mouse click was outside the block
 var dragDisabled := false
 ## Structure of the block
 var blockStructure: Dictionary = {}
@@ -63,6 +66,19 @@ func _ready() -> void:
 					options.block = self
 					if preview: options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					content.add_child(options)
+	
+	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
+	shapeNode.blockShape = blockStructure[&"shape"]
+	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
+	# Set snapping detectors enabled/disabled for block shape
+	topDetection.monitoring = shapeNode.connectors[blockStructure[&"shape"]][0]
+	topDetection.monitorable = shapeNode.connectors[blockStructure[&"shape"]][0]
+	bottomDetection.monitoring = shapeNode.connectors[blockStructure[&"shape"]][1]
+	bottomDetection.monitorable = shapeNode.connectors[blockStructure[&"shape"]][1]
+	
+	# Set bonus inputs for block shape
+	bonusInputEvent.visible = blockStructure[&"shape"] == BlockShape.blockShapes.EVENT
+	bonusInputEvent.mouse_default_cursor_shape = mouse_default_cursor_shape
 	
 	content.configureProperties()
 
@@ -178,7 +194,7 @@ func showPreview() -> void:
 		snapPreview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var previewShape: BlockShape = BlockShape.new()
 		previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		previewShape.block_color = Color("ffffff28")
+		previewShape.blockColor = Color("ffffff28")
 		snapPreview.add_child(previewShape)
 		# Add sibling for layering purposes
 		detectedBlock.add_sibling(snapPreview)
@@ -213,26 +229,26 @@ func onResize() -> void:
 	bottomDetection.position.y = size.y
 
 func detectBlockSnap() -> void:
-	for i: Area2D in bottomDetection.get_overlapping_areas():
-		# Don't snap to the top of a block if there is a block attached below this one
-		if childBlock: break
-		if i.is_in_group(&"blockSnapTop"):
-			detectedBlock = i.get_parent()
-			# Don't snap to the top of a block if it already has a parent
-			if detectedBlock.parentBlock: break
-			# Succeeded all checks
-			detectedSnapPos = 1
-			showPreview()
-			return
-	for i: Area2D in topDetection.get_overlapping_areas():
-		# Don't snap to the bottom of a block if there is a block attached above this one
-		if parentBlock: break
-		if i.is_in_group(&"blockSnapBottom"):
-			detectedBlock = i.get_parent()
-			# Succeeded all checks
-			detectedSnapPos = -1
-			showPreview()
-			return
+	# Don't snap to the top of a block if there is a block attached below this one
+	if bottomDetection.monitoring and !childBlock:
+		for i: Area2D in bottomDetection.get_overlapping_areas():
+			if i.is_in_group(&"blockSnapTop"):
+				detectedBlock = i.get_parent()
+				# Don't snap to the top of a block if it already has a parent
+				if detectedBlock.parentBlock: break
+				# Succeeded all checks
+				detectedSnapPos = 1
+				showPreview()
+				return
+	# Don't snap to the bottom of a block if there is a block attached above this one
+	if topDetection.monitoring and !parentBlock:
+		for i: Area2D in topDetection.get_overlapping_areas():
+			if i.is_in_group(&"blockSnapBottom"):
+				detectedBlock = i.get_parent()
+				# Succeeded all checks
+				detectedSnapPos = -1
+				showPreview()
+				return
 	# No possible snaps detected
 	# Fix any affected stacks if dragging away from preview in middle of stack
 	if detectedBlock:
