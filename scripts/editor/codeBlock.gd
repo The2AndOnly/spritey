@@ -174,14 +174,14 @@ func showPreview() -> void:
 	if !detectedBlock: return
 	if snapPreview == null:
 		snapPreview = MarginContainer.new()
-		snapPreview.z_index = -1
 		snapPreview.custom_minimum_size = Vector2(size.x, size.y)
 		snapPreview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var previewShape: BlockShape = BlockShape.new()
 		previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		previewShape.block_color = Color("616161")
+		previewShape.block_color = Color("ffffff28")
 		snapPreview.add_child(previewShape)
-		scriptView.add_child(snapPreview)
+		# Add sibling for layering purposes
+		detectedBlock.add_sibling(snapPreview)
 	# Position preview
 	snapPreview.global_position = detectedBlock.global_position
 	if detectedSnapPos == 1:

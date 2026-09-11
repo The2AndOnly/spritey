@@ -28,6 +28,7 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("1_gtp8a")
+block_color = Color(0, 0.3866665, 0.8, 1)
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
