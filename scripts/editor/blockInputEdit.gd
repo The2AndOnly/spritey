@@ -14,4 +14,3 @@ func _ready() -> void:
 
 func onType(_newText: String) -> void:
 	block.size.x = 0.0
-	print(get_minimum_size())

@@ -15,6 +15,7 @@ anchor_right = 0.076000005
 anchor_bottom = 0.079
 offset_right = -0.9200134
 offset_bottom = -0.32000732
+offset_transform_enabled = true
 mouse_filter = 0
 mouse_default_cursor_shape = 16
 script = ExtResource("1_avub8")

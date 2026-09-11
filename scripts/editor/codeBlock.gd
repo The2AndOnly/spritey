@@ -1,24 +1,30 @@
 class_name CodeBlock
 extends MarginContainer
 
-# There are only for the instance scene
+# These are only for the instance scene
 @export var content: HBoxContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
 
-# If true, the block acts as a preview in the block selector palete
-@export var preview := false
-@export var blockName: StringName
+## If true, the block acts as a preview in the block selector palette
+var preview := false
+## For layering
+var scriptView: SubViewport
+var blockName: StringName
 var mouseTouching := false
 var initialOffset: Vector2 = Vector2.ZERO
 var dragDisabled := false
-# Structure of the block
+## Structure of the block
 var blockStructure: Dictionary = {}
-# Which side of another block it can be connected to while dragging
-# -1 = bottom, 0 = none, 1 = top
+## Which side of another block it can be connected to while dragging | -1 = bottom, 0 = none, 1 = top
 var detectedSnapPos: int = 0
-# Which block it can be connected to while dragging
+## Which block it can be connected to while dragging
 var detectedBlock: CodeBlock = null
+## Block connected beneath this one
+var childBlock: CodeBlock = null
+## Block connected above this one
+var parentBlock: CodeBlock = null
+var snapPreview: MarginContainer = null
 
 func _ready() -> void:
 	if preview:
@@ -32,6 +38,7 @@ func _ready() -> void:
 		blockStructure = BlockStructures.structures[blockName]
 	
 	# Build the block's labels and inputs
+	if blockStructure.size() == 0: return
 	for i: Variant in blockStructure[&"structure"]:
 		# Labels
 		if i is String:
@@ -65,24 +72,136 @@ func _process(_delta: float) -> void:
 		if ((!mouseTouching) and (initialOffset == Vector2.ZERO)) or dragDisabled:
 			dragDisabled = true
 			return
+		# Initial drag
 		if initialOffset == Vector2.ZERO:
 			initialOffset = global_position - get_global_mouse_position()
+			setToFront()
+		# While dragging
 		global_position = get_global_mouse_position() + initialOffset
+		if childBlock: childBlock.moveWithParent(false)
+		# Dragging will disconnect from parent
+		if parentBlock:
+			parentBlock.childBlock = null
+			parentBlock = null
+			setToFront()
 		detectBlockSnap()
 	else:
 		if initialOffset != Vector2.ZERO:
-			blockReleased()
+			blockReleased(true)
 		initialOffset = Vector2.ZERO
 		dragDisabled = false
 
-func blockReleased() -> void:
+func blockReleased(topToBottom: bool) -> void:
+	# Snap to detected block and set parent-child relationship
 	if detectedBlock:
-		# Snap to detected block
 		global_position = detectedBlock.global_position
 		if detectedSnapPos == 1:
+			# Snapped as parent, on top of other block
 			global_position.y -= size.y
+			childBlock = detectedBlock
+			detectedBlock.parentBlock = self
 		else:
+			# Snapped as child, below other block
 			global_position.y += detectedBlock.size.y
+			parentBlock = detectedBlock
+			setStackToFront()
+			# If that block already had a child, then re-order the stack to fit between
+			if parentBlock.childBlock:
+				var lowest: CodeBlock = getLowestInStack()
+				var oldChild: CodeBlock = parentBlock.childBlock
+				lowest.childBlock = oldChild
+				oldChild.parentBlock = lowest
+				oldChild.moveWithParent(false)
+			parentBlock.childBlock = self
+	# Fix any offset from previewif dropping in middle of stack
+	if detectedBlock:
+		detectedBlock.getHighestInStack().processOffset(null)
+	detectedBlock = null
+	detectedSnapPos = 0
+	removePreview()
+	# Child blocks follow with snap
+	if topToBottom:
+		if childBlock: childBlock.moveWithParent(true)
+	# Parent blocks follow with snap
+	else:
+		if parentBlock: parentBlock.moveWithChild()
+
+# If the block above this one moves, re-position
+# Release is for the purpose of the bottom block detecting if the stack should connect on release
+func moveWithParent(release: bool) -> void:
+	global_position = parentBlock.global_position
+	global_position.y += parentBlock.size.y
+	if childBlock:
+		childBlock.moveWithParent(release)
+	else:
+		# If no child block, this block is in charge of detecting if the bottom of the stack can attach
+		if release:
+			if detectedSnapPos == 1:
+				blockReleased(false)
+		else:
+			detectBlockSnap()
+# If the block below this one moves, re-position
+func moveWithChild() -> void:
+	global_position = childBlock.global_position
+	global_position.y -= size.y
+	if parentBlock: parentBlock.moveWithChild()
+
+# Get the top block with no parent in the stack
+func getHighestInStack() -> CodeBlock:
+	if parentBlock:
+		return parentBlock.getHighestInStack()
+	else:
+		return self
+# Get the bottom block with no child in the stack
+func getLowestInStack() -> CodeBlock:
+	if childBlock:
+		return childBlock.getLowestInStack()
+	else:
+		return self
+
+# Blocks are layered by child order, not with z_index
+func setToFront() -> void:
+	scriptView.move_child(self, -1)
+	if childBlock: childBlock.setToFront()
+func setStackToFront() -> void:
+	if parentBlock:
+		parentBlock.setStackToFront()
+	else:
+		setToFront()
+
+# Snap preview
+func showPreview() -> void:
+	if !detectedBlock: return
+	if snapPreview == null:
+		snapPreview = MarginContainer.new()
+		snapPreview.z_index = -1
+		snapPreview.custom_minimum_size = Vector2(size.x, size.y)
+		snapPreview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var previewShape: BlockShape = BlockShape.new()
+		previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		previewShape.block_color = Color("616161")
+		snapPreview.add_child(previewShape)
+		scriptView.add_child(snapPreview)
+	# Position preview
+	snapPreview.global_position = detectedBlock.global_position
+	if detectedSnapPos == 1:
+		# On top of other block
+		snapPreview.global_position.y -= snapPreview.size.y
+	else:
+		# Below other block
+		snapPreview.global_position.y += detectedBlock.size.y
+		# Shift blocks if placing in middle of another stack
+		if detectedBlock.childBlock:
+			detectedBlock.childBlock.offset_transform_position.y = snapPreview.size.y
+			detectedBlock.getHighestInStack().processOffset(detectedBlock.childBlock)
+func removePreview() -> void:
+	if snapPreview:
+		snapPreview.queue_free()
+# Expected to be called from top-level block with one block offset
+func processOffset(affected: CodeBlock) -> void:
+	if parentBlock:
+		if self != affected: offset_transform_position = parentBlock.offset_transform_position
+	if childBlock: childBlock.processOffset(affected)
 
 func mouseEntered() -> void:
 	mouseTouching = true
@@ -95,14 +214,29 @@ func onResize() -> void:
 
 func detectBlockSnap() -> void:
 	for i: Area2D in bottomDetection.get_overlapping_areas():
+		# Don't snap to the top of a block if there is a block attached below this one
+		if childBlock: break
 		if i.is_in_group(&"blockSnapTop"):
 			detectedBlock = i.get_parent()
+			# Don't snap to the top of a block if it already has a parent
+			if detectedBlock.parentBlock: break
+			# Succeeded all checks
 			detectedSnapPos = 1
+			showPreview()
 			return
 	for i: Area2D in topDetection.get_overlapping_areas():
+		# Don't snap to the bottom of a block if there is a block attached above this one
+		if parentBlock: break
 		if i.is_in_group(&"blockSnapBottom"):
 			detectedBlock = i.get_parent()
+			# Succeeded all checks
 			detectedSnapPos = -1
+			showPreview()
 			return
+	# No possible snaps detected
+	# Fix any affected stacks if dragging away from preview in middle of stack
+	if detectedBlock:
+		detectedBlock.getHighestInStack().processOffset(null)
 	detectedBlock = null
 	detectedSnapPos = 0
+	removePreview()

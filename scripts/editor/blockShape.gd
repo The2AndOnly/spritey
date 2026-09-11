@@ -1,4 +1,5 @@
 @tool
+class_name BlockShape
 extends Control
 
 @export var block_color: Color = Color("0061cc"):
