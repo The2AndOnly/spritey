@@ -16,6 +16,9 @@ var mouseTouching := false
 var focused := false
 ## The offset from the mouse when started dragging
 var initialOffset: Vector2 = Vector2.ZERO
+## Original mouse position when started dragging
+var initialMousePos: Vector2 = Vector2.ZERO
+var dragDistance: float = 0.0
 ## Prevents dragging if the inital mouse click was outside the block
 var dragDisabled := false
 ## Structure of the block
@@ -75,7 +78,6 @@ func _ready() -> void:
 					content.add_child(options)
 	
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
-	defaultColor = shapeNode.blockColor
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
 	# Set snapping detectors enabled/disabled for block shape
@@ -85,6 +87,8 @@ func _ready() -> void:
 	bottomDetection.monitoring = connectors[1]
 	bottomDetection.monitorable = connectors[1]
 	
+	defaultColor = shapeNode.blockColor
+	content.blockColor = defaultColor
 	content.configureProperties()
 
 # Drag behavior
@@ -96,12 +100,14 @@ func _process(_delta: float) -> void:
 		if ((!mouseTouching) and (initialOffset == Vector2.ZERO)) or dragDisabled:
 			dragDisabled = true
 			return
-		# Initial drag
+		# Initial drag / click
 		if initialOffset == Vector2.ZERO:
 			initialOffset = global_position - get_global_mouse_position()
-			setToFront()
+			initialMousePos = get_global_mouse_position()
+			getHighestInStack().setToFront()
+		dragDistance = get_global_mouse_position().distance_to(initialMousePos)
 		# Don't do anything until the mouse moves
-		if (global_position - get_global_mouse_position()) == initialOffset:
+		if dragDistance == 0.0:
 			return
 		# While dragging
 		global_position = get_global_mouse_position() + initialOffset
@@ -111,11 +117,18 @@ func _process(_delta: float) -> void:
 			parentBlock.childBlock = null
 			parentBlock = null
 			setToFront()
+		# If the lowest block is trying to connect, then don't detect snapping
+		if getLowestInStack() != self:
+			if getLowestInStack().detectedBlock: return
 		detectBlockSnap()
 	else:
-		if initialOffset != Vector2.ZERO:
+		# Left mouse isn't pressed
+		if dragDistance > 0.0:
+			if !mouseTouching: shapeNode.blockColor = defaultColor
 			blockReleased(true)
 		initialOffset = Vector2.ZERO
+		initialMousePos = Vector2.ZERO
+		dragDistance = 0.0
 		dragDisabled = false
 
 func blockReleased(topToBottom: bool) -> void:
@@ -131,7 +144,6 @@ func blockReleased(topToBottom: bool) -> void:
 			# Snapped as child, below other block
 			global_position.y += detectedBlock.size.y + 2.0
 			parentBlock = detectedBlock
-			setStackToFront()
 			# If that block already had a child, then re-order the stack to fit between
 			if parentBlock.childBlock:
 				var lowest: CodeBlock = getLowestInStack()
@@ -140,6 +152,8 @@ func blockReleased(topToBottom: bool) -> void:
 				oldChild.parentBlock = lowest
 				oldChild.moveWithParent(false)
 			parentBlock.childBlock = self
+	# Layering
+	getHighestInStack().setToFront()
 	# Fix any offset from previewif dropping in middle of stack
 	if detectedBlock:
 		detectedBlock.getHighestInStack().processOffset(null)
@@ -162,6 +176,8 @@ func moveWithParent(release: bool) -> void:
 		childBlock.moveWithParent(release)
 	else:
 		# If no child block, this block is in charge of detecting if the bottom of the stack can attach
+		if getHighestInStack() != self:
+			if getHighestInStack().detectedBlock: return
 		if release:
 			if detectedSnapPos == 1:
 				blockReleased(false)
@@ -190,11 +206,6 @@ func getLowestInStack() -> CodeBlock:
 func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
-func setStackToFront() -> void:
-	if parentBlock:
-		parentBlock.setStackToFront()
-	else:
-		setToFront()
 
 # Snap preview
 func showPreview() -> void:
@@ -213,10 +224,10 @@ func showPreview() -> void:
 	# Position preview
 	snapPreview.global_position = detectedBlock.global_position
 	if detectedSnapPos == 1:
-		# On top of other block
+		# On top of stack
 		snapPreview.global_position.y -= snapPreview.size.y + 2.0
 	else:
-		# Below other block
+		# Below other block, or in middle of stack
 		snapPreview.global_position.y += detectedBlock.size.y + 2.0
 		# Shift blocks if placing in middle of another stack
 		if detectedBlock.childBlock:
@@ -261,26 +272,36 @@ func detectBlockSnap() -> void:
 	removePreview()
 
 func mouseEntered() -> void:
-	# Don't allow interaction while focused on another block
+	# Don't allow interaction while focused on another block (ignore this rule if preview)
 	if (!preview) and get_viewport().gui_get_focus_owner():
 		if get_viewport().gui_get_focus_owner().get_parent() != content: return
+	# Don't allow interaction if initial click was outside block
+	if dragDisabled: return
 	mouseTouching = true
+	# Don't allow interaction if dragging (but still allow mouseTouching to change)
+	if dragDistance > 0.0: return
 	if !focused:
 		shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
 	# Enable content interaction
 	if !preview: content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_INHERITED
+
 func mouseExited() -> void:
 	mouseTouching = false
+	# Don't allow exit if dragging (but still allow mouseTouching to change)
+	if dragDistance > 0.0: return
 	if !focused:
 		shapeNode.blockColor = defaultColor
 		# Disable content interaction
 		content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
+
 func focusExit() -> void:
 	focused = false
 	if !mouseTouching: shapeNode.blockColor = defaultColor
+
 func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 	if event.is_action_pressed(&"leftMouse"):
 		if !mouseTouching: mouseEntered()
 		clicked.emit()
+
 func onResize() -> void:
 	bottomDetection.position.y = size.y

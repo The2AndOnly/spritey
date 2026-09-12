@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://dih4uj3a0raie" path="res://scripts/editor/codeBlock.gd" id="1_avub8"]
 [ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/editor/blockShape.gd" id="1_gtp8a"]
 [ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/editor/blockTheme.gd" id="3_avub8"]
-[ext_resource type="Theme" uid="uid://bxh8j3gnclchu" path="res://themes/blockThemeDarkBlue.tres" id="3_cp11l"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ncklg"]
 size = Vector2(68, 33)
@@ -47,7 +46,6 @@ metadata/_edit_lock_ = true
 layout_mode = 2
 mouse_filter = 2
 mouse_behavior_recursive = 1
-theme = ExtResource("3_cp11l")
 script = ExtResource("3_avub8")
 metadata/_edit_use_anchors_ = true
 
