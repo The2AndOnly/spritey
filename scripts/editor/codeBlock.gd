@@ -6,7 +6,7 @@ extends MarginContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
 @export var shapeNode: BlockShape
-@export var bonusInputEvent: Control
+@export var grabArea: Area2D
 
 ## If true, the block acts as a preview in the block selector palette
 var preview := false
@@ -29,13 +29,13 @@ var childBlock: CodeBlock = null
 var parentBlock: CodeBlock = null
 var snapPreview: MarginContainer = null
 
+signal clicked()
+
 func _ready() -> void:
-	if preview:
-		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	else:
-		mouse_entered.connect(mouseEntered)
-		mouse_exited.connect(mouseExited)
-		resized.connect(onResize)
+	grabArea.mouse_entered.connect(mouseEntered)
+	grabArea.mouse_exited.connect(mouseExited)
+	grabArea.input_event.connect(inputEvent)
+	resized.connect(onResize)
 	
 	if BlockStructures.structures.has(blockName):
 		blockStructure = BlockStructures.structures[blockName]
@@ -64,6 +64,7 @@ func _ready() -> void:
 						options.add_item(blockStructure[i][j])
 					options.selected = blockStructure[i][2]
 					options.block = self
+					options.mouse_default_cursor_shape = Control.CURSOR_HELP
 					if preview: options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					content.add_child(options)
 	
@@ -71,14 +72,15 @@ func _ready() -> void:
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
 	# Set snapping detectors enabled/disabled for block shape
-	topDetection.monitoring = shapeNode.connectors[blockStructure[&"shape"]][0]
-	topDetection.monitorable = shapeNode.connectors[blockStructure[&"shape"]][0]
-	bottomDetection.monitoring = shapeNode.connectors[blockStructure[&"shape"]][1]
-	bottomDetection.monitorable = shapeNode.connectors[blockStructure[&"shape"]][1]
+	var connectors: Array = shapeNode.connectors[blockStructure[&"shape"]]
+	topDetection.monitoring = connectors[0]
+	topDetection.monitorable = connectors[0]
+	bottomDetection.monitoring = connectors[1]
+	bottomDetection.monitorable = connectors[1]
 	
-	# Set bonus inputs for block shape
-	bonusInputEvent.visible = blockStructure[&"shape"] == BlockShape.blockShapes.EVENT
-	bonusInputEvent.mouse_default_cursor_shape = mouse_default_cursor_shape
+	## Set bonus inputs for block shape
+	#bonusInputEvent.visible = blockStructure[&"shape"] == BlockShape.blockShapes.EVENT
+	#bonusInputEvent.mouse_default_cursor_shape = mouse_default_cursor_shape
 	
 	content.configureProperties()
 
@@ -219,15 +221,6 @@ func processOffset(affected: CodeBlock) -> void:
 		if self != affected: offset_transform_position = parentBlock.offset_transform_position
 	if childBlock: childBlock.processOffset(affected)
 
-func mouseEntered() -> void:
-	mouseTouching = true
-
-func mouseExited() -> void:
-	mouseTouching = false
-
-func onResize() -> void:
-	bottomDetection.position.y = size.y
-
 func detectBlockSnap() -> void:
 	# Don't snap to the top of a block if there is a block attached below this one
 	if bottomDetection.monitoring and !childBlock:
@@ -256,3 +249,13 @@ func detectBlockSnap() -> void:
 	detectedBlock = null
 	detectedSnapPos = 0
 	removePreview()
+
+func mouseEntered() -> void:
+	mouseTouching = true
+func mouseExited() -> void:
+	mouseTouching = false
+func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
+	if event.is_action_pressed(&"leftMouse"):
+		clicked.emit()
+func onResize() -> void:
+	bottomDetection.position.y = size.y

@@ -25,13 +25,12 @@ func _ready() -> void:
 		block.offset_transform_visual_only = false
 		block.blockName = i
 		block.preview = true
-		block.gui_input.connect(blockGuiInput.bind(i))
+		block.clicked.connect(blockClicked.bind(i))
 		add_child(block)
 
-func blockGuiInput(event: InputEvent, blockName: StringName) -> void:
-	if event.is_action_pressed(&"leftMouse"):
-		# Create a new block in the script area
-		var block: CodeBlock = CODE_BLOCK.instantiate()
-		block.blockName = blockName
-		block.scriptView = scriptView
-		scriptView.add_child(block)
+func blockClicked(blockName: StringName) -> void:
+	# Create a new block in the script area
+	var block: CodeBlock = CODE_BLOCK.instantiate()
+	block.blockName = blockName
+	block.scriptView = scriptView
+	scriptView.add_child(block)

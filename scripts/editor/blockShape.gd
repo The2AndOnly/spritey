@@ -27,6 +27,8 @@ var connectors: Dictionary[blockShapes, Array] = {
 	set(value):
 			blockShape = value
 			queue_redraw()
+@export var grabShape: CollisionPolygon2D
+var points: PackedVector2Array = PackedVector2Array()
 var cr: float = 10.0 # Corner radius
 var notchWidth: float = 60.0
 var notchHeight: float = 15.0
@@ -45,6 +47,8 @@ func _draw() -> void:
 			shapeStack()
 		blockShapes.EVENT:
 			shapeEvent()
+	if !Engine.is_editor_hint():
+		if grabShape: grabShape.polygon = points
 
 # For drawing curved lines
 func drawArc(center: Vector2, radius: float, angleStart: float, angleEnd: float, detail: int = 4) -> PackedVector2Array:
@@ -55,7 +59,7 @@ func drawArc(center: Vector2, radius: float, angleStart: float, angleEnd: float,
 	return arc
 
 func shapeStack() -> void:
-	var points: PackedVector2Array = PackedVector2Array()
+	points.clear()
 	
 	# Top left corner
 	points.append_array(drawArc(Vector2(cr, cr), cr, PI, angleRight))
@@ -87,8 +91,8 @@ func shapeStack() -> void:
 	draw_polyline(points, blockColor.darkened(0.2), 2.0)
 
 func shapeEvent() -> void:
-	var points: PackedVector2Array = PackedVector2Array()
 	var roundedTopWidth: float = 100.0
+	points.clear()
 	
 	# Rounded top
 	points.append_array(drawArc(Vector2(50.0, 0.0), 50.0, PI, angleRight, 10))
