@@ -10,9 +10,10 @@ extends MarginContainer
 
 ## If true, the block acts as a preview in the block selector palette
 var preview := false
-var scriptView: SubViewport
+var editor: Editor
 var blockName: StringName
 var mouseTouching := false
+var focused := false
 ## The offset from the mouse when started dragging
 var initialOffset: Vector2 = Vector2.ZERO
 ## Prevents dragging if the inital mouse click was outside the block
@@ -28,6 +29,8 @@ var childBlock: CodeBlock = null
 ## Block connected above this one
 var parentBlock: CodeBlock = null
 var snapPreview: MarginContainer = null
+## For setting the color back when done hovering
+var defaultColor: Color
 
 signal clicked()
 
@@ -40,7 +43,7 @@ func _ready() -> void:
 	if BlockStructures.structures.has(blockName):
 		blockStructure = BlockStructures.structures[blockName]
 	
-	# Build the block's labels and inputs
+	# Read the structure to build the block's labels and inputs
 	if blockStructure.size() == 0: return
 	for i: Variant in blockStructure[&"structure"]:
 		# Labels
@@ -56,19 +59,23 @@ func _ready() -> void:
 					input.type = blockStructure[i][1]
 					input.text = blockStructure[i][2]
 					input.block = self
-					if preview: input.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					input.mouse_filter = Control.MOUSE_FILTER_PASS
 					content.add_child(input)
 				&"options":
 					var options: BlockOptions = BlockOptions.new()
-					for j: int in range(3, blockStructure[i].size()):
-						options.add_item(blockStructure[i][j])
+					var optionsList: Array = blockStructure[i][3].duplicate()
+					match blockStructure[i][1]:
+						2: optionsList.append_array(editor.signals)
+						3: optionsList.append_array(BlockStructures.keyOptions)
+					for j: String in optionsList:
+						options.add_item(j)
 					options.selected = blockStructure[i][2]
 					options.block = self
-					options.mouse_default_cursor_shape = Control.CURSOR_HELP
-					if preview: options.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					options.mouse_filter = Control.MOUSE_FILTER_PASS
 					content.add_child(options)
 	
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
+	defaultColor = shapeNode.blockColor
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
 	# Set snapping detectors enabled/disabled for block shape
@@ -78,14 +85,13 @@ func _ready() -> void:
 	bottomDetection.monitoring = connectors[1]
 	bottomDetection.monitorable = connectors[1]
 	
-	## Set bonus inputs for block shape
-	#bonusInputEvent.visible = blockStructure[&"shape"] == BlockShape.blockShapes.EVENT
-	#bonusInputEvent.mouse_default_cursor_shape = mouse_default_cursor_shape
-	
 	content.configureProperties()
 
+# Drag behavior
 func _process(_delta: float) -> void:
 	if preview: return
+	# Don't allow drag while focused, so the user can do things like select text
+	if focused: return
 	if Input.is_action_pressed(&"leftMouse"):
 		if ((!mouseTouching) and (initialOffset == Vector2.ZERO)) or dragDisabled:
 			dragDisabled = true
@@ -94,6 +100,9 @@ func _process(_delta: float) -> void:
 		if initialOffset == Vector2.ZERO:
 			initialOffset = global_position - get_global_mouse_position()
 			setToFront()
+		# Don't do anything until the mouse moves
+		if (global_position - get_global_mouse_position()) == initialOffset:
+			return
 		# While dragging
 		global_position = get_global_mouse_position() + initialOffset
 		if childBlock: childBlock.moveWithParent(false)
@@ -115,12 +124,12 @@ func blockReleased(topToBottom: bool) -> void:
 		global_position = detectedBlock.global_position
 		if detectedSnapPos == 1:
 			# Snapped as parent, on top of other block
-			global_position.y -= size.y
+			global_position.y -= size.y + 2.0
 			childBlock = detectedBlock
 			detectedBlock.parentBlock = self
 		else:
 			# Snapped as child, below other block
-			global_position.y += detectedBlock.size.y
+			global_position.y += detectedBlock.size.y + 2.0
 			parentBlock = detectedBlock
 			setStackToFront()
 			# If that block already had a child, then re-order the stack to fit between
@@ -148,7 +157,7 @@ func blockReleased(topToBottom: bool) -> void:
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
 func moveWithParent(release: bool) -> void:
 	global_position = parentBlock.global_position
-	global_position.y += parentBlock.size.y
+	global_position.y += parentBlock.size.y + 2.0
 	if childBlock:
 		childBlock.moveWithParent(release)
 	else:
@@ -161,7 +170,7 @@ func moveWithParent(release: bool) -> void:
 # If the block below this one moves, re-position
 func moveWithChild() -> void:
 	global_position = childBlock.global_position
-	global_position.y -= size.y
+	global_position.y -= size.y + 2.0
 	if parentBlock: parentBlock.moveWithChild()
 
 # Get the top block with no parent in the stack
@@ -179,7 +188,7 @@ func getLowestInStack() -> CodeBlock:
 
 # Blocks are layered by child order, not with z_index
 func setToFront() -> void:
-	scriptView.move_child(self, -1)
+	move_to_front()
 	if childBlock: childBlock.setToFront()
 func setStackToFront() -> void:
 	if parentBlock:
@@ -197,6 +206,7 @@ func showPreview() -> void:
 		var previewShape: BlockShape = BlockShape.new()
 		previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		previewShape.blockColor = Color("ffffff28")
+		previewShape.blockShape = shapeNode.blockShape
 		snapPreview.add_child(previewShape)
 		# Add sibling for layering purposes
 		detectedBlock.add_sibling(snapPreview)
@@ -204,13 +214,13 @@ func showPreview() -> void:
 	snapPreview.global_position = detectedBlock.global_position
 	if detectedSnapPos == 1:
 		# On top of other block
-		snapPreview.global_position.y -= snapPreview.size.y
+		snapPreview.global_position.y -= snapPreview.size.y + 2.0
 	else:
 		# Below other block
-		snapPreview.global_position.y += detectedBlock.size.y
+		snapPreview.global_position.y += detectedBlock.size.y + 2.0
 		# Shift blocks if placing in middle of another stack
 		if detectedBlock.childBlock:
-			detectedBlock.childBlock.offset_transform_position.y = snapPreview.size.y
+			detectedBlock.childBlock.offset_transform_position.y = snapPreview.size.y + 2.0
 			detectedBlock.getHighestInStack().processOffset(detectedBlock.childBlock)
 func removePreview() -> void:
 	if snapPreview:
@@ -251,11 +261,26 @@ func detectBlockSnap() -> void:
 	removePreview()
 
 func mouseEntered() -> void:
+	# Don't allow interaction while focused on another block
+	if (!preview) and get_viewport().gui_get_focus_owner():
+		if get_viewport().gui_get_focus_owner().get_parent() != content: return
 	mouseTouching = true
+	if !focused:
+		shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
+	# Enable content interaction
+	if !preview: content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_INHERITED
 func mouseExited() -> void:
 	mouseTouching = false
+	if !focused:
+		shapeNode.blockColor = defaultColor
+		# Disable content interaction
+		content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
+func focusExit() -> void:
+	focused = false
+	if !mouseTouching: shapeNode.blockColor = defaultColor
 func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 	if event.is_action_pressed(&"leftMouse"):
+		if !mouseTouching: mouseEntered()
 		clicked.emit()
 func onResize() -> void:
 	bottomDetection.position.y = size.y

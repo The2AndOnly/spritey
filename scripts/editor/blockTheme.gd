@@ -33,5 +33,8 @@ func setOptionButtonProperties(optionButton: OptionButton) -> void:
 	optionButton.custom_maximum_size = Vector2(-1.0, 55.0)
 
 func optionsOpened(optionButton: OptionButton) -> void:
+	# Get the search bar of the options popup
 	var lineEdits: Array[Node] = optionButton.get_popup().find_children("*", "LineEdit", true, false)
 	setLineEditProperties(lineEdits[0], true)
+	optionButton.get_popup().min_size.x = 200
+	optionButton.get_popup().max_size.y = 500

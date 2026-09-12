@@ -11,6 +11,17 @@ var block: CodeBlock
 
 func _ready() -> void:
 	text_changed.connect(onType)
+	focus_entered.connect(onFocus)
+	focus_exited.connect(onFocusExit)
+	text_submitted.connect(onSubmit)
 
 func onType(_newText: String) -> void:
 	block.size.x = 0.0
+
+func onFocus() -> void:
+	block.focused = true
+	block.getHighestInStack().setToFront()
+func onFocusExit() -> void:
+	block.focusExit()
+func onSubmit(_newText: String) -> void:
+	release_focus()

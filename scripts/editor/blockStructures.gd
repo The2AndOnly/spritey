@@ -8,15 +8,59 @@ extends Node
 # 3 = positive integer
 # 4 = positive float
 
+# OPTION ADDONS:
+# 0 = custom
+# 1 = sprites
+# 2 = events
+# 3 = keyboard keys
+
 static var categoryColors: Dictionary[StringName, Color] = {
-	&"transform": Color("0061cc"),
-	&"events": Color("c92e2eff"),
+	&"transform": Color("0050a6ff"),
+	&"events": Color("b52a2aff"),
 	&"unknown": Color("636363ff")
 }
+
+static var keyOptions: Array[String] = [
+	"space",
+	"up arrow",
+	"down arrow",
+	"left arrow",
+	"right arrow",
+	"enter",
+	"A","B","C","D","E","F","G","H","I","J","K","L","M",
+	"N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+	"0","1","2","3","4","5","6","7","8","9"
+]
 
 static var structures: Dictionary[StringName, Dictionary] = {
 	&"event_start": {
 		&"structure": ["when project started"],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"event_keyboard": {
+		&"structure": ["when", 0, "key", 1],
+		0: [&"options", 3, 0, []],
+		1: [&"options", 0, 0, ["pressed", "released"]],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"event_mouse": {
+		&"structure": ["when", 0, "mouse button", 1],
+		0: [&"options", 0, 0, ["left", "right"]],
+		1: [&"options", 0, 0, ["pressed", "released"]],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"event_receive": {
+		&"structure": ["when signal", 0, "received"],
+		0: [&"options", 2, 0, []],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"event_signal": {
+		&"structure": ["send signal", 0],
+		0: [&"options", 2, 0, []],
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
@@ -29,7 +73,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"trans_setPositionOption": {
 		&"structure": ["set position to", 0],
-		0: [&"options", 1, 0, "pointer", "random"], # input type, 1 = include sprites, default, values
+		0: [&"options", 1, 0, ["pointer", "random"]], # input type, option addon, default, values
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -56,7 +100,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"trans_glideToOption": {
 		&"structure": ["glide", 0, "seconds to", 1],
 		0: [&"input", 4, "1"],
-		1: [&"options", 1, 0, "pointer", "random position"],
+		1: [&"options", 1, 0, ["pointer", "random position"]],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},

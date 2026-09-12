@@ -3,9 +3,14 @@ extends VBoxContainer
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
 @export var scriptView: SubViewport
+@export var editor: Editor
 
 var blockOrder: Array[StringName] = [
 	&"event_start",
+	&"event_keyboard",
+	&"event_mouse",
+	&"event_receive",
+	&"event_signal",
 	&"trans_setPosition",
 	&"trans_setPositionOption",
 	&"trans_setX",
@@ -15,9 +20,19 @@ var blockOrder: Array[StringName] = [
 	&"test_emptyStack",
 	&"test_emptyEvent"
 ]
+var shapeExtraSpacing: Dictionary[BlockShape.blockShapes, float] = {
+	BlockShape.blockShapes.STACK: 0.0,
+	BlockShape.blockShapes.EVENT: 25.0
+}
 
 func _ready() -> void:
 	for i: StringName in blockOrder:
+		var extraSpacing: float = shapeExtraSpacing[BlockStructures.structures[i][&"shape"]]
+		if extraSpacing != 0.0:
+			var spacing: Control = Control.new()
+			spacing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			spacing.custom_minimum_size.y = extraSpacing
+			add_child(spacing)
 		var block: CodeBlock = CODE_BLOCK.instantiate()
 		block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		block.offset_transform_scale = Vector2(0.7, 0.7)
@@ -25,6 +40,7 @@ func _ready() -> void:
 		block.offset_transform_visual_only = false
 		block.blockName = i
 		block.preview = true
+		block.editor = editor
 		block.clicked.connect(blockClicked.bind(i))
 		add_child(block)
 
@@ -32,5 +48,5 @@ func blockClicked(blockName: StringName) -> void:
 	# Create a new block in the script area
 	var block: CodeBlock = CODE_BLOCK.instantiate()
 	block.blockName = blockName
-	block.scriptView = scriptView
+	block.editor = editor
 	scriptView.add_child(block)

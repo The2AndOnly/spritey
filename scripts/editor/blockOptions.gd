@@ -5,10 +5,15 @@ var block: CodeBlock
 
 func _ready() -> void:
 	item_selected.connect(onSelect)
-	pressed.connect(onPress)
+	focus_entered.connect(onFocus)
+	focus_exited.connect(onFocusExit)
 
 func onSelect(_item: int) -> void:
 	block.size.x = 0.0
+	release_focus()
 
-func onPress() -> void:
-	Input.set_custom_mouse_cursor(Global.ARROW, Input.CURSOR_ARROW)
+func onFocus() -> void:
+	block.focused = true
+	block.getHighestInStack().setToFront()
+func onFocusExit() -> void:
+	block.focusExit()

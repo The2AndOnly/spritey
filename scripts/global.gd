@@ -1,10 +1,5 @@
 extends Node
 
-const ARROW: Texture2D = preload("uid://ckd60idwwyam7")
-
-func _ready() -> void:
-	Input.set_custom_mouse_cursor(ARROW, Input.CURSOR_HELP)
-
 func _input(event: InputEvent) -> void:
 	# Debug toggle fullscreen
 	if event is InputEventKey:

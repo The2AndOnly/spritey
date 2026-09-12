@@ -8,13 +8,9 @@
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/scriptAreaBG.png" id="7_5tm2q"]
-[ext_resource type="Script" uid="uid://b86ay2rq0pqcb" path="res://scripts/editor/blockMouseGrab.gd" id="8_j8y2p"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_xh0pi"]
-radius = 2.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
@@ -240,14 +236,6 @@ texture = ExtResource("7_5tm2q")
 region_enabled = true
 region_rect = Rect2(0, 0, 20000, 20000)
 
-[node name="mouseGrab" type="Area2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1494990634]
-collision_layer = 2
-collision_mask = 2
-script = ExtResource("8_j8y2p")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="scripts/SubViewportContainer/ScriptView/mouseGrab" unique_id=1785832639]
-shape = SubResource("CircleShape2D_xh0pi")
-
 [node name="blockSelector" type="ScrollContainer" parent="scripts" unique_id=1761487375]
 layout_mode = 1
 anchors_preset = -1
@@ -270,10 +258,11 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("scriptView")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("scriptView", "editor")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 script = ExtResource("6_eqbpn")
 scriptView = NodePath("../../../SubViewportContainer/ScriptView")
+editor = NodePath("../../../..")

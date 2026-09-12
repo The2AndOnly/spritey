@@ -86,18 +86,19 @@ func shapeStack() -> void:
 	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
 	
 	# Fill and outline
-	points.append(points[0])
 	draw_polygon(points, PackedColorArray([blockColor]))
+	points.append(points[0])
 	draw_polyline(points, blockColor.darkened(0.2), 2.0)
 
 func shapeEvent() -> void:
+	var roundedTopHeight: float = 40.0
 	var roundedTopWidth: float = 100.0
 	points.clear()
 	
 	# Rounded top
-	points.append_array(drawArc(Vector2(50.0, 0.0), 50.0, PI, angleRight, 10))
-	points.append(Vector2(roundedTopWidth, -50.0))
-	points.append_array(drawArc(Vector2(roundedTopWidth + 50.0, 0.0), 50.0, angleRight, angleDown, 10))
+	points.append_array(drawArc(Vector2(roundedTopHeight, 0.0), roundedTopHeight, PI, angleRight, 10))
+	points.append(Vector2(roundedTopWidth, -roundedTopHeight))
+	points.append_array(drawArc(Vector2(roundedTopWidth + roundedTopHeight, 0.0), roundedTopHeight, angleRight, angleDown, 10))
 	
 	# Top right corner
 	points.append_array(drawArc(Vector2(size.x - cr, cr), cr, angleRight, angleDown))
@@ -115,6 +116,6 @@ func shapeEvent() -> void:
 	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
 	
 	# Fill and outline
-	points.append(points[0])
 	draw_polygon(points, PackedColorArray([blockColor]))
+	points.append(points[0])
 	draw_polyline(points, blockColor.darkened(0.2), 2.0)
