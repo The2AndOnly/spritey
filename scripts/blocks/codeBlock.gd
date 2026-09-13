@@ -121,9 +121,13 @@ func _process(_delta: float) -> void:
 		if childBlock: childBlock.moveWithParent(false)
 		# Dragging will disconnect from parent
 		if parentBlock:
+			var previousParent: CodeBlock = parentBlock
 			parentBlock.childBlock = null
 			parentBlock = null
 			setToFront()
+			# After disconnecting, update the two new stacks that were formed
+			previousParent.getHighestInStack().updateSpriteScript()
+			updateSpriteScript()
 		# If the lowest block is trying to connect, then don't detect snapping
 		if getLowestInStack() != self:
 			if getLowestInStack().detectedBlock: return
@@ -132,13 +136,13 @@ func _process(_delta: float) -> void:
 		# Left mouse isn't pressed
 		if dragDistance > 0.0:
 			if !mouseTouching: shapeNode.blockColor = defaultColor
-			blockReleased(true)
+			released(true)
 		initialOffset = Vector2.ZERO
 		initialMousePos = Vector2.ZERO
 		dragDistance = 0.0
 		dragDisabled = false
 
-func blockReleased(topToBottom: bool) -> void:
+func released(topToBottom: bool) -> void:
 	# Snap to detected block and set parent-child relationship
 	if detectedBlock:
 		global_position = detectedBlock.global_position
@@ -189,7 +193,7 @@ func moveWithParent(release: bool) -> void:
 			if getHighestInStack().detectedBlock: return
 		if release:
 			if detectedSnapPos == 1:
-				blockReleased(false)
+				released(false)
 		else:
 			detectBlockSnap()
 # If the block below this one moves, re-position

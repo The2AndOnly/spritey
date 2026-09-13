@@ -1,5 +1,5 @@
 class_name Sprite
-extends Sprite2D
+extends BlockDefinitions
 
 # SPRITE SCRIPT BLOCK DOCS:
 # &"block": StringName | Name of block
@@ -13,7 +13,6 @@ extends Sprite2D
 ## Input data for read type 2: [read type, option]
 ## - option is int (selected option)
 
-var gameView: GameView
 var spriteScript: Dictionary[int, Dictionary] = {}
 # This holds the compiled script, but only the top-level blocks are listed in their category
 # Ex: &"event_start": [CompiledBlock, CompiledBlock]
@@ -64,7 +63,7 @@ func runStack(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
 	block = block.nextBlock
 	# Stops once it reaches a block with nextBlock set to null, or if a block returns true
 	while block:
-		if block.definition:
+		if block.definition.is_valid():
 			if block.inputs.is_empty():
 				cancelStack = block.definition.call()
 			else:
@@ -96,23 +95,3 @@ func castType(type: int, value: String) -> Variant:
 		4: # positive float
 			return abs(float(value))
 	return null
-
-# Block definitions
-
-func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
-	if inputs[0] == 0:
-		# Any key
-		return inputs[1] != eventData[1]
-	return inputs != eventData
-
-func trans_setX(inputs: Array) -> bool:
-	position.x = gameView.getCoord(inputs[0], 0.0).x
-	return false
-
-func trans_setY(inputs: Array) -> bool:
-	position.y = gameView.getCoord(0.0, inputs[0]).y
-	return false
-
-func trans_setPosition(inputs: Array) -> bool:
-	position = gameView.getCoord(inputs[0], inputs[1])
-	return false

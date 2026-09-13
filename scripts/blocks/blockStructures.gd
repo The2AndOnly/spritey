@@ -34,6 +34,9 @@ static var keyOptions: Array[StringName] = [
 ]
 
 static var structures: Dictionary[StringName, Dictionary] = {
+	
+	## EVENTS
+	
 	&"event_start": {
 		&"structure": ["when project started"],
 		&"color": &"events",
@@ -65,6 +68,9 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
+	
+	## TRANSFORM
+	
 	&"trans_setPosition": {
 		&"structure": ["set position X:", 0, "Y:", 1],
 		0: [&"input", 1, "0"], # input type, value type, default
@@ -86,6 +92,18 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"trans_setY": {
 		&"structure": ["set Y to", 0],
+		0: [&"input", 1, "0"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"trans_changeX": {
+		&"structure": ["change X by", 0],
+		0: [&"input", 1, "0"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"trans_changeY": {
+		&"structure": ["change Y by", 0],
 		0: [&"input", 1, "0"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK

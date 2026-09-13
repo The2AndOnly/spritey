@@ -15,6 +15,8 @@ var blockOrder: Array[StringName] = [
 	&"trans_setPositionOption",
 	&"trans_setX",
 	&"trans_setY",
+	&"trans_changeX",
+	&"trans_changeY",
 	&"trans_glideToPosition",
 	&"trans_glideToOption",
 	&"test_emptyStack",

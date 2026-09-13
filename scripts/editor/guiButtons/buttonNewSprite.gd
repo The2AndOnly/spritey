@@ -18,7 +18,7 @@ func onPress() -> void:
 	sprite.texture = ICON
 	sprite.gameView = gameView
 	gameView.add_child(sprite)
-	sprite.position = gameView.getCoord(0.0, 0.0)
+	sprite.position = gameView.toLocalCoords(Vector2.ZERO)
 	
 	spriteEntry.sprite = sprite
 	editor.selectedSprite = sprite
