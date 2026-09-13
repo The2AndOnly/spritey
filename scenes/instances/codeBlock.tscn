@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://pskgxv2e6pjo"]
 
-[ext_resource type="Script" uid="uid://dih4uj3a0raie" path="res://scripts/editor/codeBlock.gd" id="1_avub8"]
-[ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/editor/blockShape.gd" id="1_gtp8a"]
-[ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/editor/blockTheme.gd" id="3_avub8"]
+[ext_resource type="Script" uid="uid://dih4uj3a0raie" path="res://scripts/blocks/codeBlock.gd" id="1_avub8"]
+[ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/blocks/blockShape.gd" id="1_gtp8a"]
+[ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/blocks/blockTheme.gd" id="3_avub8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ncklg"]
 size = Vector2(68, 33)

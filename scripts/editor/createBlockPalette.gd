@@ -49,4 +49,13 @@ func blockClicked(blockName: StringName) -> void:
 	var block: CodeBlock = CODE_BLOCK.instantiate()
 	block.blockName = blockName
 	block.editor = editor
+	block.sprite = editor.selectedSprite
+	# Assign this new block an ID
+	var i: int = 0
+	var takenIds: Array[int] = editor.selectedSprite.spriteScript.keys()
+	while true:
+		if i in takenIds: i += 1
+		else:
+			block.blockID = i
+			break
 	scriptView.add_child(block)

@@ -20,4 +20,5 @@ func onPress() -> void:
 	gameView.add_child(sprite)
 	sprite.position = gameView.getCoord(0.0, 0.0)
 	
+	spriteEntry.sprite = sprite
 	editor.selectedSprite = sprite

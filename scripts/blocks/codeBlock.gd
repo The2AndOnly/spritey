@@ -11,6 +11,10 @@ extends MarginContainer
 ## If true, the block acts as a preview in the block selector palette
 var preview := false
 var editor: Editor
+## Which sprite's script this block is a part of
+var sprite: Sprite
+## The ID of the block in a spriteScript
+var blockID: int
 var blockName: StringName
 var mouseTouching := false
 var focused := false
@@ -90,6 +94,9 @@ func _ready() -> void:
 	defaultColor = shapeNode.blockColor
 	content.blockColor = defaultColor
 	content.configureProperties()
+	
+	# Finally, add this block to the sprite's code
+	if sprite: BuildSpriteScript.updateBlock(self, sprite)
 
 # Drag behavior
 func _process(_delta: float) -> void:
@@ -166,6 +173,8 @@ func blockReleased(topToBottom: bool) -> void:
 	# Parent blocks follow with snap
 	else:
 		if parentBlock: parentBlock.moveWithChild()
+	# Finally, update this stack in the sprite's code
+	getHighestInStack().updateSpriteScript()
 
 # If the block above this one moves, re-position
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
@@ -206,6 +215,9 @@ func getLowestInStack() -> CodeBlock:
 func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
+func updateSpriteScript() -> void:
+	BuildSpriteScript.updateBlock(self, sprite)
+	if childBlock: childBlock.updateSpriteScript()
 
 # Snap preview
 func showPreview() -> void:
@@ -294,8 +306,10 @@ func mouseExited() -> void:
 		# Disable content interaction
 		content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
 
+# When finished editing one of the inputs
 func focusExit() -> void:
 	focused = false
+	getHighestInStack().updateSpriteScript()
 	if !mouseTouching: shapeNode.blockColor = defaultColor
 
 func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:

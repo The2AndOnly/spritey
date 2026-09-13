@@ -6,4 +6,5 @@ func _ready() -> void:
 	pressed.connect(onPress)
 
 func onPress() -> void:
-	gameView.event.emit(&"event_start")
+	gameView.event.emit(&"event_start", [])
+	release_focus()

@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bhqp5qjohejt3" path="res://scripts/editor/gameView.gd" id="1_ba0ut"]
 [ext_resource type="Script" uid="uid://bwbrqjjnmmsge" path="res://scripts/editor/editor.gd" id="1_q68jb"]
-[ext_resource type="Script" uid="uid://jxs1kkb13lbb" path="res://scripts/editor/buttonNewSprite.gd" id="4_q68jb"]
+[ext_resource type="Script" uid="uid://jxs1kkb13lbb" path="res://scripts/editor/guiButtons/buttonNewSprite.gd" id="4_q68jb"]
 [ext_resource type="Script" uid="uid://b6lrotmsxgnnu" path="res://scripts/project/buttonStart.gd" id="4_xg7d5"]
-[ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/buttonEditorView.gd" id="5_xg7d5"]
+[ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/guiButtons/buttonEditorView.gd" id="5_xg7d5"]
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/scriptAreaBG.png" id="7_5tm2q"]
@@ -97,12 +97,13 @@ mouse_filter = 2
 stretch = true
 metadata/_edit_use_anchors_ = true
 
-[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631]
+[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor")]
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
 render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
+editor = NodePath("../../..")
 
 [node name="clear" type="ColorRect" parent="sprites/SubViewportContainer/GameView" unique_id=826513618]
 anchors_preset = 15
