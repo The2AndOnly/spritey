@@ -3,6 +3,7 @@ extends MarginContainer
 
 @export_group("for instance scene")
 @export var content: HBoxContainer
+@export var margin: MarginContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
 @export var shapeNode: BlockShape
@@ -76,14 +77,20 @@ func _ready() -> void:
 						3: optionsList.append_array(BlockStructures.keyOptions)
 					for j: String in optionsList:
 						options.add_item(j)
-					options.selected = blockStructure[i][2]
 					options.block = self
 					options.mouse_filter = Control.MOUSE_FILTER_PASS
+					# It switches back to 0 if not deferred
+					options.call_deferred(&"select", blockStructure[i][2])
 					content.add_child(options)
 	
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
+	# Value blocks are smaller vertically, so every other block should increase in height
+	if blockStructure[&"shape"] != BlockShape.blockShapes.VALUE:
+		custom_minimum_size.y = 85.0
+		margin.add_theme_constant_override(&"margin_top", 15)
+		margin.add_theme_constant_override(&"margin_bottom", 15)
 	# Set snapping detectors enabled/disabled for block shape
 	var connectors: Array = shapeNode.connectors[blockStructure[&"shape"]]
 	topDetection.monitoring = connectors[0]

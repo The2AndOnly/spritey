@@ -4,19 +4,22 @@ extends Control
 
 enum blockShapes {
 	STACK,
-	EVENT
+	EVENT,
+	VALUE
 }
 # The horizontal minimum size
 var minimumSizes: Dictionary[blockShapes, float] = {
 	blockShapes.STACK: 145.0,
-	blockShapes.EVENT: 250.0
+	blockShapes.EVENT: 250.0,
+	blockShapes.VALUE: 100.0
 }
 # Determines which parts of the block can connect
 # [top connector, bottom connector]
-# Both false means the block is a reporter
+# Both false means the block is a value
 var connectors: Dictionary[blockShapes, Array] = {
 	blockShapes.STACK: [true, true],
-	blockShapes.EVENT: [false, true]
+	blockShapes.EVENT: [false, true],
+	blockShapes.VALUE: [false, false]
 }
 
 @export var blockColor: Color = Color("636363ff"):
@@ -47,6 +50,8 @@ func _draw() -> void:
 			shapeStack()
 		blockShapes.EVENT:
 			shapeEvent()
+		blockShapes.VALUE:
+			shapeValue()
 	if !Engine.is_editor_hint():
 		if grabShape: grabShape.polygon = points
 
@@ -112,6 +117,23 @@ func shapeEvent() -> void:
 	points.append(Vector2(notchDistance + notchWidth / 3.0, size.y + notchHeight))
 	points.append(Vector2(notchDistance, size.y))
 	
+	# Bottom left corner
+	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
+	
+	# Fill and outline
+	draw_polygon(points, PackedColorArray([blockColor]))
+	points.append(points[0])
+	draw_polyline(points, blockColor.darkened(0.2), 2.0)
+
+func shapeValue() -> void:
+	points.clear()
+	
+	# Top left corner
+	points.append_array(drawArc(Vector2(cr, cr), cr, PI, angleRight))
+	# Top right corner
+	points.append_array(drawArc(Vector2(size.x - cr, cr), cr, angleRight, angleDown))
+	# Bottom right corner
+	points.append_array(drawArc(Vector2(size.x - cr, size.y - cr), cr, 0.0, angleLeft))
 	# Bottom left corner
 	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
 	

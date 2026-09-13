@@ -14,6 +14,9 @@ func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
 	# Specific key
 	return inputs != eventData
 
+func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
+	return inputs != eventData
+
 ## TRANSFORM
 
 func trans_setX(inputs: Array) -> bool:

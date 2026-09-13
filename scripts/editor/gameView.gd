@@ -88,14 +88,21 @@ func setMousePosition() -> void:
 
 # Send input events
 func _input(inputEvent: InputEvent) -> void:
-	if editor:
-		if editor.currentView != &"sprites": return
+	if editor: if editor.currentView != &"sprites": return
+	
 	if inputEvent is InputEventKey:
 		if inputEvent.is_echo(): return
 		event.emit(&"event_keyboard", [
 			BlockStructures.keyOptions.find(keyToString(inputEvent.physical_keycode)),
 			0 if inputEvent.pressed else 1
 		])
+		return
+	
+	if inputEvent is InputEventMouseButton:
+		if inputEvent.button_index > 2: return
+		event.emit(&"event_mouse", [inputEvent.button_index - 1, 0 if inputEvent.pressed else 1])
+		return
+	
 	# In the editor, mouse movement input is handled by editor.gd
 	if editor: return
 	if inputEvent is InputEventMouseMotion:

@@ -6,7 +6,7 @@ extends BlockDefinitions
 # &"top": bool | True if this block is the top of the stack
 # &"next": int | ID of the block to run next, if missing then no block is next
 # &"inputs": Array[Array] | Maps out each input, inner array is input data
-## read type: 0=raw input, 1=reporter block, 2=options
+## read type: 0=raw input, 1=value block, 2=options
 ## Input data for read type 0: [read type, [input type, input]]
 ## - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat
 ## - input is string (raw input)

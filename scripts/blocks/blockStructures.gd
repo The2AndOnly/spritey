@@ -17,6 +17,7 @@ extends Node
 static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
 	&"events": Color("b52a2aff"),
+	&"expressions": Color("a6981eff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -44,7 +45,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"event_keyboard": {
 		&"structure": ["when", 0, "key", 1],
-		0: [&"options", 3, 0, []],
+		0: [&"options", 3, 1, []],
 		1: [&"options", 0, 0, ["pressed", "released"]],
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
@@ -66,7 +67,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["send signal", 0],
 		0: [&"options", 2, 0, []],
 		&"color": &"events",
-		&"shape": BlockShape.blockShapes.EVENT
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	
 	## TRANSFORM
@@ -123,6 +124,19 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	
+	## EXPRESSIONS
+	
+	&"exp_add": {
+		&"structure": [0, "+", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	
+	## TESTS
+	
 	&"test_emptyStack": {
 		&"structure": [],
 		&"color": &"unknown",
@@ -132,5 +146,10 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": [],
 		&"color": &"unknown",
 		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"test_emptyValue": {
+		&"structure": [],
+		&"color": &"unknown",
+		&"shape": BlockShape.blockShapes.VALUE
 	}
 }

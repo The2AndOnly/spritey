@@ -11,6 +11,7 @@ var blockOrder: Array[StringName] = [
 	&"event_mouse",
 	&"event_receive",
 	&"event_signal",
+	&"exp_add",
 	&"trans_setPosition",
 	&"trans_setPositionOption",
 	&"trans_setX",
@@ -20,16 +21,17 @@ var blockOrder: Array[StringName] = [
 	&"trans_glideToPosition",
 	&"trans_glideToOption",
 	&"test_emptyStack",
-	&"test_emptyEvent"
+	&"test_emptyEvent",
+	&"test_emptyValue"
 ]
-var shapeExtraSpacing: Dictionary[BlockShape.blockShapes, float] = {
-	BlockShape.blockShapes.STACK: 0.0,
-	BlockShape.blockShapes.EVENT: 25.0
-}
+func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
+	match shape:
+		BlockShape.blockShapes.EVENT: return 28.0
+		_: return 0.0
 
 func _ready() -> void:
 	for i: StringName in blockOrder:
-		var extraSpacing: float = shapeExtraSpacing[BlockStructures.structures[i][&"shape"]]
+		var extraSpacing: float = shapeExtraSpacing(BlockStructures.structures[i][&"shape"])
 		if extraSpacing != 0.0:
 			var spacing: Control = Control.new()
 			spacing.mouse_filter = Control.MOUSE_FILTER_IGNORE

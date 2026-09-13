@@ -7,17 +7,18 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ncklg"]
 size = Vector2(68, 33)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "topDetection", "bottomDetection", "shapeNode", "grabArea")]
-custom_minimum_size = Vector2(145, 85)
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "margin", "topDetection", "bottomDetection", "shapeNode", "grabArea")]
+custom_minimum_size = Vector2(145, 75)
 anchors_preset = -1
-anchor_right = 0.10464584
-anchor_bottom = 0.079
+anchor_right = 0.076000005
+anchor_bottom = 0.06974075
 offset_right = -0.9200134
 offset_bottom = -0.32000732
 offset_transform_enabled = true
 mouse_filter = 2
 script = ExtResource("1_avub8")
 content = NodePath("MarginContainer/content")
+margin = NodePath("MarginContainer")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
 shapeNode = NodePath("shape")
@@ -36,9 +37,9 @@ metadata/_edit_lock_ = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 15
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_bottom = 10
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
