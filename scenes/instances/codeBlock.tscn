@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" uid="uid://dih4uj3a0raie" path="res://scripts/blocks/codeBlock.gd" id="1_avub8"]
 [ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/blocks/blockShape.gd" id="1_gtp8a"]
-[ext_resource type="Theme" uid="uid://bxh8j3gnclchu" path="res://themes/blockTheme.tres" id="1_m85d7"]
 [ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/blocks/blockTheme.gd" id="3_avub8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ncklg"]
@@ -11,7 +10,7 @@ size = Vector2(68, 33)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cp11l"]
 size = Vector2(63, 100)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "margin", "topDetection", "bottomDetection", "valueDrop", "shapeNode", "grabArea")]
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "topDetection", "bottomDetection", "valueDrop", "shapeNode", "grabArea")]
 custom_minimum_size = Vector2(145, 85)
 anchors_preset = -1
 anchor_right = 0.076000005
@@ -20,10 +19,8 @@ offset_right = -0.9200134
 offset_bottom = -10.320007
 offset_transform_enabled = true
 mouse_filter = 2
-theme = ExtResource("1_m85d7")
 script = ExtResource("1_avub8")
 content = NodePath("MarginContainer/content")
-margin = NodePath("MarginContainer")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
 valueDrop = NodePath("valueDrop")
@@ -38,23 +35,6 @@ script = ExtResource("1_gtp8a")
 grabShape = NodePath("../grabArea/CollisionPolygon2D")
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
-
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=588179317]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 15
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 15
-metadata/_edit_use_anchors_ = true
-metadata/_edit_lock_ = true
-
-[node name="content" type="HBoxContainer" parent="MarginContainer" unique_id=1261424088]
-layout_mode = 2
-mouse_filter = 2
-mouse_behavior_recursive = 1
-script = ExtResource("3_avub8")
-metadata/_edit_use_anchors_ = true
 
 [node name="top" type="Area2D" parent="." unique_id=1492623312 groups=["blockSnapTop"]]
 input_pickable = false
@@ -88,3 +68,20 @@ collision_layer = 2
 collision_mask = 0
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="grabArea" unique_id=359035348]
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=588179317]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
+
+[node name="content" type="HBoxContainer" parent="MarginContainer" unique_id=1261424088]
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+script = ExtResource("3_avub8")
+metadata/_edit_use_anchors_ = true

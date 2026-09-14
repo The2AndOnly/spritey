@@ -6,6 +6,7 @@ corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+corner_detail = 4
 expand_margin_left = 4.0
 expand_margin_top = 4.0
 expand_margin_right = 4.0

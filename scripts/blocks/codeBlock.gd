@@ -3,7 +3,6 @@ extends MarginContainer
 
 @export_group("for instance scene")
 @export var content: HBoxContainer
-@export var margin: MarginContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
 @export var valueDrop: Area2D
@@ -36,8 +35,10 @@ var detectedBlock: CodeBlock = null
 var detectedInput: BlockInputEdit
 ## Block connected beneath this one
 var childBlock: CodeBlock = null
+var childValueBlocks: Array[CodeBlock]
 ## Block connected above this one
 var parentBlock: CodeBlock = null
+var parentInput: BlockInputEdit
 var snapPreview: MarginContainer = null
 ## For setting the color back when done hovering
 var defaultColor: Color
@@ -58,8 +59,6 @@ func _ready() -> void:
 		custom_minimum_size.y = 75.0
 		set_deferred(&"size:y", 0.0)
 		call_deferred(&"onResize")
-		margin.add_theme_constant_override(&"margin_top", 10)
-		margin.add_theme_constant_override(&"margin_bottom", 10)
 		valueDrop.monitoring = true
 	
 	# Read the structure to build the block's labels and inputs
@@ -86,6 +85,8 @@ func _ready() -> void:
 					detection.set_collision_layer_value(1, false)
 					detection.set_collision_layer_value(3, true)
 					detection.add_to_group(&"blockValueDrop")
+					# Decrease z-index so it doesn't interfere with GUI mouse detection
+					detection.z_index = -4096
 					input.add_child(detection)
 					var detectionShape: CollisionShape2D = CollisionShape2D.new()
 					detectionShape.shape = RectangleShape2D.new()
@@ -128,6 +129,7 @@ func _process(_delta: float) -> void:
 	if preview: return
 	# Don't allow drag while focused, so the user can do things like select text
 	if focused: return
+	
 	if Input.is_action_pressed(&"leftMouse"):
 		if ((!mouseTouching) and (initialOffset == Vector2.ZERO)) or dragDisabled:
 			dragDisabled = true
@@ -146,13 +148,17 @@ func _process(_delta: float) -> void:
 		if childBlock: childBlock.moveWithParent(false)
 		# Dragging will disconnect from parent
 		if parentBlock:
-			var previousParent: CodeBlock = parentBlock
-			parentBlock.childBlock = null
-			parentBlock = null
-			setToFront()
-			# After disconnecting, update the spriteScript for the two new stacks that were formed
-			previousParent.getHighestInStack().updateSpriteScript()
-			updateSpriteScript()
+			# Value blocks have a different method of disconnecting
+			if parentInput:
+				disconnectValueBlock()
+			else:
+				var previousParent: CodeBlock = parentBlock
+				parentBlock.childBlock = null
+				parentBlock = null
+				setToFront()
+				# After disconnecting, update the spriteScript for the two new stacks that were formed
+				previousParent.getHighestInStack().updateSpriteScript()
+				updateSpriteScript()
 		# If the lowest block is trying to connect, then don't detect snapping
 		if getLowestInStack() != self:
 			if getLowestInStack().detectedBlock: return
@@ -161,14 +167,20 @@ func _process(_delta: float) -> void:
 		if dragDistance > 0.0:
 			if !mouseTouching: shapeNode.blockColor = defaultColor
 			released(true)
-			initialOffset = Vector2.ZERO
-			initialMousePos = Vector2.ZERO
 			dragDistance = 0.0
+		initialOffset = Vector2.ZERO
+		initialMousePos = Vector2.ZERO
 		dragDisabled = false
 
+# topToBottom: If true, child blocks move when snapped
+# If false, parent blocks move when snapped
 func released(topToBottom: bool) -> void:
-	# Snap to detected block and set parent-child relationship
 	if detectedBlock:
+		# Value blocks have different behavior for inserting
+		if valueDrop.monitoring:
+			insertValueBlock()
+			return
+		# Snap to detected block and set a parent-child relationship
 		global_position = detectedBlock.global_position
 		if detectedSnapPos == 1:
 			# Snapped as parent, on top of other block
@@ -189,20 +201,58 @@ func released(topToBottom: bool) -> void:
 			parentBlock.childBlock = self
 	# Layering
 	getHighestInStack().setToFront()
-	# Fix any offset from previewif dropping in middle of stack
-	if detectedBlock:
-		detectedBlock.getHighestInStack().processOffset(null)
+	# Fix any offset from preview if dropping in middle of stack
+	getHighestInStack().processOffset(null)
 	detectedBlock = null
 	detectedSnapPos = 0
 	removePreview()
-	# Child blocks follow with snap
-	if topToBottom:
-		if childBlock: childBlock.moveWithParent(true)
-	# Parent blocks follow with snap
-	else:
-		if parentBlock: parentBlock.moveWithChild()
+	if topToBottom: if childBlock: childBlock.moveWithParent(true)
+	else: if parentBlock: parentBlock.moveWithChild()
 	# Finally, update this stack in the sprite's code
 	getHighestInStack().updateSpriteScript()
+
+# Called as a value block
+func insertValueBlock() -> void:
+	detectedBlock = null
+	if !detectedInput: return
+	detectedInput.visible = false
+	detectedInput.detectionShape.disabled = true
+	# Reparent to the block's content container
+	reparent(detectedInput.get_parent(), false)
+	detectedInput.get_parent().move_child(self, detectedInput.get_index())
+	# Set parent and child relationships
+	parentInput = detectedInput
+	parentBlock = detectedInput.block
+	parentBlock.childValueBlocks.append(self)
+	detectedInput = null
+	# Layering and updating spriteScript
+	getHighestInStack().setToFront()
+	getHighestInStack().updateSpriteScript()
+
+# Called as a value block
+func disconnectValueBlock() -> void:
+	# Reparent to the script area
+	reparent(getContentOwner().get_parent())
+	# Re-enable disconnecting input
+	parentInput.visible = true
+	parentInput.detectionShape.disabled = false
+	# Fix parent minimum size
+	# It could be a value block that got its minimum size affected by being in a content container
+	fixMinimumSize()
+	# Set parent-child relationships and layering
+	parentBlock.childValueBlocks.erase(self)
+	getContentOwner().getHighestInStack().setToFront()
+	setToFront()
+	parentBlock = null
+	parentInput = null
+
+# Starts at parent and goes up
+func fixMinimumSize() -> void:
+	if parentBlock:
+		parentBlock.custom_minimum_size = Vector2(
+			parentBlock.shapeNode.minimumSizes[blockStructure[&"shape"]], 0.0)
+		parentBlock.size = Vector2(0.0, 0.0)
+		parentBlock.fixMinimumSize()
 
 # If the block above this one moves, re-position
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
@@ -238,8 +288,15 @@ func getLowestInStack() -> CodeBlock:
 		return childBlock.getLowestInStack()
 	else:
 		return self
+# Get the highest-level block that isn't a value block
+func getContentOwner() -> CodeBlock:
+	if grabArea.monitoring and parentBlock:
+		return parentBlock.getHighestInStack()
+	else:
+		return self
 
 # Blocks are layered by child order, not with z_index
+# If isValue is true, then this is being called on a value block
 func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
@@ -335,7 +392,7 @@ func mouseEntered() -> void:
 	if !focused:
 		shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
 	# Enable content interaction
-	if !preview: content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_INHERITED
+	if !preview: content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_ENABLED
 
 func mouseExited() -> void:
 	mouseTouching = false
@@ -356,6 +413,12 @@ func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 	if event.is_action_pressed(&"leftMouse"):
 		if !mouseTouching: mouseEntered()
 		clicked.emit()
+
+func hoveringChildValue() -> bool:
+	for i: CodeBlock in childValueBlocks:
+		if i.get_global_rect().has_point(get_global_mouse_position()):
+			return true
+	return false
 
 func onResize() -> void:
 	bottomDetection.position.y = size.y
