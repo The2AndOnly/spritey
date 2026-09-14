@@ -2,6 +2,7 @@ class_name Editor
 extends Control
 
 @export var gameView: GameView
+@export var scriptView: SubViewport
 @export var mousePosLabel: Label
 const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
 

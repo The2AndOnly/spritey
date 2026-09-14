@@ -2,7 +2,6 @@ extends VBoxContainer
 
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
-@export var scriptView: SubViewport
 @export var editor: Editor
 
 var blockOrder: Array[StringName] = [
@@ -62,4 +61,4 @@ func blockClicked(blockName: StringName) -> void:
 		else:
 			block.blockID = i
 			break
-	scriptView.add_child(block)
+	editor.scriptView.add_child(block)

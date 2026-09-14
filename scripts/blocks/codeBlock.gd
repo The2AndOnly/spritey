@@ -77,22 +77,25 @@ func _ready() -> void:
 					input.type = blockStructure[i][1]
 					input.text = blockStructure[i][2]
 					input.block = self
-					input.mouse_filter = Control.MOUSE_FILTER_PASS
 					content.add_child(input)
-					# Create collision for the input so value blocks can detect it
-					var detection: Area2D = Area2D.new()
-					detection.monitoring = false
-					detection.set_collision_layer_value(1, false)
-					detection.set_collision_layer_value(3, true)
-					detection.add_to_group(&"blockValueDrop")
-					# Decrease z-index so it doesn't interfere with GUI mouse detection
-					detection.z_index = -4096
-					input.add_child(detection)
-					var detectionShape: CollisionShape2D = CollisionShape2D.new()
-					detectionShape.shape = RectangleShape2D.new()
-					detection.add_child(detectionShape)
-					input.detectionShape = detectionShape
-					input.call_deferred(&"setDetectionRect")
+					if preview:
+						input.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					else:
+						# Create collision for the input so the mouse/value blocks can detect it
+						var detection: Area2D = Area2D.new()
+						detection.monitoring = false
+						detection.set_collision_layer_value(1, false)
+						detection.set_collision_layer_value(3, true)
+						detection.add_to_group(&"blockValueDrop")
+						detection.mouse_entered.connect(input.mouseEntered)
+						detection.mouse_exited.connect(input.mouseExited)
+						detection.input_event.connect(input.inputEvent)
+						input.add_child(detection)
+						var detectionShape: CollisionShape2D = CollisionShape2D.new()
+						detectionShape.shape = RectangleShape2D.new()
+						detection.add_child(detectionShape)
+						input.detectionShape = detectionShape
+						input.call_deferred(&"setDetectionRect")
 				&"options":
 					var options: BlockOptions = BlockOptions.new()
 					var optionsList: Array = blockStructure[i][3].duplicate()
@@ -102,7 +105,7 @@ func _ready() -> void:
 					for j: String in optionsList:
 						options.add_item(j)
 					options.block = self
-					options.mouse_filter = Control.MOUSE_FILTER_PASS
+					options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					# It switches back to 0 if not deferred
 					options.call_deferred(&"select", blockStructure[i][2])
 					content.add_child(options)
@@ -381,9 +384,10 @@ func detectBlockSnap() -> void:
 	removePreview()
 
 func mouseEntered() -> void:
-	# Don't allow interaction while focused on another block (ignore this rule if preview)
-	if (!preview) and get_viewport().gui_get_focus_owner():
-		if get_viewport().gui_get_focus_owner().get_parent() != content: return
+	if !preview:
+		# Don't allow interaction while focused on another block
+		if get_viewport().gui_get_focus_owner():
+			if get_viewport().gui_get_focus_owner().get_parent() != content: return
 	# Don't allow interaction if initial click was outside block
 	if dragDisabled: return
 	mouseTouching = true
@@ -391,8 +395,6 @@ func mouseEntered() -> void:
 	if dragDistance > 0.0: return
 	if !focused:
 		shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
-	# Enable content interaction
-	if !preview: content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_ENABLED
 
 func mouseExited() -> void:
 	mouseTouching = false
@@ -400,8 +402,6 @@ func mouseExited() -> void:
 	if dragDistance > 0.0: return
 	if !focused:
 		shapeNode.blockColor = defaultColor
-		# Disable content interaction
-		content.mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
 
 # When finished editing one of the inputs
 func focusExit() -> void:

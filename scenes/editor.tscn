@@ -15,7 +15,7 @@ bg_color = Color(0.22, 0.22, 0.22, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
-[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "mousePosLabel")]
+[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -25,6 +25,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_q68jb")
 gameView = NodePath("sprites/SubViewportContainer/GameView")
+scriptView = NodePath("scripts/SubViewportContainer/ScriptView")
 mousePosLabel = NodePath("sprites/mousePosition")
 metadata/_edit_lock_ = true
 
@@ -75,6 +76,7 @@ editor = NodePath("..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -101,7 +103,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 
@@ -194,7 +196,6 @@ text = "0, 0"
 metadata/_edit_use_anchors_ = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -225,7 +226,7 @@ physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1354, 859)
-render_target_update_mode = 0
+render_target_update_mode = 4
 script = ExtResource("6_j8y2p")
 
 [node name="Camera2D" type="Camera2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1134382404]
@@ -273,11 +274,10 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("scriptView", "editor")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("editor")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 script = ExtResource("6_eqbpn")
-scriptView = NodePath("../../../SubViewportContainer/ScriptView")
 editor = NodePath("../../../..")
