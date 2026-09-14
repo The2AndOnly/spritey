@@ -2,25 +2,31 @@
 
 [ext_resource type="Script" uid="uid://dih4uj3a0raie" path="res://scripts/blocks/codeBlock.gd" id="1_avub8"]
 [ext_resource type="Script" uid="uid://bhtexs4onagvp" path="res://scripts/blocks/blockShape.gd" id="1_gtp8a"]
+[ext_resource type="Theme" uid="uid://bxh8j3gnclchu" path="res://themes/blockTheme.tres" id="1_m85d7"]
 [ext_resource type="Script" uid="uid://bf3jcwtvfyho3" path="res://scripts/blocks/blockTheme.gd" id="3_avub8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ncklg"]
 size = Vector2(68, 33)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "margin", "topDetection", "bottomDetection", "shapeNode", "grabArea")]
-custom_minimum_size = Vector2(145, 75)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cp11l"]
+size = Vector2(63, 100)
+
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "margin", "topDetection", "bottomDetection", "valueDrop", "shapeNode", "grabArea")]
+custom_minimum_size = Vector2(145, 85)
 anchors_preset = -1
 anchor_right = 0.076000005
-anchor_bottom = 0.06974075
+anchor_bottom = 0.079
 offset_right = -0.9200134
-offset_bottom = -0.32000732
+offset_bottom = -10.320007
 offset_transform_enabled = true
 mouse_filter = 2
+theme = ExtResource("1_m85d7")
 script = ExtResource("1_avub8")
 content = NodePath("MarginContainer/content")
 margin = NodePath("MarginContainer")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
+valueDrop = NodePath("valueDrop")
 shapeNode = NodePath("shape")
 grabArea = NodePath("grabArea")
 metadata/_edit_use_anchors_ = true
@@ -37,9 +43,9 @@ metadata/_edit_lock_ = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 15
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_bottom = 15
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
@@ -64,6 +70,18 @@ input_pickable = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="bottom" unique_id=2128940026]
 position = Vector2(60, 1.5)
 shape = SubResource("RectangleShape2D_ncklg")
+
+[node name="valueDrop" type="Area2D" parent="." unique_id=1901981629]
+position = Vector2(0, 42)
+collision_layer = 0
+collision_mask = 4
+input_pickable = false
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="valueDrop" unique_id=2039821306]
+position = Vector2(15.5, 0)
+shape = SubResource("RectangleShape2D_cp11l")
 
 [node name="grabArea" type="Area2D" parent="." unique_id=776635314]
 collision_layer = 2

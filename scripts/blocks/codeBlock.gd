@@ -6,6 +6,7 @@ extends MarginContainer
 @export var margin: MarginContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
+@export var valueDrop: Area2D
 @export var shapeNode: BlockShape
 @export var grabArea: Area2D
 
@@ -32,6 +33,7 @@ var blockStructure: Dictionary = {}
 var detectedSnapPos: int = 0
 ## Which block it can be connected to while dragging
 var detectedBlock: CodeBlock = null
+var detectedInput: BlockInputEdit
 ## Block connected beneath this one
 var childBlock: CodeBlock = null
 ## Block connected above this one
@@ -51,6 +53,15 @@ func _ready() -> void:
 	if BlockStructures.structures.has(blockName):
 		blockStructure = BlockStructures.structures[blockName]
 	
+	# Special properties for value blocks
+	if blockStructure[&"shape"] == BlockShape.blockShapes.VALUE:
+		custom_minimum_size.y = 75.0
+		set_deferred(&"size:y", 0.0)
+		call_deferred(&"onResize")
+		margin.add_theme_constant_override(&"margin_top", 10)
+		margin.add_theme_constant_override(&"margin_bottom", 10)
+		valueDrop.monitoring = true
+	
 	# Read the structure to build the block's labels and inputs
 	if blockStructure.size() == 0: return
 	for i: Variant in blockStructure[&"structure"]:
@@ -69,6 +80,18 @@ func _ready() -> void:
 					input.block = self
 					input.mouse_filter = Control.MOUSE_FILTER_PASS
 					content.add_child(input)
+					# Create collision for the input so value blocks can detect it
+					var detection: Area2D = Area2D.new()
+					detection.monitoring = false
+					detection.set_collision_layer_value(1, false)
+					detection.set_collision_layer_value(3, true)
+					detection.add_to_group(&"blockValueDrop")
+					input.add_child(detection)
+					var detectionShape: CollisionShape2D = CollisionShape2D.new()
+					detectionShape.shape = RectangleShape2D.new()
+					detection.add_child(detectionShape)
+					input.detectionShape = detectionShape
+					input.call_deferred(&"setDetectionRect")
 				&"options":
 					var options: BlockOptions = BlockOptions.new()
 					var optionsList: Array = blockStructure[i][3].duplicate()
@@ -86,11 +109,6 @@ func _ready() -> void:
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
-	# Value blocks are smaller vertically, so every other block should increase in height
-	if blockStructure[&"shape"] != BlockShape.blockShapes.VALUE:
-		custom_minimum_size.y = 85.0
-		margin.add_theme_constant_override(&"margin_top", 15)
-		margin.add_theme_constant_override(&"margin_bottom", 15)
 	# Set snapping detectors enabled/disabled for block shape
 	var connectors: Array = shapeNode.connectors[blockStructure[&"shape"]]
 	topDetection.monitoring = connectors[0]
@@ -132,21 +150,20 @@ func _process(_delta: float) -> void:
 			parentBlock.childBlock = null
 			parentBlock = null
 			setToFront()
-			# After disconnecting, update the two new stacks that were formed
+			# After disconnecting, update the spriteScript for the two new stacks that were formed
 			previousParent.getHighestInStack().updateSpriteScript()
 			updateSpriteScript()
 		# If the lowest block is trying to connect, then don't detect snapping
 		if getLowestInStack() != self:
 			if getLowestInStack().detectedBlock: return
 		detectBlockSnap()
-	else:
-		# Left mouse isn't pressed
+	else: # Left mouse isn't pressed
 		if dragDistance > 0.0:
 			if !mouseTouching: shapeNode.blockColor = defaultColor
 			released(true)
-		initialOffset = Vector2.ZERO
-		initialMousePos = Vector2.ZERO
-		dragDistance = 0.0
+			initialOffset = Vector2.ZERO
+			initialMousePos = Vector2.ZERO
+			dragDistance = 0.0
 		dragDisabled = false
 
 func released(topToBottom: bool) -> void:
@@ -273,7 +290,6 @@ func detectBlockSnap() -> void:
 				detectedBlock = i.get_parent()
 				# Don't snap to the top of a block if it already has a parent
 				if detectedBlock.parentBlock: break
-				# Succeeded all checks
 				detectedSnapPos = 1
 				showPreview()
 				return
@@ -282,15 +298,28 @@ func detectBlockSnap() -> void:
 		for i: Area2D in topDetection.get_overlapping_areas():
 			if i.is_in_group(&"blockSnapBottom"):
 				detectedBlock = i.get_parent()
-				# Succeeded all checks
 				detectedSnapPos = -1
 				showPreview()
+				return
+	# For value blocks
+	if valueDrop.monitoring:
+		for i: Area2D in valueDrop.get_overlapping_areas():
+			if i.is_in_group(&"blockValueDrop") and !is_ancestor_of(i):
+				if detectedInput: detectedInput.highlight.visible = false
+				detectedInput = i.get_parent()
+				detectedBlock = detectedInput.block
+				detectedInput.detectedBlock = self
+				detectedInput.highlight.visible = true
 				return
 	# No possible snaps detected
 	# Fix any affected stacks if dragging away from preview in middle of stack
 	if detectedBlock:
 		detectedBlock.getHighestInStack().processOffset(null)
-	detectedBlock = null
+		detectedBlock = null
+	if detectedInput:
+		detectedInput.detectedBlock = null
+		detectedInput.highlight.visible = false
+		detectedInput = null
 	detectedSnapPos = 0
 	removePreview()
 
@@ -330,3 +359,4 @@ func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 
 func onResize() -> void:
 	bottomDetection.position.y = size.y
+	valueDrop.position.y = size.y / 2.0

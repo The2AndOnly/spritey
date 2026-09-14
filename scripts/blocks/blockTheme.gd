@@ -6,6 +6,8 @@ const BLOCK_THEME: Theme = preload("uid://bxh8j3gnclchu")
 const BLOCK_LINE_EDIT: StyleBoxFlat = preload("uid://c8rhkk0ropejo")
 const BLOCK_OPTION_BUTTON: StyleBoxFlat = preload("uid://dmp801j6y02fr")
 const BLOCK_OPTIONS_POPUP_PANEL: StyleBoxFlat = preload("uid://b136o4ympmsgo")
+const BLOCK_VALUE_HIGHLIGHT: StyleBoxFlat = preload("uid://b0mbrqntfnjk6")
+
 
 func configureProperties() -> void:
 	var newTheme: Theme = BLOCK_THEME.duplicate()
@@ -49,8 +51,18 @@ func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
 		lineEdit.expand_to_text_length = true
 		lineEdit.custom_minimum_size = Vector2(60.0, 55.0)
 		lineEdit.custom_maximum_size = Vector2(-1.0, 55.0)
+	# Create a highlight for if a value block is dragged over it
+	if lineEdit is BlockInputEdit:
+		var highlight: Panel = Panel.new()
+		highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
+		highlight.add_theme_stylebox_override(&"panel", BLOCK_VALUE_HIGHLIGHT)
+		highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		highlight.show_behind_parent = true
+		highlight.visible = false
+		lineEdit.add_child(highlight)
+		lineEdit.highlight = highlight
 
-func setOptionButtonProperties(optionButton: OptionButton) -> void:
+func setOptionButtonProperties(optionButton: BlockOptions) -> void:
 	optionButton.fit_to_longest_item = false
 	optionButton.selected = 0
 	optionButton.search_bar_enabled = true
@@ -60,7 +72,7 @@ func setOptionButtonProperties(optionButton: OptionButton) -> void:
 	optionButton.custom_maximum_size = Vector2(-1.0, 55.0)
 	optionButton.allow_reselect = true
 
-func optionsOpened(optionButton: OptionButton) -> void:
+func optionsOpened(optionButton: BlockOptions) -> void:
 	# Get the search bar of the options popup
 	var lineEdits: Array[Node] = optionButton.get_popup().find_children("*", "LineEdit", true, false)
 	setLineEditProperties(lineEdits[0], true)

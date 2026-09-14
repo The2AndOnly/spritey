@@ -8,6 +8,9 @@ extends LineEdit
 # 4 = positive float
 var type: int = 0
 var block: CodeBlock
+var detectedBlock: CodeBlock
+var highlight: Panel
+var detectionShape: CollisionShape2D
 
 func _ready() -> void:
 	text_changed.connect(onType)
@@ -17,6 +20,11 @@ func _ready() -> void:
 
 func onType(_newText: String) -> void:
 	block.size.x = 0.0
+	setDetectionRect()
+
+func setDetectionRect() -> void:
+	detectionShape.shape.size = size
+	detectionShape.position = size / Vector2(2.0, 2.0)
 
 func onFocus() -> void:
 	block.focused = true

@@ -28,11 +28,6 @@ window/size/viewport_height=1080
 window/size/mode=3
 window/stretch/mode="canvas_items"
 
-[global_group]
-
-blockSnapTop=""
-blockSnapBottom=""
-
 [input]
 
 ui_accept={
@@ -119,6 +114,7 @@ rightMouse={
 
 2d_physics/layer_1="blockSnap"
 2d_physics/layer_2="blockGrab"
+2d_physics/layer_3="blockValue"
 
 [physics]
 
