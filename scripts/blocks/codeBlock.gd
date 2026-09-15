@@ -18,7 +18,6 @@ var sprite: Sprite
 var blockID: int
 var blockName: StringName
 var mouseTouching := false
-var focused := false
 ## The offset from the mouse when started dragging
 var initialOffset: Vector2 = Vector2.ZERO
 ## Original mouse position when started dragging
@@ -49,6 +48,7 @@ func _ready() -> void:
 	grabArea.mouse_entered.connect(mouseEntered)
 	grabArea.mouse_exited.connect(mouseExited)
 	grabArea.input_event.connect(inputEvent)
+	editor.changedFocus.connect(changedFocus)
 	resized.connect(onResize)
 	
 	if BlockStructures.structures.has(blockName):
@@ -130,9 +130,9 @@ func _ready() -> void:
 # Drag behavior
 func _process(_delta: float) -> void:
 	if preview: return
-	# Don't allow drag while focused, so the user can do things like select text
-	if focused: return
-	
+	if editor.uiFocused:
+		dragDisabled = false
+		return
 	if Input.is_action_pressed(&"leftMouse"):
 		if ((!mouseTouching) and (initialOffset == Vector2.ZERO)) or dragDisabled:
 			dragDisabled = true
@@ -148,7 +148,7 @@ func _process(_delta: float) -> void:
 			return
 		# While dragging
 		global_position = get_global_mouse_position() + initialOffset
-		if childBlock: childBlock.moveWithParent(false)
+		if childBlock: childBlock.dragWithParent(false)
 		# Dragging will disconnect from parent
 		if parentBlock:
 			# Value blocks have a different method of disconnecting
@@ -200,7 +200,7 @@ func released(topToBottom: bool) -> void:
 				var oldChild: CodeBlock = parentBlock.childBlock
 				lowest.childBlock = oldChild
 				oldChild.parentBlock = lowest
-				oldChild.moveWithParent(false)
+				oldChild.moveWithParent()
 			parentBlock.childBlock = self
 	# Layering
 	getHighestInStack().setToFront()
@@ -209,8 +209,10 @@ func released(topToBottom: bool) -> void:
 	detectedBlock = null
 	detectedSnapPos = 0
 	removePreview()
-	if topToBottom: if childBlock: childBlock.moveWithParent(true)
-	else: if parentBlock: parentBlock.moveWithChild()
+	if topToBottom:
+		if childBlock: childBlock.dragWithParent(true)
+	else:
+		if parentBlock: parentBlock.moveWithChild()
 	# Finally, update this stack in the sprite's code
 	getHighestInStack().updateSpriteScript()
 
@@ -253,17 +255,18 @@ func disconnectValueBlock() -> void:
 func fixMinimumSize() -> void:
 	if parentBlock:
 		parentBlock.custom_minimum_size = Vector2(
-			parentBlock.shapeNode.minimumSizes[blockStructure[&"shape"]], 0.0)
+			parentBlock.shapeNode.minimumSizes[blockStructure[&"shape"]],
+			75.0 if parentBlock.valueDrop.monitoring else 85.0
+		)
 		parentBlock.size = Vector2(0.0, 0.0)
 		parentBlock.fixMinimumSize()
 
-# If the block above this one moves, re-position
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
-func moveWithParent(release: bool) -> void:
+func dragWithParent(release: bool) -> void:
 	global_position = parentBlock.global_position
 	global_position.y += parentBlock.size.y + 2.0
 	if childBlock:
-		childBlock.moveWithParent(release)
+		childBlock.dragWithParent(release)
 	else:
 		# If no child block, this block is in charge of detecting if the bottom of the stack can attach
 		if getHighestInStack() != self:
@@ -278,6 +281,11 @@ func moveWithChild() -> void:
 	global_position = childBlock.global_position
 	global_position.y -= size.y + 2.0
 	if parentBlock: parentBlock.moveWithChild()
+# If the block above this one moves, re-position
+func moveWithParent() -> void:
+	global_position = parentBlock.global_position
+	global_position.y += parentBlock.size.y + 2.0
+	if childBlock: childBlock.moveWithParent()
 
 # Get the top block with no parent in the stack
 func getHighestInStack() -> CodeBlock:
@@ -293,7 +301,7 @@ func getLowestInStack() -> CodeBlock:
 		return self
 # Get the highest-level block that isn't a value block
 func getContentOwner() -> CodeBlock:
-	if grabArea.monitoring and parentBlock:
+	if valueDrop.monitoring and parentBlock:
 		return parentBlock.getHighestInStack()
 	else:
 		return self
@@ -384,30 +392,27 @@ func detectBlockSnap() -> void:
 	removePreview()
 
 func mouseEntered() -> void:
-	if !preview:
-		# Don't allow interaction while focused on another block
-		if get_viewport().gui_get_focus_owner():
-			if get_viewport().gui_get_focus_owner().get_parent() != content: return
 	# Don't allow interaction if initial click was outside block
 	if dragDisabled: return
 	mouseTouching = true
+	# Only allow mouseTouching to change if UI is focused
+	if editor.uiFocused: return
 	# Don't allow interaction if dragging (but still allow mouseTouching to change)
 	if dragDistance > 0.0: return
-	if !focused:
-		shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
+	shapeNode.blockColor = shapeNode.blockColor.lightened(0.2)
 
 func mouseExited() -> void:
 	mouseTouching = false
+	if editor.uiFocused: return
 	# Don't allow exit if dragging (but still allow mouseTouching to change)
 	if dragDistance > 0.0: return
-	if !focused:
-		shapeNode.blockColor = defaultColor
+	shapeNode.blockColor = defaultColor
 
-# When finished editing one of the inputs
-func focusExit() -> void:
-	focused = false
-	getHighestInStack().updateSpriteScript()
-	if !mouseTouching: shapeNode.blockColor = defaultColor
+func changedFocus(newFocus: Control) -> void:
+	if newFocus == null:
+		if mouseTouching: mouseEntered()
+	else:
+		if mouseTouching: mouseExited()
 
 func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 	if event.is_action_pressed(&"leftMouse"):
@@ -423,3 +428,4 @@ func hoveringChildValue() -> bool:
 func onResize() -> void:
 	bottomDetection.position.y = size.y
 	valueDrop.position.y = size.y / 2.0
+	if childBlock: childBlock.moveWithParent()

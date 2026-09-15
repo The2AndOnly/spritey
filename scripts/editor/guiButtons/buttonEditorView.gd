@@ -10,7 +10,6 @@ func _ready() -> void:
 
 func onPress() -> void:
 	editor.currentView = viewName
-	editor.changedView.emit(viewName)
 
 func changedView(view: StringName) -> void:
 	enabledWithView.visible = view == viewName

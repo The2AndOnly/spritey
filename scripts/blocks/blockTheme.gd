@@ -45,7 +45,6 @@ func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
 	lineEdit.virtual_keyboard_enabled = false
 	lineEdit.clear_button_enabled = false
 	lineEdit.caret_blink = true
-	lineEdit.keep_editing_on_text_submit = false
 	lineEdit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if !searchBar:
 		lineEdit.expand_to_text_length = true
