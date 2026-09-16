@@ -10,6 +10,7 @@ var blockOrder: Array[StringName] = [
 	&"event_mouse",
 	&"event_receive",
 	&"event_signal",
+	&"ctrl_wait",
 	&"exp_add",
 	&"exp_subtract",
 	&"exp_multiply",

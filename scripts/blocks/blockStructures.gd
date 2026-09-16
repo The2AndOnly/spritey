@@ -22,6 +22,7 @@ static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
 	&"events": Color("b52a2aff"),
 	&"expressions": Color("a6981eff"),
+	&"control": Color("9e501cff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -179,6 +180,15 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		1: [&"input", 2, "text2"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
+	},
+	
+	## CONTROL
+	
+	&"ctrl_wait": {
+		&"structure": ["wait", 0, "seconds"],
+		0: [&"input", 1, "1"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	
 	## TESTS

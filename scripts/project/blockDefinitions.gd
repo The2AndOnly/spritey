@@ -47,6 +47,12 @@ func trans_setPositionOption(inputs: Array) -> bool:
 			position = gameView.getRandomCoord()
 	return false
 
+## CONTROL
+
+func ctrl_wait(inputs: Array) -> bool:
+	await get_tree().create_timer(inputs[0]).timeout
+	return false
+
 ## EXPRESSIONS
 
 func exp_add(inputs: Array) -> float:
