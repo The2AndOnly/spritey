@@ -75,5 +75,6 @@ func optionsOpened(optionButton: BlockOptions) -> void:
 	# Get the search bar of the options popup
 	var lineEdits: Array[Node] = optionButton.get_popup().find_children("*", "LineEdit", true, false)
 	setLineEditProperties(lineEdits[0], true)
+	#optionButton.block.editor.uiFocused = lineEdits[0]
 	optionButton.get_popup().min_size.x = 200
 	optionButton.get_popup().max_size.y = 500

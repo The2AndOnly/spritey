@@ -2,18 +2,28 @@ class_name BlockOptions
 extends OptionButton
 
 var block: CodeBlock
+var detectionShape: CollisionShape2D
 
 func _ready() -> void:
-	item_selected.connect(onSelect)
-	focus_entered.connect(onFocus)
-	focus_exited.connect(onFocusExit)
+	mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
+	focus_entered.connect(popupHide)
 
-func onSelect(_item: int) -> void:
+func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int):
+	if event.is_action_pressed(&"leftMouse"):
+		block.editor.uiFocused = self
+		block.getHighestInStack().setToFront()
+		show_popup()
+		get_popup().popup_hide.connect(func() -> void:
+			popupHide.call_deferred()
+		)
+
+func setDetectionRect() -> void:
+	detectionShape.shape.size = size
+	detectionShape.position = size / Vector2(2.0, 2.0)
+
+func popupHide() -> void:
 	block.size.x = 0.0
-	release_focus()
-
-func onFocus() -> void:
-	block.focused = true
-	block.getHighestInStack().setToFront()
-func onFocusExit() -> void:
-	block.focusExit()
+	block.getHighestInStack().updateSpriteScript()
+	if block.editor.uiFocused == self: block.editor.uiFocused = null
+	await get_tree().process_frame
+	setDetectionRect()

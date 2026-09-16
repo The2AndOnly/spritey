@@ -66,6 +66,9 @@ func _ready() -> void:
 	if editor: editor.setMousePosition()
 	else: setMousePosition()
 
+func _process(_delta: float) -> void:
+	event.emit(&"test_process", [])
+
 # Input is game coords, output is local coords
 func toLocalCoords(position: Vector2) -> Vector2:
 	return Vector2(

@@ -7,8 +7,8 @@ extends LineEdit
 # 3 = positive integer
 # 4 = positive float
 var type: int = 0
+var inputID: int
 var block: CodeBlock
-var detectedBlock: CodeBlock
 var highlight: Panel
 var detectionShape: CollisionShape2D
 
@@ -43,7 +43,9 @@ func onFocus() -> void:
 	mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_ENABLED
 	block.getHighestInStack().setToFront()
 func onFocusExit() -> void:
-	call_deferred(&"onSubmit", text)
+	# For some reason, focus exit gets emitted when clicking on a LineEdit you're editing
+	# So defer the call, and in the submit function check if it has focus
+	onSubmit.call_deferred(text)
 func changedFocus(newFocus: Control) -> void:
 	# Disable detectionShape if this was the input focused because it doesn't resize while typing
 	detectionShape.get_parent().visible = newFocus != self

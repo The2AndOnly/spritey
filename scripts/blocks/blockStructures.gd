@@ -1,18 +1,22 @@
 class_name BlockStructures
 extends Node
 
-# VALUE TYPES:
-# 0 = integer
-# 1 = float
-# 2 = string
-# 3 = positive integer
-# 4 = positive float
-
-# OPTION ADDONS:
-# 0 = custom
-# 1 = sprites
-# 2 = events
-# 3 = keyboard keys
+# INPUT DOCS:
+# blockInputEdit (lineEdit):
+# [&"input", 0, "0"] - input type, value type, default
+## VALUE TYPES:
+## 0 = integer
+## 1 = float
+## 2 = string
+## 3 = positive integer
+## 4 = positive float
+# blockOptions (optionButton):
+# [&"options", 0, 0, ["option1"]] - input type, option addon, default, values
+## OPTION ADDONS:
+## 0 = none
+## 1 = sprites
+## 2 = events
+## 3 = keyboard keys
 
 static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
@@ -74,14 +78,14 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	
 	&"trans_setPosition": {
 		&"structure": ["set position X:", 0, "Y:", 1],
-		0: [&"input", 1, "0"], # input type, value type, default
+		0: [&"input", 1, "0"],
 		1: [&"input", 1, "0"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"trans_setPositionOption": {
 		&"structure": ["set position to", 0],
-		0: [&"options", 1, 0, ["pointer", "random"]], # input type, option addon, default, values
+		0: [&"options", 1, 0, ["pointer", "random"]],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -134,9 +138,62 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
+	&"exp_subtract": {
+		&"structure": [0, "-", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_multiply": {
+		&"structure": [0, "*", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_divide": {
+		&"structure": [0, "/", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "1"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_randomFloat": {
+		&"structure": ["random decimal", 0, "to", 1],
+		0: [&"input", 1, "1"],
+		1: [&"input", 1, "5"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_randomInt": {
+		&"structure": ["random", 0, "to", 1],
+		0: [&"input", 0, "1"],
+		1: [&"input", 0, "5"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_join": {
+		&"structure": ["join", 0, 1],
+		0: [&"input", 2, "text1"],
+		1: [&"input", 2, "text2"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
 	
 	## TESTS
 	
+	&"test_print": {
+		&"structure": ["print", 0],
+		0: [&"input", 2, ""],
+		&"color": &"unknown",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"test_process": {
+		&"structure": ["process"],
+		&"color": &"unknown",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
 	&"test_emptyStack": {
 		&"structure": [],
 		&"color": &"unknown",

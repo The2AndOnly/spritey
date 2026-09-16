@@ -46,3 +46,28 @@ func trans_setPositionOption(inputs: Array) -> bool:
 		1:
 			position = gameView.getRandomCoord()
 	return false
+
+## EXPRESSIONS
+
+func exp_add(inputs: Array) -> float:
+	return inputs[0] + inputs[1]
+func exp_subtract(inputs: Array) -> float:
+	return inputs[0] - inputs[1]
+func exp_multiply(inputs: Array) -> float:
+	return inputs[0] * inputs[1]
+func exp_divide(inputs: Array) -> float:
+	return inputs[0] / inputs[1]
+
+func exp_randomFloat(inputs: Array) -> float:
+	return randf_range(inputs[0], inputs[1])
+func exp_randomInt(inputs: Array) -> int:
+	return randi_range(inputs[0], inputs[1])
+
+func exp_join(inputs: Array) -> String:
+	return inputs[0] + inputs[1]
+
+## TEST
+
+func test_print(inputs: Array) -> bool:
+	print(inputs[0])
+	return false
