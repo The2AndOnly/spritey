@@ -23,6 +23,12 @@ var topLevelBlocks: Dictionary[StringName, Array] = {}
 # Contains all value blocks (they are all a singular stack) | blockID: block
 var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var scriptsCompiled := false
+# This stores all of the actively running compiled stacks in the sprite
+var activeStacks: Array[ScriptStack] = []
+# Return result from execute block
+var result: Variant
+# Used in stack processing
+var currentStack: ScriptStack
 
 func _ready() -> void:
 	gameView.event.connect(receivedEvent)
@@ -31,7 +37,7 @@ func receivedEvent(eventBlockName: StringName, eventData: Array[Variant]) -> voi
 	if !scriptsCompiled: compileAll()
 	if !topLevelBlocks.has(eventBlockName): return
 	for i: CompiledBlock in topLevelBlocks[eventBlockName]:
-		runStack(i, eventData)
+		runStackFromEvent(i, eventData)
 
 # For block parsing
 
@@ -64,16 +70,58 @@ func compileStack(blockID: int) -> CompiledBlock:
 		compiledBlock.nextBlock = compileStack(rawBlock[&"next"])
 	return compiledBlock
 
-func runStack(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
-	var block: CompiledBlock = startBlock
+func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
 	# The first block must be an event, so if it has inputs then pass the eventData
-	if !block.inputs.is_empty():
-		if block.definition.call(block.inputs, eventData): return
-	block = block.nextBlock
-	# Stops once it reaches a block with nextBlock set to null, or if a block returns true
-	while block:
-		if executeBlock(block): return
-		block = block.nextBlock
+	if !startBlock.inputs.is_empty():
+		if startBlock.definition.call(startBlock.inputs, eventData): return
+	# Clear any previous running stacks from this event
+	# Iterate backwards so stacks can be removed
+	for i: int in range(activeStacks.size() - 1, -1, -1):
+			if activeStacks[i].startEvent == startBlock:
+				activeStacks.remove_at(i)
+	activeStacks.append(ScriptStack.new(startBlock.nextBlock, startBlock))
+
+func _process(delta: float) -> void:
+	# Iterate backwards so stacks can be removed
+	for i: int in range(activeStacks.size() - 1, -1, -1):
+		currentStack = activeStacks[i]
+		# Skip processing this stack if there is wait time
+		if currentStack.waitTime > 0.0:
+			currentStack.waitTime -= delta
+			if currentStack.waitTime <= 0.0: currentStack.waitTime = -1.0
+			continue
+		# Wait one frame for a wait time of 0.0
+		elif currentStack.waitTime == 0.0:
+			currentStack.waitTime = -1.0
+			continue
+		# Process stack
+		while currentStack.currentBlock:
+			result = executeBlock(currentStack.currentBlock)
+			if result is bool:
+				# If a block returns true, terminate this stack
+				if result:
+					activeStacks.remove_at(i)
+					break
+			elif result is float:
+				# If a block returns a positive float, wait for that many seconds
+				if result > 0.0:
+					currentStack.waitTime = result
+					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+					break
+				# If the wait time is negative, then it will just execute the same block next frame
+				if result < 0.0:
+					break
+				# If the wait time is zero, then it will wait one frame
+				if result == 0.0:
+					currentStack.waitTime = 0.0
+					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+					break
+			# If the result didn't catch anything, then execute the next block on this frame
+			currentStack.currentBlock = currentStack.currentBlock.nextBlock
+			# If the next block is null, then the stack will terminate
+			if !currentStack.currentBlock:
+				activeStacks.remove_at(i)
+				break
 
 func executeBlock(block: CompiledBlock) -> Variant:
 	if block.definition.is_valid():

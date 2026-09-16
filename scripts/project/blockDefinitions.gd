@@ -1,7 +1,12 @@
 class_name BlockDefinitions
 extends Sprite2D
 
-# If a block returns true, then it stops executing that stack
+# BLOCK RETURNS:
+# false - Continue with next block
+# true - Terminate stack
+# positive float - pause the stack for that many seconds
+# negative float - pause the stack and keep executing it every frame
+# 0.0 - pause the stack for 1 frame
 
 var gameView: GameView
 
@@ -49,9 +54,8 @@ func trans_setPositionOption(inputs: Array) -> bool:
 
 ## CONTROL
 
-func ctrl_wait(inputs: Array) -> bool:
-	await get_tree().create_timer(inputs[0]).timeout
-	return false
+func ctrl_wait(inputs: Array) -> float:
+	return inputs[0]
 
 ## EXPRESSIONS
 
