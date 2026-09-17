@@ -88,15 +88,27 @@ func _process(delta: float) -> void:
 		# Skip processing this stack if there is wait time
 		if currentStack.waitTime > 0.0:
 			currentStack.waitTime -= delta
-			if currentStack.waitTime <= 0.0: currentStack.waitTime = -1.0
+			# If time reached zero naturally, then continue with the stack
+			if currentStack.waitTime <= 0.0:
+				currentStack.waitTime = -1.0
+				# Execute the block one last time if it needs to finish up something
+				executeBlock(currentStack.currentBlock, currentStack)
+				currentStack.currentBlock = currentStack.currentBlock.nextBlock
+			else:
+				# Execute the waiting block every frame, and send the stack
+				currentStack.waitTime = executeBlock(currentStack.currentBlock, currentStack)
+				# If the block returns -1.0, it's done waiting
+				if currentStack.waitTime == -1.0:
+					currentStack.currentBlock = currentStack.currentBlock.nextBlock
 			continue
 		# Wait one frame for a wait time of 0.0
 		elif currentStack.waitTime == 0.0:
 			currentStack.waitTime = -1.0
+			currentStack.currentBlock = currentStack.currentBlock.nextBlock
 			continue
 		# Process stack
 		while currentStack.currentBlock:
-			result = executeBlock(currentStack.currentBlock)
+			result = executeBlock(currentStack.currentBlock, null)
 			if result is bool:
 				# If a block returns true, terminate this stack
 				if result:
@@ -104,18 +116,9 @@ func _process(delta: float) -> void:
 					break
 			elif result is float:
 				# If a block returns a positive float, wait for that many seconds
-				if result > 0.0:
-					currentStack.waitTime = result
-					currentStack.currentBlock = currentStack.currentBlock.nextBlock
-					break
-				# If the wait time is negative, then it will just execute the same block next frame
-				if result < 0.0:
-					break
 				# If the wait time is zero, then it will wait one frame
-				if result == 0.0:
-					currentStack.waitTime = 0.0
-					currentStack.currentBlock = currentStack.currentBlock.nextBlock
-					break
+				currentStack.waitTime = result if result > 0.0 else 0.0
+				break
 			# If the result didn't catch anything, then execute the next block on this frame
 			currentStack.currentBlock = currentStack.currentBlock.nextBlock
 			# If the next block is null, then the stack will terminate
@@ -123,7 +126,7 @@ func _process(delta: float) -> void:
 				activeStacks.remove_at(i)
 				break
 
-func executeBlock(block: CompiledBlock) -> Variant:
+func executeBlock(block: CompiledBlock, stack: ScriptStack) -> Variant:
 	if block.definition.is_valid():
 		if block.inputs.is_empty():
 			return block.definition.call()
@@ -131,12 +134,15 @@ func executeBlock(block: CompiledBlock) -> Variant:
 			# Build the input data from any potential value blocks
 			var returnedValues: Array = []
 			for i in block.inputs:
+				# If it's an array, then it's a value block
 				if i is Array:
 					returnedValues.append(
-						castType(i[0], executeBlock(valueBlocks[i[1]]))
+						castType(i[0], executeBlock(valueBlocks[i[1]], stack))
 					)
 					continue
+				# Raw input or options
 				returnedValues.append(i)
+			returnedValues.append(stack)
 			return block.definition.call(returnedValues)
 	return false
 

@@ -3,7 +3,7 @@ extends Node
 
 var currentBlock: CompiledBlock
 var startEvent: CompiledBlock
-# Negative wait time means no wait
+# Wait time of -1.0 means no wait
 var waitTime: float = -1.0
 
 func _init(startBlock: CompiledBlock, eventBlock: CompiledBlock) -> void:
