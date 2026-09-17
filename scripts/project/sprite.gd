@@ -27,8 +27,6 @@ var scriptsCompiled := false
 var activeStacks: Array[ScriptStack] = []
 # Return result from execute block
 var result: Variant
-# Used in stack processing
-var currentStack: ScriptStack
 
 func _ready() -> void:
 	gameView.event.connect(receivedEvent)
@@ -73,7 +71,8 @@ func compileStack(blockID: int) -> CompiledBlock:
 func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
 	# The first block must be an event, so if it has inputs then pass the eventData
 	if !startBlock.inputs.is_empty():
-		if startBlock.definition.call(startBlock.inputs, eventData): return
+		# If the event block returns false, then don't continue
+		if !startBlock.definition.call(startBlock.inputs, eventData): return
 	# Clear any previous running stacks from this event
 	# Iterate backwards so stacks can be removed
 	for i: int in range(activeStacks.size() - 1, -1, -1):
@@ -92,14 +91,16 @@ func _process(delta: float) -> void:
 			if currentStack.waitTime <= 0.0:
 				currentStack.waitTime = -1.0
 				# Execute the block one last time if it needs to finish up something
-				executeBlock(currentStack.currentBlock, currentStack)
-				currentStack.currentBlock = currentStack.currentBlock.nextBlock
+				# Must go after setting waitTime to -1.0 and before calling finishExecuteWait
+				executeBlock(currentStack.currentBlock)
+				finishWaitBlock()
 			else:
-				# Execute the waiting block every frame, and send the stack
-				currentStack.waitTime = executeBlock(currentStack.currentBlock, currentStack)
-				# If the block returns -1.0, it's done waiting
-				if currentStack.waitTime == -1.0:
-					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+				if currentStack.executeWait:
+					# Execute the waiting block every frame
+					currentStack.waitTime = executeBlock(currentStack.currentBlock)
+					# If the block returns -1.0, it's done waiting
+					if currentStack.waitTime == -1.0:
+						finishWaitBlock()
 			continue
 		# Wait one frame for a wait time of 0.0
 		elif currentStack.waitTime == 0.0:
@@ -108,41 +109,45 @@ func _process(delta: float) -> void:
 			continue
 		# Process stack
 		while currentStack.currentBlock:
-			result = executeBlock(currentStack.currentBlock, null)
-			if result is bool:
-				# If a block returns true, terminate this stack
-				if result:
-					activeStacks.remove_at(i)
-					break
-			elif result is float:
-				# If a block returns a positive float, wait for that many seconds
-				# If the wait time is zero, then it will wait one frame
-				currentStack.waitTime = result if result > 0.0 else 0.0
-				break
-			# If the result didn't catch anything, then execute the next block on this frame
-			currentStack.currentBlock = currentStack.currentBlock.nextBlock
-			# If the next block is null, then the stack will terminate
-			if !currentStack.currentBlock:
+			result = executeBlock(currentStack.currentBlock)
+			# If a block returns -2.0, terminate this stack
+			if result == -2.0:
 				activeStacks.remove_at(i)
 				break
+			# If a block returns > 0.0, wait for that many seconds
+			# If the wait time is zero, then it will wait one frame
+			currentStack.waitTime = result if result > 0.0 else 0.0
+			break
+			# If the result didn't catch anything, then execute the next block on this frame
+			currentStack.currentBlock = currentStack.currentBlock.nextBlock
+		# If the next block is null, then the stack will terminate
+		if !currentStack.currentBlock:
+			activeStacks.remove_at(i)
 
-func executeBlock(block: CompiledBlock, stack: ScriptStack) -> Variant:
+func finishWaitBlock() -> void:
+	currentStack.executeWait = false
+	currentStack.blockData.clear()
+	currentStack.currentBlock = currentStack.currentBlock.nextBlock
+
+func executeBlock(block: CompiledBlock) -> Variant:
 	if block.definition.is_valid():
 		if block.inputs.is_empty():
 			return block.definition.call()
 		else:
+			# If it's an execute wait, don't re-evaluate inputs
+			if currentStack.executeWait:
+				return block.definition.call(block.inputs)
 			# Build the input data from any potential value blocks
 			var returnedValues: Array = []
 			for i in block.inputs:
-				# If it's an array, then it's a value block
 				if i is Array:
+					# Execute value block
 					returnedValues.append(
-						castType(i[0], executeBlock(valueBlocks[i[1]], stack))
+						castType(i[0], executeBlock(valueBlocks[i[1]]))
 					)
 					continue
 				# Raw input or options
 				returnedValues.append(i)
-			returnedValues.append(stack)
 			return block.definition.call(returnedValues)
 	return false
 
@@ -168,7 +173,7 @@ func castType(type: int, value: Variant) -> Variant:
 		2: # string
 			return value
 		3: # positive integer
-			return abs(int(value))
+			return max(0, int(value))
 		4: # positive float
-			return abs(float(value))
+			return max(0.0, float(value))
 	return null

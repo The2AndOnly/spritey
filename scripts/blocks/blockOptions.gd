@@ -22,6 +22,7 @@ func setDetectionRect() -> void:
 	detectionShape.position = size / Vector2(2.0, 2.0)
 
 func popupHide() -> void:
+	block.fixMinimumSize()
 	block.size.x = 0.0
 	block.getHighestInStack().updateSpriteScript()
 	if block.editor.uiFocused == self: block.editor.uiFocused = null

@@ -14,7 +14,15 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	for i: Control in block.content.get_children():
 		if i is LineEdit:
 			# If not visible, then a value block is inserted
-			if i.visible: inputs.append([0, [i.type, i.text]])
+			if i.visible:
+				# Type of 5 has to infer between float or integer
+				if i.type == 5:
+					if "." in i.text:
+						inputs.append([0, [1, i.text]])
+					else:
+						inputs.append([0, [0, i.text]])
+				else:
+					inputs.append([0, [i.type, i.text]])
 		if i is CodeBlock:
 			inputs.append([1, [i.parentInput.type, i.blockID]])
 			updateBlock(i, sprite)

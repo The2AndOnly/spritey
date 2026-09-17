@@ -210,6 +210,8 @@ func released(topToBottom: bool) -> void:
 				oldChild.parentBlock = lowest
 				oldChild.moveWithParent()
 			parentBlock.childBlock = self
+		# If any block was detected on release, update the sprite's script
+		getHighestInStack().updateSpriteScript()
 	# Layering
 	getHighestInStack().setToFront()
 	# Fix any offset from preview if dropping in middle of stack
@@ -221,8 +223,6 @@ func released(topToBottom: bool) -> void:
 		if childBlock: childBlock.dragWithParent(true)
 	else:
 		if parentBlock: parentBlock.moveWithChild()
-	# Finally, update this stack in the sprite's code
-	getHighestInStack().updateSpriteScript()
 
 # Called as a value block
 func insertValueBlock() -> void:
@@ -238,7 +238,7 @@ func insertValueBlock() -> void:
 	parentBlock = detectedInput.block
 	parentBlock.childValueBlocks.append(self)
 	detectedInput = null
-	fixParentMinimumSize()
+	parentBlock.fixMinimumSize()
 	# Layering and updating spriteScript
 	getHighestInStack().setToFront()
 	getHighestInStack().updateSpriteScript()
@@ -251,7 +251,7 @@ func disconnectValueBlock() -> void:
 	parentInput.visible = true
 	parentInput.detectionShape.disabled = false
 	# It could be a value block that got its minimum size affected by being in a content container
-	fixParentMinimumSize()
+	parentBlock.fixMinimumSize()
 	parentBlock.childValueBlocks.erase(self)
 	# Change z_index due to flickering bug
 	z_index = 1
@@ -261,15 +261,13 @@ func disconnectValueBlock() -> void:
 	parentBlock = null
 	parentInput = null
 
-# Called by value blocks, starts at parent and goes up
-func fixParentMinimumSize() -> void:
-	if parentInput:
-		parentBlock.custom_minimum_size = Vector2(
-			parentBlock.shapeNode.minimumSizes[parentBlock.blockStructure[&"shape"]],
-			75.0 if parentBlock.valueDrop.monitoring else 85.0
-		)
-		parentBlock.size = Vector2(0.0, 0.0)
-		parentBlock.fixParentMinimumSize()
+func fixMinimumSize() -> void:
+	custom_minimum_size = Vector2(
+		shapeNode.minimumSizes[blockStructure[&"shape"]],
+		75.0 if valueDrop.monitoring else 85.0
+	)
+	size = Vector2(0.0, 0.0)
+	if parentBlock: parentBlock.fixMinimumSize()
 
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
 func dragWithParent(release: bool) -> void:
@@ -327,7 +325,6 @@ func updateSpriteScript() -> void:
 
 # Snap preview
 func showPreview() -> void:
-	if !detectedBlock: return
 	if snapPreview == null:
 		snapPreview = MarginContainer.new()
 		snapPreview.custom_minimum_size = Vector2(size.x, size.y)
@@ -337,8 +334,11 @@ func showPreview() -> void:
 		previewShape.blockColor = Color("ffffff28")
 		previewShape.blockShape = shapeNode.blockShape
 		snapPreview.add_child(previewShape)
-		# Add sibling for layering purposes
 		detectedBlock.add_sibling(snapPreview)
+	# Layering
+	detectedBlock.getHighestInStack().setToFront()
+	snapPreview.move_to_front()
+	setToFront()
 	# Position preview
 	snapPreview.global_position = detectedBlock.global_position
 	if detectedSnapPos == 1:
@@ -361,6 +361,9 @@ func processOffset(affected: CodeBlock) -> void:
 	if childBlock: childBlock.processOffset(affected)
 
 func detectBlockSnap() -> void:
+	if detectedBlock:
+		# Fix any affected stacks if dragging away from preview in middle of stack
+		detectedBlock.getHighestInStack().processOffset(null)
 	# Don't snap to the top of a block if there is a block attached below this one
 	if bottomDetection.monitoring and !childBlock:
 		for i: Area2D in bottomDetection.get_overlapping_areas():
@@ -393,10 +396,7 @@ func detectBlockSnap() -> void:
 				setToFront()
 				return
 	# No possible snaps detected
-	# Fix any affected stacks if dragging away from preview in middle of stack
-	if detectedBlock:
-		detectedBlock.getHighestInStack().processOffset(null)
-		detectedBlock = null
+	if detectedBlock: detectedBlock = null
 	if detectedInput:
 		detectedInput.highlight.visible = false
 		detectedInput = null

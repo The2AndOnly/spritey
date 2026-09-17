@@ -33,6 +33,7 @@ func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int):
 		caret_column = text.length()
 
 func onType(_newText: String) -> void:
+	block.fixMinimumSize()
 	block.size.x = 0.0
 
 func setDetectionRect() -> void:

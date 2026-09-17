@@ -5,18 +5,19 @@ extends Node
 # blockInputEdit (lineEdit):
 # [&"input", 0, "0"] - input type, value type, default
 ## VALUE TYPES:
-## 0 = integer
-## 1 = float
-## 2 = string
-## 3 = positive integer
-## 4 = positive float
+## 0 - integer
+## 1 - float
+## 2 - string
+## 3 - positive integer
+## 4 - positive float
+## 5 - infer between float and integer when building sprite script
 # blockOptions (optionButton):
 # [&"options", 0, 0, ["option1"]] - input type, option addon, default, values
 ## OPTION ADDONS:
-## 0 = none
-## 1 = sprites
-## 2 = events
-## 3 = keyboard keys
+## 0 - none
+## 1 - sprites
+## 2 - events
+## 3 - keyboard keys
 
 static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
@@ -160,17 +161,10 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
-	&"exp_randomFloat": {
-		&"structure": ["random decimal", 0, "to", 1],
-		0: [&"input", 1, "1"],
-		1: [&"input", 1, "5"],
-		&"color": &"expressions",
-		&"shape": BlockShape.blockShapes.VALUE
-	},
-	&"exp_randomInt": {
+	&"exp_random": {
 		&"structure": ["random", 0, "to", 1],
-		0: [&"input", 0, "1"],
-		1: [&"input", 0, "5"],
+		0: [&"input", 5, "1"],
+		1: [&"input", 5, "5"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -186,7 +180,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	
 	&"ctrl_wait": {
 		&"structure": ["wait", 0, "seconds"],
-		0: [&"input", 1, "1"],
+		0: [&"input", 4, "1"],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STACK
 	},

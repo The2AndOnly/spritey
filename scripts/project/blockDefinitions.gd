@@ -1,86 +1,94 @@
 class_name BlockDefinitions
 extends Sprite2D
 
+# Helper functions are marked with "H_"
+
 ## INPUTS ARRAY:
 # The items are in the order that the inputs are listed in blockStructures.gd
-# The last item is either null, or the ScriptStack executing the block if it's waiting
-# If the scriptStack's waitTime is -1.0, then whatever the block returns doesn't matter
+# If a block has execute wait functions, it CAN NOT access these inputs again
+# Execute wait blocks should store needed inputs in currentStack.blockData
 
 ## BLOCK RETURNS:
-# false - Continue with next block
-# true - Terminate stack
-# positive float - pause the stack for that many seconds
-# -1.0 - Stop waiting
-# 0.0 - pause the stack for 1 frame
+# Value blocks can return any value necessary
+# Event blocks return true if the stack can begin
+# Stack blocks return floats:
+# > 0.0 - Pause the stack for that many seconds
+# -1.0 - Move to next block / stop waiting
+# 0.0 - Pause the stack for 1 frame
+# -2.0 - Terminate stack
 
 var gameView: GameView
+var currentStack: ScriptStack
 
 ## EVENTS
 
 func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
 	if inputs[0] == 0:
 		# Any key
-		return inputs[1] != eventData[1]
+		return inputs[1] == eventData[1]
 	# Specific key
-	return inputs != eventData
+	return inputs == eventData
 
 func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
-	return inputs != eventData
+	return inputs == eventData
 
 ## TRANSFORM
 
-func trans_setX(inputs: Array) -> bool:
+func trans_setX(inputs: Array) -> float:
 	position.x = gameView.toLocalCoords(Vector2(inputs[0], 0.0)).x
-	return false
-
-func trans_setY(inputs: Array) -> bool:
+	return -1.0
+func trans_setY(inputs: Array) -> float:
 	position.y = gameView.toLocalCoords(Vector2(0.0, inputs[0])).y
-	return false
-
-func trans_changeX(inputs: Array) -> bool:
+	return -1.0
+func trans_changeX(inputs: Array) -> float:
 	position.x += inputs[0]
-	return false
-
-func trans_changeY(inputs: Array) -> bool:
+	return -1.0
+func trans_changeY(inputs: Array) -> float:
 	position.y -= inputs[0]
-	return false
+	return -1.0
 
-func trans_setPosition(inputs: Array) -> bool:
+func trans_setPosition(inputs: Array) -> float:
 	position = gameView.toLocalCoords(Vector2(inputs[0], inputs[1]))
-	return false
-
-func trans_setPositionOption(inputs: Array) -> bool:
-	match inputs[0]:
+	return -1.0
+func trans_setPositionOption(inputs: Array) -> float:
+	position = H_getPositionFromOption(inputs[0])
+	return -1.0
+func H_getPositionFromOption(option: int) -> Vector2:
+	match option:
 		0:
-			position = gameView.toLocalCoords(gameView.mousePosition)
+			return gameView.toLocalCoords(gameView.mousePosition)
 		1:
-			position = gameView.getRandomCoord()
-	return false
+			return gameView.getRandomCoord()
+	return position
 
 func trans_glideToPosition(inputs: Array) -> float:
-	var progress: float
-	if inputs[3]:
-		if inputs[3].waitTime == -1.0:
+	return H_glideToDestination(inputs, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])))
+func trans_glideToOption(inputs: Array) -> float:
+	return H_glideToDestination(inputs, H_getPositionFromOption(inputs[1]))
+func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
+	if currentStack.waitTime == -1.0:
+		if currentStack.executeWait:
 			# Finished gliding
-			position = gameView.toLocalCoords(Vector2(inputs[1], inputs[2]))
-			return -1.0
+			position = currentStack.blockData[1]
+			return 0.0
 		else:
-			# While gliding
-			progress = inputs[0] - (inputs[3].waitTime / inputs[0])
-			position = gameView.toLocalCoords(Vector2(
-				lerpf(0.0, inputs[1], progress),
-				lerpf(0.0, inputs[2], progress)
-			))
-			return inputs[3].waitTime
+			# Initial execution
+			if inputs[0] <= 0.0:
+				return -1.0
+			currentStack.executeWait = true
+			currentStack.blockData.append_array([position, destination, inputs[0]])
+			return inputs[0]
 	else:
-		# Initial execution
-		progress = 0.0
-		return inputs[0]
+		# While gliding
+		position = currentStack.blockData[0].lerp(
+			currentStack.blockData[1],
+			1.0 - (currentStack.waitTime / currentStack.blockData[2])
+		)
+		return currentStack.waitTime
 
 ## CONTROL
 
 func ctrl_wait(inputs: Array) -> float:
-	if inputs[1]: return inputs[1].waitTime
 	return inputs[0]
 
 ## EXPRESSIONS
@@ -94,9 +102,9 @@ func exp_multiply(inputs: Array) -> float:
 func exp_divide(inputs: Array) -> float:
 	return inputs[0] / inputs[1]
 
-func exp_randomFloat(inputs: Array) -> float:
-	return randf_range(inputs[0], inputs[1])
-func exp_randomInt(inputs: Array) -> int:
+func exp_random(inputs: Array) -> Variant:
+	if (inputs[0] is float) or (inputs[1] is float):
+		return randf_range(inputs[0], inputs[1])
 	return randi_range(inputs[0], inputs[1])
 
 func exp_join(inputs: Array) -> String:
@@ -104,6 +112,6 @@ func exp_join(inputs: Array) -> String:
 
 ## TEST
 
-func test_print(inputs: Array) -> bool:
+func test_print(inputs: Array) -> float:
 	print(inputs[0])
-	return false
+	return -1.0
