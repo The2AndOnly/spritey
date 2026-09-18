@@ -29,21 +29,23 @@ var blockOrder: Array[StringName] = [
 	&"test_process",
 	&"test_emptyStack",
 	&"test_emptyEvent",
-	&"test_emptyValue"
+	&"test_emptyValue",
+	&"test_emptyNest"
 ]
+
+# Negative: Spacing before
+# Position: Spacing after
 func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 	match shape:
-		BlockShape.blockShapes.EVENT: return 28.0
+		BlockShape.blockShapes.EVENT: return -28.0
+		BlockShape.blockShapes.NEST: return 100.0
 		_: return 0.0
 
 func _ready() -> void:
 	for i: StringName in blockOrder:
 		var extraSpacing: float = shapeExtraSpacing(BlockStructures.structures[i][&"shape"])
-		if extraSpacing != 0.0:
-			var spacing: Control = Control.new()
-			spacing.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			spacing.custom_minimum_size.y = extraSpacing
-			add_child(spacing)
+		if extraSpacing < 0.0:
+			createSpacing(abs(extraSpacing))
 		var block: CodeBlock = CODE_BLOCK.instantiate()
 		block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		block.offset_transform_scale = Vector2(0.7, 0.7)
@@ -54,6 +56,14 @@ func _ready() -> void:
 		block.editor = editor
 		block.clicked.connect(blockClicked.bind(i))
 		add_child(block)
+		if extraSpacing > 0.0:
+			createSpacing(extraSpacing)
+
+func createSpacing(amount: float) -> void:
+	var spacing: Control = Control.new()
+	spacing.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spacing.custom_minimum_size.y = amount
+	add_child(spacing)
 
 func blockClicked(blockName: StringName) -> void:
 	# Create a new block in the script area

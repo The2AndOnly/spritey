@@ -212,5 +212,10 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": [],
 		&"color": &"unknown",
 		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"test_emptyNest": {
+		&"structure": [],
+		&"color": &"unknown",
+		&"shape": BlockShape.blockShapes.NEST
 	}
 }
