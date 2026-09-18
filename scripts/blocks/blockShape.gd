@@ -33,7 +33,7 @@ var connectors: Dictionary[blockShapes, Array] = {
 	set(value):
 			blockShape = value
 			queue_redraw()
-@export var nestEnd: float = 89.0:
+@export var nestEnd: float = 100.0:
 	set(value):
 		nestEnd = value
 		queue_redraw()
@@ -159,9 +159,9 @@ func shapeValue() -> void:
 	draw_polyline(points, blockColor.darkened(0.2), 2.0)
 
 func shapeNest() -> void:
-	var nestEndTop: float = size.y + nestEnd
-	var nestEndBottom: float = nestEndTop + nestEndHeight
-	var notchDistanceFromNest: float = nestSideWidth + notchDistance
+	var nestEndBottom: float = size.y + nestEnd
+	var nestEndTop: float = nestEndBottom - nestEndHeight
+	var notchDistanceFromNest: float = nestSideWidth + notchDistance + 2.0
 	points.clear()
 	
 	# Top left corner

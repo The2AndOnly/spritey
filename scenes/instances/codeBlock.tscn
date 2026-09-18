@@ -10,7 +10,7 @@ size = Vector2(68, 33)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cp11l"]
 size = Vector2(63, 100)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "topDetection", "bottomDetection", "valueDrop", "shapeNode", "grabArea")]
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "topDetection", "bottomDetection", "valueDrop", "nestDetection", "shapeNode", "grabArea")]
 custom_minimum_size = Vector2(145, 85)
 anchors_preset = -1
 anchor_right = 0.076000005
@@ -24,6 +24,7 @@ content = NodePath("MarginContainer/content")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
 valueDrop = NodePath("valueDrop")
+nestDetection = NodePath("nestEnd")
 shapeNode = NodePath("shape")
 grabArea = NodePath("grabArea")
 metadata/_edit_use_anchors_ = true
@@ -38,7 +39,6 @@ metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
 [node name="top" type="Area2D" parent="." unique_id=1492623312 groups=["blockSnapTop"]]
-visible = false
 input_pickable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="top" unique_id=568772573]
@@ -46,7 +46,6 @@ position = Vector2(60, -1.5)
 shape = SubResource("RectangleShape2D_ncklg")
 
 [node name="bottom" type="Area2D" parent="." unique_id=1738803274 groups=["blockSnapBottom"]]
-visible = false
 position = Vector2(0, 85)
 input_pickable = false
 
@@ -54,13 +53,19 @@ input_pickable = false
 position = Vector2(60, 1.5)
 shape = SubResource("RectangleShape2D_ncklg")
 
+[node name="nestEnd" type="Area2D" parent="." unique_id=1621136184 groups=["blockSnapNestEnd"]]
+position = Vector2(0, 85)
+input_pickable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="nestEnd" unique_id=1950814858]
+position = Vector2(60, 1.5)
+shape = SubResource("RectangleShape2D_ncklg")
+
 [node name="valueDrop" type="Area2D" parent="." unique_id=1901981629]
-visible = false
 position = Vector2(0, 42)
 collision_layer = 0
 collision_mask = 4
 input_pickable = false
-monitoring = false
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="valueDrop" unique_id=2039821306]
@@ -91,3 +96,6 @@ mouse_filter = 2
 mouse_behavior_recursive = 1
 script = ExtResource("3_avub8")
 metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="." unique_id=1504246214]
+layout_mode = 2
