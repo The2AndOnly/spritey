@@ -24,7 +24,7 @@ content = NodePath("MarginContainer/content")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
 valueDrop = NodePath("valueDrop")
-nestDetection = NodePath("nestEnd")
+nestDetection = NodePath("innerNest")
 shapeNode = NodePath("shape")
 grabArea = NodePath("grabArea")
 metadata/_edit_use_anchors_ = true
@@ -53,11 +53,12 @@ input_pickable = false
 position = Vector2(60, 1.5)
 shape = SubResource("RectangleShape2D_ncklg")
 
-[node name="nestEnd" type="Area2D" parent="." unique_id=1621136184 groups=["blockSnapNestEnd"]]
-position = Vector2(0, 85)
+[node name="innerNest" type="Area2D" parent="." unique_id=1621136184 groups=["blockSnapNest"]]
+position = Vector2(32, 85)
 input_pickable = false
+monitoring = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="nestEnd" unique_id=1950814858]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="innerNest" unique_id=1950814858]
 position = Vector2(60, 1.5)
 shape = SubResource("RectangleShape2D_ncklg")
 

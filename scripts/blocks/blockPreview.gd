@@ -2,8 +2,7 @@ class_name BlockPreview
 extends MarginContainer
 
 var shape: BlockShape.blockShapes
-var height: float = 0.0
-var nestEnd: float = 0.0:
+var nestEnd: float = 100.0:
 	set(value):
 		nestEnd = value
 		if previewShape: previewShape.nestEnd = nestEnd
@@ -15,4 +14,5 @@ func _ready() -> void:
 	previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	previewShape.blockColor = Color("ffffff28")
 	previewShape.blockShape = shape
+	previewShape.nestEnd = nestEnd
 	add_child(previewShape)

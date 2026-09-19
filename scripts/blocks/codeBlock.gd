@@ -28,7 +28,8 @@ var dragDistance: float = 0.0
 var dragDisabled := false
 ## Structure of the block
 var blockStructure: Dictionary = {}
-## Which side of another block it can be connected to while dragging | -1 = bottom, 0 = none, 1 = top
+## Which side of another block it can be connected to while dragging
+# -1 = bottom, 0 = none, 1 = top, -2 = first in nest
 var detectedSnapPos: int = 0
 ## Which block it can be connected to while dragging
 var detectedBlock: CodeBlock = null
@@ -39,9 +40,12 @@ var fallbackNestEnd: float = 0.0
 ## Block connected beneath this one
 var childBlock: CodeBlock = null
 var childValueBlocks: Array[CodeBlock]
-## Block connected above this one
+## The first inside of the nest, only set for nest blocks
+var childNest: CodeBlock = null
+## Block connected above this one, null if first in nest
 var parentBlock: CodeBlock = null
 var parentInput: BlockInputEdit
+## Set for every block inside a nest
 var parentNest: CodeBlock = null
 var snapPreview: BlockPreview = null
 ## For setting the color back when done hovering
@@ -65,12 +69,10 @@ func _ready() -> void:
 			nestDetection.queue_free()
 			custom_minimum_size.y = 75.0
 			set_deferred(&"size:y", 0.0)
-			onResize.call_deferred()
 		BlockShape.blockShapes.NEST:
 			valueDrop.queue_free()
-			nestEnd = shapeNode.nestEnd
-			fallbackNestEnd = nestEnd
-			bottomDetection.position.x += 30.0
+			fallbackNestEnd = shapeNode.nestEnd
+			call_deferred(&"setNestEnd", fallbackNestEnd)
 		_:
 			valueDrop.queue_free()
 			nestDetection.queue_free()
@@ -126,7 +128,7 @@ func _ready() -> void:
 	defaultColor = shapeNode.blockColor
 	content.blockColor = defaultColor
 	content.configureProperties()
-	onResize()
+	onResize.call_deferred()
 	# Finally, add this block to the sprite's code
 	if sprite: BuildSpriteScript.updateBlock(self, sprite)
 
@@ -174,25 +176,10 @@ func _process(_delta: float) -> void:
 		# While dragging
 		global_position = get_global_mouse_position() + initialOffset
 		if childBlock: childBlock.dragWithParent(false)
+		if childNest: childNest.dragWithParent(false)
 		if nestEnd != fallbackNestEnd: setNestEnd(fallbackNestEnd)
 		# Dragging will disconnect from parent
-		if parentBlock:
-			# Value blocks have a different method of disconnecting
-			if parentInput:
-				disconnectValueBlock()
-			else:
-				var previousParent: CodeBlock = parentBlock
-				parentBlock.childBlock = null
-				parentBlock = null
-				if parentNest:
-					parentNest.fallbackNestEnd = max(parentNest.nestEnd - calculateStackHeight(self), 100.0)
-					parentNest.setNestEnd(parentNest.fallbackNestEnd)
-					parentNest = null
-					setChildrenParentNests()
-				setToFront()
-				# After disconnecting, update the spriteScript for the two new stacks that were formed
-				previousParent.getHighestInStack().updateSpriteScript()
-				updateSpriteScript()
+		disconnectFromParent()
 		# If the lowest block is trying to connect, then don't detect snapping
 		if getLowestInStack() != self:
 			if getLowestInStack().detectedBlock: return
@@ -206,6 +193,33 @@ func _process(_delta: float) -> void:
 		initialMousePos = Vector2.ZERO
 		dragDisabled = false
 
+func disconnectFromParent() -> void:
+	if parentBlock:
+		# Value blocks have a different method of disconnecting
+		if parentInput:
+			disconnectValueBlock()
+		else:
+			var previousParent: CodeBlock = parentBlock
+			parentBlock.childBlock = null
+			parentBlock = null
+			# If this was part of a stack in a nest, then fix the nestEnd
+			if parentNest:
+				parentNest.fallbackNestEnd = 57.0 + calculateStackHeight(parentNest.childNest)
+				parentNest.setNestEnd(parentNest.fallbackNestEnd)
+				parentNest = null
+				setChildrenParentNests()
+			setToFront()
+			# After disconnecting, update the spriteScript for the two new stacks that were formed
+			previousParent.getHighestInStack().updateSpriteScript()
+			updateSpriteScript()
+	# If removed the first block in a nest
+	elif parentNest:
+		parentNest.fallbackNestEnd = 100.0
+		parentNest.setNestEnd(100.0)
+		parentNest.childNest = null
+		parentNest = null
+		setChildrenParentNests()
+
 # topToBottom: If true, child blocks move when snapped
 # If false, parent blocks move when snapped
 func released(topToBottom: bool) -> void:
@@ -216,15 +230,15 @@ func released(topToBottom: bool) -> void:
 			insertValueBlock()
 			return
 		# If nest end was changed during a preview, that's now the permanent nestEnd
-		if nestDetection: fallbackNestEnd = nestEnd
-		# If dropped into a nest, adjust its nestEnd
-		if parentNest:
-			setChildrenParentNests()
-			if !parentNest.childBlock:
-				parentNest.fallbackNestEnd = calculateStackHeight(self) + 57.0
-			else:
-				parentNest.fallbackNestEnd += calculateStackHeight(self)
-			parentNest.setNestEnd(parentNest.fallbackNestEnd)
+		if nestDetection: nestEnd = fallbackNestEnd
+		# If dropped into a nest
+		#if parentNest:
+			#setChildrenParentNests()
+			#if !parentNest.childNest:
+				#parentNest.fallbackNestEnd = calculateStackHeight(self) + 57.0
+			#else:
+				#parentNest.fallbackNestEnd += calculateStackHeight(self)
+			#parentNest.setNestEnd(parentNest.fallbackNestEnd)
 		# Snap to detected block and set a parent-child relationship
 		global_position = detectedBlock.global_position
 		if detectedSnapPos == 1:
@@ -232,28 +246,47 @@ func released(topToBottom: bool) -> void:
 			global_position.y -= height
 			childBlock = detectedBlock
 			detectedBlock.parentBlock = self
-			if nestDetection:
-				detectedBlock.parentNest = self
-				detectedBlock.setChildrenParentNests()
+			#if nestDetection:
+				#childNest = detectedBlock
+				#detectedBlock.parentNest = self
+				#detectedBlock.setChildrenParentNests()
+		elif detectedSnapPos == -2:
+			# Snapped as first inside nest
+			global_position.y += detectedBlock.height - detectedBlock.nestEnd
+			global_position.x += 32.0
+			parentNest = detectedBlock
+			setChildrenParentNests()
+			parentNest.fallbackNestEnd = 57.0 + calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)
+			parentNest.setNestEnd(parentNest.fallbackNestEnd)
+			# If there were already blocks in the nest, then set that as child of this stack
+			if parentNest.childNest:
+				var lowest: CodeBlock = getLowestInStack()
+				lowest.childBlock = parentNest.childNest
+				lowest.childBlock.parentBlock = lowest
+			parentNest.childNest = self
 		else:
 			# Snapped as child, below other block
 			global_position.y += detectedBlock.height
 			parentBlock = detectedBlock
-			if parentBlock.nestDetection: global_position.x += 32.0
+			parentNest = detectedBlock.parentNest
+			setChildrenParentNests()
 			# If that block already had a child, then re-order the stack to fit between
 			if parentBlock.childBlock:
+				# For nest blocks, this means nesting everything below it
 				if nestDetection:
-					childBlock = parentBlock.childBlock
-					childBlock.parentBlock = self
-					childBlock.parentNest = self
-					childBlock.setChildrenParentNests()
+					childNest = parentBlock.childBlock
+					childNest.parentBlock = self
+					childNest.parentNest = self
+					childNest.setChildrenParentNests()
 				else:
 					var lowest: CodeBlock = getLowestInStack()
-					var oldChild: CodeBlock = parentBlock.childBlock
-					lowest.childBlock = oldChild
-					oldChild.parentBlock = lowest
-					oldChild.moveWithParent()
+					lowest.childBlock = parentBlock.childBlock
+					lowest.childBlock.parentBlock = lowest
 			parentBlock.childBlock = self
+			# If snapped into a nest, fix the nestEnd
+			if parentNest:
+				parentNest.fallbackNestEnd = 57.0 + calculateStackHeight(parentNest.childNest)
+				parentNest.setNestEnd(parentNest.fallbackNestEnd)
 		# If any block was detected on release, update the sprite's script
 		getHighestInStack().updateSpriteScript()
 	# Layering
@@ -265,6 +298,7 @@ func released(topToBottom: bool) -> void:
 	removePreview()
 	if topToBottom:
 		if childBlock: childBlock.dragWithParent(true)
+		if childNest: childNest.dragWithParent(true)
 	else:
 		if parentBlock: parentBlock.moveWithChild()
 
@@ -315,16 +349,19 @@ func fixMinimumSize() -> void:
 
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
 func dragWithParent(release: bool) -> void:
-	global_position = parentBlock.global_position
-	global_position.y += parentBlock.height
-	if parentBlock.nestDetection: global_position.x += 32.0
+	if parentBlock:
+		global_position = parentBlock.global_position
+		global_position.y += parentBlock.height
+	elif parentNest:
+		global_position = parentNest.global_position
+		global_position += Vector2(32.0, parentNest.size.y + 2.0)
+	if childNest: childNest.dragWithParent(release)
 	if childBlock:
 		childBlock.dragWithParent(release)
 	else:
 		# If no child block, this block is in charge of detecting if the bottom of the stack can attach
-		# Unless it's a stack or part of a stack
+		# Unless it's part of a stack
 		if parentNest: return
-		if nestDetection: return
 		if getHighestInStack() != self:
 			if getHighestInStack().detectedBlock: return
 		if release:
@@ -339,15 +376,14 @@ func moveWithChild() -> void:
 	if parentBlock: parentBlock.moveWithChild()
 # If the block above this one moves, re-position
 func moveWithParent() -> void:
-	global_position = parentBlock.global_position
-	global_position.y += parentBlock.height
-	if parentBlock.nestDetection: global_position.x += 32.0
+	if parentBlock:
+		global_position = parentBlock.global_position
+		global_position.y += parentBlock.height
+	elif parentNest:
+		global_position = parentNest.global_position
+		global_position += Vector2(32.0, parentNest.size.y + 2.0)
 	if childBlock: childBlock.moveWithParent()
-
-func setChildrenParentNests() -> void:
-	if childBlock:
-		childBlock.parentNest = parentNest
-		childBlock.setChildrenParentNests()
+	if childNest: childNest.moveWithParent()
 
 # Get the top block with no parent in the stack
 func getHighestInStack() -> CodeBlock:
@@ -373,9 +409,11 @@ func getContentOwner() -> CodeBlock:
 func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
+	if childNest: childNest.setToFront()
 func updateSpriteScript() -> void:
 	BuildSpriteScript.updateBlock(self, sprite)
 	if childBlock: childBlock.updateSpriteScript()
+	if childNest: childNest.updateSpriteScript()
 
 # Snap preview
 func showPreview() -> void:
@@ -383,9 +421,7 @@ func showPreview() -> void:
 		snapPreview = BlockPreview.new()
 		snapPreview.custom_minimum_size = Vector2(size.x, size.y)
 		snapPreview.shape = shapeNode.blockShape
-		snapPreview.height = height
 		detectedBlock.add_sibling(snapPreview)
-	snapPreview.nestEnd = nestEnd
 	# Layering
 	detectedBlock.getHighestInStack().setToFront()
 	snapPreview.move_to_front()
@@ -394,41 +430,56 @@ func showPreview() -> void:
 	snapPreview.global_position = detectedBlock.global_position
 	if detectedSnapPos == 1:
 		# On top of stack
-		snapPreview.global_position.y -= snapPreview.height
 		if nestDetection:
-			detectedBlock.offset_transform_position.x = 32.0
-			detectedBlock.getHighestInStack().processOffset(detectedBlock)
+			snapPreview.global_position.y -= size.y + 102.0
+		else:
+			snapPreview.global_position.y -= height
+	elif detectedSnapPos == -2:
+		# First inside nest
+		snapPreview.global_position.y += detectedBlock.height - detectedBlock.nestEnd
+		snapPreview.global_position.x += 32.0
+		detectedBlock.setNestEnd(57.0 + height + calculateStackHeight(detectedBlock.childNest))
+		# Shift blocks if there were already blocks in that nest
+		if detectedBlock.childNest:
+			detectedBlock.childNest.offset_transform_position.y = size.y + 2.0
+			detectedBlock.childNest.processOffset(detectedBlock.childNest)
 	else:
 		# Below other block, or in middle of stack
 		snapPreview.global_position.y += detectedBlock.height
-		if detectedBlock.nestDetection:
-			snapPreview.global_position.x += 32.0
 		# Shift blocks if placing in middle of another stack
 		if detectedBlock.childBlock:
-			detectedBlock.childBlock.offset_transform_position.y = snapPreview.size.y + 2.0
+			detectedBlock.childBlock.offset_transform_position.y = size.y + 2.0
 			if nestDetection: detectedBlock.childBlock.offset_transform_position.x = 32.0
 			detectedBlock.getHighestInStack().processOffset(detectedBlock.childBlock)
+		# If this stack is part of a nest, fix the nestEnd
+		if detectedBlock.parentNest:
+			detectedBlock.parentNest.setNestEnd(detectedBlock.parentNest.fallbackNestEnd + height)
 func removePreview() -> void:
 	if snapPreview:
 		snapPreview.queue_free()
 # Expected to be called from top-level block with one block offset
-# If called null then reset all offsets for this stack
 func processOffset(affected: CodeBlock) -> void:
+	# If called null then reset all offsets for this stack
 	if !affected:
 		offset_transform_position = Vector2(0.0, 0.0)
 		if childBlock: childBlock.processOffset(null)
+		if childNest: childNest.processOffset(null)
 		return
 	if parentBlock:
 		if self != affected: offset_transform_position = parentBlock.offset_transform_position
-	if childBlock: childBlock.processOffset(affected)
+	elif parentNest:
+		if self != affected: offset_transform_position = parentNest.offset_transform_position
+	if childBlock:
+		childBlock.processOffset(affected)
+	if childNest: childNest.processOffset(affected)
 
 func detectBlockSnap() -> void:
 	if detectedBlock:
 		# Fix any changes made to other blocks with previews from the previous frame
 		detectedBlock.getHighestInStack().processOffset(null)
 		detectedBlock.setNestEnd(detectedBlock.fallbackNestEnd)
-		if parentNest: parentNest.setNestEnd(parentNest.fallbackNestEnd)
-	parentNest = null
+		if detectedBlock.parentNest:
+			detectedBlock.parentNest.setNestEnd(detectedBlock.parentNest.fallbackNestEnd)
 	# Don't snap to the top of a block if there is a block attached below this one
 	if bottomDetection.monitoring and !childBlock:
 		for i: Area2D in bottomDetection.get_overlapping_areas():
@@ -437,9 +488,9 @@ func detectBlockSnap() -> void:
 				# Don't snap to the top of a block if it already has a parent
 				if detectedBlock.parentBlock: break
 				detectedSnapPos = 1
-				if nestDetection:
-					# 57.0 is the height of the nest end + outline
-					setNestEnd(calculateStackHeight(detectedBlock) + 57.0)
+				#if nestDetection:
+					## 57.0 is the height of the nest end + outline
+					#setNestEnd(calculateStackHeight(detectedBlock) + 57.0)
 				showPreview()
 				return
 	# Don't snap to the bottom of a block if there is a block attached above this one
@@ -451,14 +502,11 @@ func detectBlockSnap() -> void:
 				if nestDetection:
 					if detectedBlock.childBlock:
 						setNestEnd(calculateStackHeight(detectedBlock.childBlock) + 57.0)
-				# Detect if dragging into a nest
-				if detectedBlock.nestDetection: parentNest = detectedBlock
-				if !parentNest: parentNest = detectedBlock.parentNest
-				if parentNest:
-					if parentNest.childBlock:
-						parentNest.setNestEnd(parentNest.fallbackNestEnd + height)
-					else:
-						parentNest.setNestEnd(height + 57.0)
+				showPreview()
+				return
+			elif i.is_in_group(&"blockSnapNest"):
+				detectedBlock = i.get_parent()
+				detectedSnapPos = -2
 				showPreview()
 				return
 	# For value blocks
@@ -484,7 +532,7 @@ func detectBlockSnap() -> void:
 
 # Goes down the stack and adds heights of blocks
 func calculateStackHeight(fromBlock: CodeBlock) -> float:
-	if !fromBlock: return fallbackNestEnd
+	if !fromBlock: return 0.0
 	var currentBlock: CodeBlock = fromBlock
 	var stackHeight: float = 0.0
 	stackHeight += currentBlock.height
@@ -496,7 +544,12 @@ func calculateStackHeight(fromBlock: CodeBlock) -> float:
 func setNestEnd(newEnd: float) -> void:
 	nestEnd = newEnd
 	shapeNode.nestEnd = nestEnd
-	if nestDetection: nestDetection.position.y = height + nestEnd
+	onResize()
+
+func setChildrenParentNests() -> void:
+	if childBlock:
+		childBlock.parentNest = parentNest
+		childBlock.setChildrenParentNests()
 
 func mouseEntered() -> void:
 	# Don't allow interaction if initial click was outside block
@@ -533,10 +586,8 @@ func hoveringChildValue() -> bool:
 	return false
 
 func onResize() -> void:
-	height = size.y + 2.0
-	bottomDetection.position.y = size.y
-	if parentNest:
-		parentNest.fallbackNestEnd = calculateStackHeight(parentNest.childBlock) + 57.0
-		parentNest.setNestEnd(parentNest.fallbackNestEnd)
+	height = size.y + nestEnd
+	bottomDetection.position.y = height
+	height += 2.0 # For outline
 	if valueDrop: valueDrop.position.y = size.y / 2.0
 	if childBlock: childBlock.moveWithParent()
