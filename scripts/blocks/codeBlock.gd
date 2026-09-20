@@ -243,9 +243,8 @@ func released(topToBottom: bool) -> void:
 			global_position.x += NestSideWidth
 			parentNest = detectedBlock
 			setChildrenParentNests()
-			# Adjust nestEnd of parent nest, unless this is an empty nest block
-			if childNest or !nestDetection:
-				parentNest.setNestEnd((calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)) - NestEndHeight, true)
+			# Adjust nestEnd of parent nest
+			parentNest.setNestEnd((calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)) - NestEndHeight, true)
 			# If there were already blocks in the nest, then set that as child of this stack
 			if parentNest.childNest:
 				# For empty nest blocks, this means nesting everything
@@ -253,7 +252,7 @@ func released(topToBottom: bool) -> void:
 					childNest = parentNest.childNest
 					childNest.parentNest = self
 					childNest.setChildrenParentNests()
-					setNestEnd(calculateStackHeight(childNest), true, false)
+					setNestEnd(calculateStackHeight(childNest), true)
 					parentNest.setNestEnd(height + NestEndHeight, true)
 				else:
 					var lowest: CodeBlock = getLowestInStack()
@@ -578,12 +577,14 @@ func nestedNestPreviewHeight(nesting: CodeBlock) -> float:
 	else:
 		return size.y + snapPreview.nestEnd + 2.0
 
-func setNestEnd(newEnd: float, setFallback: bool, changeParent: bool = true) -> void:
-	if parentNest and changeParent:
-		parentNest.setNestEnd(parentNest.fallbackNestEnd + (newEnd - fallbackNestEnd), setFallback)
+func setNestEnd(newEnd: float, setFallback: bool) -> void:
+	if parentNest:
+		parentNest.setNestEnd(parentNest.nestEnd + (newEnd - nestEnd), setFallback)
 	nestEnd = newEnd
 	shapeNode.nestEnd = newEnd
-	if setFallback: fallbackNestEnd = newEnd
+	if setFallback:
+		fallbackNestEnd = newEnd
+		print("set fallback")
 	onResize()
 
 func setChildrenParentNests() -> void:

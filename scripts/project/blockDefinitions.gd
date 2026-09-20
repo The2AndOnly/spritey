@@ -13,7 +13,7 @@ extends Sprite2D
 # Event blocks return true if the stack can begin
 # Stack blocks return floats:
 # > 0.0 - Pause the stack for that many seconds
-# -1.0 - Move to next block / stop waiting
+# -1.0 - Move to next block / stop executing
 # 0.0 - Pause the stack for 1 frame
 # -2.0 - Terminate stack
 
@@ -90,6 +90,9 @@ func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
 
 func ctrl_wait(inputs: Array) -> float:
 	return inputs[0]
+
+func ctrl_repeat(inputs: Array) -> float:
+	return -1.0
 
 ## EXPRESSIONS
 

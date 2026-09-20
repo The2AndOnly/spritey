@@ -9,6 +9,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	spriteScriptBlock[&"top"] = block.parentBlock == null
 	spriteScriptBlock[&"value"] = block.parentInput != null
 	if block.childBlock: spriteScriptBlock[&"next"] = block.childBlock.blockID
+	if block.childNest: spriteScriptBlock[&"nest"] = block.childNest.blockID
 	# Build inputs
 	var inputs: Array[Array] = []
 	for i: Control in block.content.get_children():

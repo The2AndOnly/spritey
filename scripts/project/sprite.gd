@@ -7,6 +7,7 @@ extends BlockDefinitions
 # &"next": int | ID of the block to run next, if missing then no block is next
 # &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 # &"value": bool | True if this block is a value block
+# &"nest": int | ID of the first block in this block's nest, if missing then no nest or blocks in nest
 ## Read type 0 (raw input): [read type, [input type, input]]
 # - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat
 # - input is string (raw input)
@@ -66,6 +67,9 @@ func compileStack(blockID: int) -> CompiledBlock:
 	# Compile next block in stack
 	if rawBlock.has(&"next"):
 		compiledBlock.nextBlock = compileStack(rawBlock[&"next"])
+	# Compile any nest
+	if rawBlock.has(&"nest"):
+		compiledBlock.firstInNest = compileStack(rawBlock[&"nest"])
 	return compiledBlock
 
 func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
@@ -121,9 +125,8 @@ func _process(delta: float) -> void:
 				break
 			# If the result didn't catch anything, then execute the next block on this frame
 			currentStack.currentBlock = currentStack.currentBlock.nextBlock
-		# If the next block is null, then the stack will terminate
-		if !currentStack.currentBlock:
-			activeStacks.remove_at(i)
+		# If no more blocks to execute, terminate this stack
+		if !currentStack.currentBlock: activeStacks.remove_at(i)
 
 func finishWaitBlock() -> void:
 	currentStack.executeWait = false
