@@ -584,7 +584,6 @@ func setNestEnd(newEnd: float, setFallback: bool) -> void:
 	shapeNode.nestEnd = newEnd
 	if setFallback:
 		fallbackNestEnd = newEnd
-		print("set fallback")
 	onResize()
 
 func setChildrenParentNests() -> void:

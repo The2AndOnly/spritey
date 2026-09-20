@@ -7,7 +7,7 @@ extends BlockDefinitions
 # &"next": int | ID of the block to run next, if missing then no block is next
 # &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 # &"value": bool | True if this block is a value block
-# &"nest": int | ID of the first block in this block's nest, if missing then no nest or blocks in nest
+# &"nest": int | ID of the first block in nest, if missing then no nest or blocks in nest
 ## Read type 0 (raw input): [read type, [input type, input]]
 # - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat
 # - input is string (raw input)
@@ -24,10 +24,10 @@ var topLevelBlocks: Dictionary[StringName, Array] = {}
 # Contains all value blocks (they are all a singular stack) | blockID: block
 var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var scriptsCompiled := false
-# This stores all of the actively running compiled stacks in the sprite
-var activeStacks: Array[ScriptStack] = []
 # Return result from execute block
 var result: Variant
+# This stores all of the actively running compiled stacks in the sprite
+var activeStacks: Array[ScriptStack] = []
 
 func _ready() -> void:
 	gameView.event.connect(receivedEvent)

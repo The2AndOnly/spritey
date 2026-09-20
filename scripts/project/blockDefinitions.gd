@@ -73,8 +73,7 @@ func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
 			return 0.0
 		else:
 			# Initial execution
-			if inputs[0] <= 0.0:
-				return -1.0
+			if inputs[0] <= 0.0: return -1.0
 			currentStack.executeWait = true
 			currentStack.blockData.append_array([position, destination, inputs[0]])
 			return inputs[0]
