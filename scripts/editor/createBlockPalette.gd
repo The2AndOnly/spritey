@@ -11,6 +11,7 @@ var blockOrder: Array[StringName] = [
 	&"event_receive",
 	&"event_signal",
 	&"ctrl_wait",
+	&"ctrl_repeat",
 	&"exp_add",
 	&"exp_subtract",
 	&"exp_multiply",
@@ -38,7 +39,7 @@ var blockOrder: Array[StringName] = [
 func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 	match shape:
 		BlockShape.blockShapes.EVENT: return -28.0
-		BlockShape.blockShapes.NEST: return 100.0
+		BlockShape.blockShapes.NEST: return 80.0
 		_: return 0.0
 
 func _ready() -> void:

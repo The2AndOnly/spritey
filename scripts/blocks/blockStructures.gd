@@ -184,6 +184,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	&"ctrl_repeat": {
+		&"structure": ["repeat", 0],
+		0: [&"input", 3, "20"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.NEST
+	},
 	
 	## TESTS
 	

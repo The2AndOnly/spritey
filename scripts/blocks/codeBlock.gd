@@ -243,16 +243,26 @@ func released(topToBottom: bool) -> void:
 			global_position.x += NestSideWidth
 			parentNest = detectedBlock
 			setChildrenParentNests()
-			parentNest.setNestEnd((calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)) - NestEndHeight, true)
+			# Adjust nestEnd of parent nest, unless this is an empty nest block
+			if childNest or !nestDetection:
+				parentNest.setNestEnd((calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)) - NestEndHeight, true)
 			# If there were already blocks in the nest, then set that as child of this stack
 			if parentNest.childNest:
-				var lowest: CodeBlock = getLowestInStack()
-				lowest.childBlock = parentNest.childNest
-				lowest.childBlock.parentBlock = lowest
+				# For empty nest blocks, this means nesting everything
+				if nestDetection and !childNest:
+					childNest = parentNest.childNest
+					childNest.parentNest = self
+					childNest.setChildrenParentNests()
+					setNestEnd(calculateStackHeight(childNest), true, false)
+					parentNest.setNestEnd(height + NestEndHeight, true)
+				else:
+					var lowest: CodeBlock = getLowestInStack()
+					lowest.childBlock = parentNest.childNest
+					lowest.childBlock.parentBlock = lowest
 			parentNest.childNest = self
 		# Nest block nesting entire stack
 		elif detectedSnapPos == 2:
-			global_position.y -= detectedBlock.height - detectedBlock.nestEnd
+			global_position.y -= size.y + 2.0
 			global_position.x -= NestSideWidth
 			childNest = detectedBlock
 			childNest.parentNest = self
@@ -434,16 +444,21 @@ func showPreview() -> void:
 		snapPreview.global_position.y += detectedBlock.height - detectedBlock.nestEnd
 		snapPreview.global_position.x += NestSideWidth
 		if nestDetection:
+			if !childNest and detectedBlock.childNest: snapPreview.nestEnd = calculateStackHeight(detectedBlock.childNest)
 			detectedBlock.setNestEnd(nestedNestPreviewHeight(detectedBlock.childNest) + calculateStackHeight(detectedBlock.childNest), false)
 		else:
 			detectedBlock.setNestEnd(height + calculateStackHeight(detectedBlock.childNest), false)
 		# Shift blocks if there were already blocks in that nest
 		if detectedBlock.childNest:
 			detectedBlock.childNest.offset_transform_position.y = size.y + 2.0
+			if childNest:
+				detectedBlock.childNest.offset_transform_position.y += DefaultNestEnd
+			elif nestDetection:
+				detectedBlock.childNest.offset_transform_position.x += NestSideWidth
 			detectedBlock.childNest.processOffset(detectedBlock.childNest)
 	# Nest block nesting entire stack
 	elif detectedSnapPos == 2:
-		snapPreview.global_position.y -= detectedBlock.height - detectedBlock.nestEnd
+		snapPreview.global_position.y -= snapPreview.size.y + 2.0
 		snapPreview.global_position.x -= NestSideWidth
 		snapPreview.nestEnd = calculateStackHeight(detectedBlock)
 	else:
@@ -547,7 +562,7 @@ func detectBlockSnap() -> void:
 	if snapPreview: snapPreview.queue_free()
 
 # Goes down the stack and adds heights of blocks
-# Adding NestEndHeight to results since every use of this function did that
+# Adding NestEndHeight to results since almost every use of this function did that
 func calculateStackHeight(fromBlock: CodeBlock) -> float:
 	if !fromBlock: return NestEndHeight
 	var currentBlock: CodeBlock = fromBlock
@@ -563,8 +578,9 @@ func nestedNestPreviewHeight(nesting: CodeBlock) -> float:
 	else:
 		return size.y + snapPreview.nestEnd + 2.0
 
-func setNestEnd(newEnd: float, setFallback: bool) -> void:
-	if parentNest: parentNest.setNestEnd(parentNest.nestEnd + (newEnd - nestEnd), setFallback)
+func setNestEnd(newEnd: float, setFallback: bool, changeParent: bool = true) -> void:
+	if parentNest and changeParent:
+		parentNest.setNestEnd(parentNest.fallbackNestEnd + (newEnd - fallbackNestEnd), setFallback)
 	nestEnd = newEnd
 	shapeNode.nestEnd = newEnd
 	if setFallback: fallbackNestEnd = newEnd
@@ -614,4 +630,8 @@ func onResize() -> void:
 	bottomDetection.position.y = height
 	height += 2.0 # For outline
 	if valueDrop: valueDrop.position.y = size.y / 2.0
+	if nestDetection:
+		nestDetection.position.y = size.y
+		if childNest: childNest.moveWithParent()
 	if childBlock: childBlock.moveWithParent()
+	if parentNest: parentNest.setNestEnd(calculateStackHeight(getHighestInStack()), true)
