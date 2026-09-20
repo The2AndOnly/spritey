@@ -116,8 +116,9 @@ func _process(delta: float) -> void:
 				break
 			# If a block returns > 0.0, wait for that many seconds
 			# If the wait time is zero, then it will wait one frame
-			currentStack.waitTime = result if result > 0.0 else 0.0
-			break
+			if result >= 0.0:
+				currentStack.waitTime = result if result > 0.0 else 0.0
+				break
 			# If the result didn't catch anything, then execute the next block on this frame
 			currentStack.currentBlock = currentStack.currentBlock.nextBlock
 		# If the next block is null, then the stack will terminate
@@ -149,7 +150,7 @@ func executeBlock(block: CompiledBlock) -> Variant:
 				# Raw input or options
 				returnedValues.append(i)
 			return block.definition.call(returnedValues)
-	return false
+	return -1.0
 
 func parseInput(inputs: Array) -> Array:
 	var parsed: Array = []

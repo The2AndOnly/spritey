@@ -14,5 +14,4 @@ func _ready() -> void:
 	previewShape.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	previewShape.blockColor = Color("ffffff28")
 	previewShape.blockShape = shape
-	previewShape.nestEnd = nestEnd
 	add_child(previewShape)
