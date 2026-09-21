@@ -3,6 +3,7 @@ extends MarginContainer
 
 @export_group("for instance scene")
 @export var content: HBoxContainer
+@export var contentMargin: MarginContainer
 @export var topDetection: Area2D
 @export var bottomDetection: Area2D
 @export var valueDrop: Area2D
@@ -36,7 +37,7 @@ var blockStructure: Dictionary = {}
 var detectedSnapPos: int = 0
 ## Which block it can be connected to while dragging
 var detectedBlock: CodeBlock = null
-var detectedInput: BlockInputEdit
+var detectedInput: Control
 var nestEnd: float = 0.0
 ## Nest end goes back to this if dragging out of a preview
 var fallbackNestEnd: float = 0.0
@@ -47,7 +48,7 @@ var childValueBlocks: Array[CodeBlock]
 var childNest: CodeBlock = null
 ## Block connected above this one, null if first in nest
 var parentBlock: CodeBlock = null
-var parentInput: BlockInputEdit
+var parentInput: Control
 ## Set for every block inside a nest
 var parentNest: CodeBlock = null
 var snapPreview: BlockPreview = null
@@ -56,6 +57,8 @@ var defaultColor: Color
 var height: float = 0.0
 ## Used for forcing the block to be dragged further until detecting something else
 var detectPosition: Vector2 = Vector2.ZERO
+## Just so you don't have to check the block shape
+var boolBlock := false
 
 signal clicked()
 
@@ -73,6 +76,13 @@ func _ready() -> void:
 		BlockShape.blockShapes.VALUE:
 			nestDetection.queue_free()
 			custom_minimum_size.y = 75.0
+			set_deferred(&"size:y", 0.0)
+		BlockShape.blockShapes.BOOLEAN:
+			nestDetection.queue_free()
+			valueDrop.set_collision_mask_value(3, false)
+			valueDrop.set_collision_mask_value(4, true)
+			custom_minimum_size.y = 75.0
+			boolBlock = true
 			set_deferred(&"size:y", 0.0)
 		BlockShape.blockShapes.NEST:
 			valueDrop.queue_free()
@@ -97,7 +107,6 @@ func _ready() -> void:
 					input.type = blockStructure[i][1]
 					input.text = blockStructure[i][2]
 					input.block = self
-					input.inputID = i
 					content.add_child(input)
 					if preview:
 						input.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -120,6 +129,12 @@ func _ready() -> void:
 						options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					else:
 						addInputArea(options)
+				&"bool":
+					var boolean: BlockBoolPanel = BlockBoolPanel.new()
+					boolean.mouse_filter = Control.MOUSE_FILTER_IGNORE
+					boolean.block = self
+					content.add_child(boolean)
+					if !preview: addInputArea(boolean)
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
@@ -142,12 +157,17 @@ func addInputArea(blockInput: Control) -> void:
 	var detection: Area2D = Area2D.new()
 	detection.monitoring = false
 	detection.set_collision_layer_value(1, false)
-	detection.set_collision_layer_value(3, true)
-	if blockInput is BlockInputEdit:
+	if blockInput is BlockBoolPanel:
+		detection.set_collision_layer_value(4, true)
 		detection.add_to_group(&"blockValueDrop")
-		detection.mouse_entered.connect(blockInput.mouseEntered)
-		detection.mouse_exited.connect(blockInput.mouseExited)
-	detection.input_event.connect(blockInput.inputEvent)
+		detection.input_pickable = false
+	else:
+		detection.input_event.connect(blockInput.inputEvent)
+		detection.set_collision_layer_value(3, true)
+		if blockInput is BlockInputEdit:
+			detection.add_to_group(&"blockValueDrop")
+			detection.mouse_entered.connect(blockInput.mouseEntered)
+			detection.mouse_exited.connect(blockInput.mouseExited)
 	blockInput.add_child(detection)
 	var detectionShape: CollisionShape2D = CollisionShape2D.new()
 	detectionShape.shape = RectangleShape2D.new()
@@ -642,3 +662,7 @@ func onResize() -> void:
 		if childNest: childNest.moveWithParent()
 	if childBlock: childBlock.moveWithParent()
 	if parentNest: parentNest.setNestEnd(calculateStackHeight(getHighestInStack()), true)
+	if boolBlock:
+		contentMargin.add_theme_constant_override(&"margin_left", int(size.y / 3.0))
+		contentMargin.add_theme_constant_override(&"margin_right", int(size.y / 3.0))
+		fixMinimumSize.call_deferred()

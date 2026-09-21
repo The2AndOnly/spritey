@@ -1,5 +1,5 @@
 class_name BlockDefinitions
-extends Sprite2D
+extends SpriteData
 
 # Helper functions are marked with "H_"
 
@@ -18,7 +18,6 @@ extends Sprite2D
 # -2.0 - Terminate stack
 # -3.0 - Enter nest
 
-var gameView: GameView
 var currentStack: ScriptStack
 
 ## EVENTS
@@ -36,60 +35,74 @@ func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 ## TRANSFORM
 
 func trans_setX(inputs: Array) -> float:
-	position.x = gameView.toLocalCoords(Vector2(inputs[0], 0.0)).x
+	spritePos.x = inputs[0]
 	return -1.0
 func trans_setY(inputs: Array) -> float:
-	position.y = gameView.toLocalCoords(Vector2(0.0, inputs[0])).y
+	spritePos.y = inputs[0]
 	return -1.0
 func trans_changeX(inputs: Array) -> float:
-	position.x += inputs[0]
+	spritePos.x += inputs[0]
 	return -1.0
 func trans_changeY(inputs: Array) -> float:
-	position.y -= inputs[0]
+	spritePos.y -= inputs[0]
 	return -1.0
 
 func trans_setPosition(inputs: Array) -> float:
-	position = gameView.toLocalCoords(Vector2(inputs[0], inputs[1]))
+	spritePos = Vector2(inputs[0], inputs[1])
 	return -1.0
 func trans_setPositionOption(inputs: Array) -> float:
-	position = H_getPositionFromOption(inputs[0])
+	spritePos = H_getPositionFromOption(inputs[0])
 	return -1.0
 func H_getPositionFromOption(option: int) -> Vector2:
 	match option:
 		0:
-			return gameView.toLocalCoords(gameView.mousePosition)
+			return gameView.mousePosition
 		1:
 			return gameView.getRandomCoord()
-	return position
+	return spritePos
 
 func trans_glideToPosition(inputs: Array) -> float:
-	return H_glideToDestination(inputs, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])))
+	return H_glideToDestination(inputs, Vector2(inputs[1], inputs[2]))
 func trans_glideToOption(inputs: Array) -> float:
 	return H_glideToDestination(inputs, H_getPositionFromOption(inputs[1]))
 func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
 	if currentStack.waitTime == -1.0:
 		if currentStack.executeWait:
 			# Finished gliding
-			position = currentStack.blockData[1]
+			spritePos = currentStack.blockData[1]
 			return 0.0
 		else:
 			# Initial execution
-			if inputs[0] <= 0.0: return -1.0
+			var time: float = inputs[0]
+			if time <= 0.0: return -1.0
 			currentStack.executeWait = true
-			currentStack.blockData.append_array([position, destination, inputs[0]])
-			return inputs[0]
+			currentStack.blockData.append_array([spritePos, destination, time])
+			return time
 	else:
 		# While gliding
-		position = currentStack.blockData[0].lerp(
+		spritePos = currentStack.blockData[0].lerp(
 			currentStack.blockData[1],
 			1.0 - (currentStack.waitTime / currentStack.blockData[2])
 		)
 		return currentStack.waitTime
 
+func trans_XPos() -> float:
+	return round(spritePos.x)
+func trans_YPos() -> float:
+	return round(spritePos.y)
+
 ## CONTROL
 
 func ctrl_wait(inputs: Array) -> float:
 	return inputs[0]
+
+func ctrl_waitUntil(inputs: Array) -> float:
+	if currentStack.executeWait:
+		return -1.0 if inputs[0] else 1.0
+	else:
+		if inputs[0]: return -1.0
+		currentStack.executeWait = true
+		return 1.0
 
 func ctrl_repeat(inputs: Array) -> float:
 	if currentStack.currentBlock in currentStack.loops:
@@ -109,6 +122,31 @@ func ctrl_repeat(inputs: Array) -> float:
 		currentStack.loopData.append(inputs[0])
 		return -3.0
 
+func ctrl_while(inputs: Array) -> float:
+	if currentStack.currentBlock in currentStack.loops:
+		# While looping
+		if inputs[0]:
+			# Continue loop
+			return -3.0
+		else:
+			# Loop finished
+			currentStack.loops.remove_at(-1)
+			return -1.0
+	else:
+		# Initial call
+		if inputs[0]:
+			currentStack.loops.append(currentStack.currentBlock)
+			return -3.0
+		else:
+			return -1.0
+
+func ctrl_if(inputs: Array) -> float:
+	if inputs[0]:
+		currentStack.exitNest = currentStack.currentBlock.nextBlock
+		return -3.0
+	else:
+		return -1.0
+
 ## EXPRESSIONS
 
 func exp_add(inputs: Array) -> float:
@@ -119,14 +157,90 @@ func exp_multiply(inputs: Array) -> float:
 	return inputs[0] * inputs[1]
 func exp_divide(inputs: Array) -> float:
 	return inputs[0] / inputs[1]
+func exp_mod(inputs: Array) -> float:
+	return fmod(inputs[0], inputs[1])
+func exp_exponent(inputs: Array) -> float:
+	return inputs[0] ** inputs[1]
+
+func exp_and(inputs: Array) -> bool:
+	return inputs[0] and inputs[1]
+func exp_or(inputs: Array) -> bool:
+	return inputs[0] or inputs[1]
+func exp_not(inputs: Array) -> bool:
+	return !inputs[0]
+
+func exp_equals(inputs: Array) -> bool:
+	var val1: String = inputs[0]
+	var val2: String = inputs[1]
+	if val1.is_valid_float() and val2.is_valid_float():
+		# Necessary so it won't return false with 2.0 and 2
+		return float(val1) == float(val2)
+	return val1 == val2
+func exp_greater(inputs: Array) -> bool:
+	return inputs[0] > inputs[1]
+func exp_less(inputs: Array) -> bool:
+	return inputs[0] < inputs[1]
 
 func exp_random(inputs: Array) -> Variant:
-	if (inputs[0] is float) or (inputs[1] is float):
-		return randf_range(inputs[0], inputs[1])
-	return randi_range(inputs[0], inputs[1])
+	if inputs[0] == 0:
+		return randi_range(inputs[1], inputs[2])
+	else:
+		return randf_range(inputs[1], inputs[2])
 
 func exp_join(inputs: Array) -> String:
 	return inputs[0] + inputs[1]
+func exp_charOf(inputs: Array) -> String:
+	var index: int = inputs[0]
+	var text: String = inputs[1]
+	if index < 0:
+		index += text.length()
+	return text.substr(index, 1)
+func exp_substring(inputs: Array) -> String:
+	var index: int = inputs[0]
+	var lastIndex: int = inputs[1]
+	var text: String = inputs[2]
+	if index < 0:
+		index += text.length()
+	if lastIndex < 0:
+		lastIndex += text.length()
+	if lastIndex > index:
+		return text.substr(index, (lastIndex - index) + 1)
+	else:
+		return text.substr(lastIndex, (index - lastIndex) + 1)
+
+func exp_textLength(inputs: Array) -> int:
+	return inputs[0].length()
+
+func exp_ternary(inputs: Array) -> String:
+	return inputs[0] if inputs[1] else inputs[2]
+
+func exp_abs(inputs: Array) -> float:
+	return abs(inputs[0])
+func exp_round(inputs: Array) -> int:
+	return roundi(inputs[0])
+
+func exp_math(inputs: Array) -> float:
+	match inputs[0]:
+		0: return floorf(inputs[1])
+		1: return ceilf(inputs[1])
+		2: return sin(deg_to_rad(inputs[1]))
+		3: return cos(deg_to_rad(inputs[1]))
+		4: return tan(deg_to_rad(inputs[1]))
+		5: return rad_to_deg(asin(inputs[1]))
+		6: return rad_to_deg(acos(inputs[1]))
+		7: return rad_to_deg(atan(inputs[1]))
+		8: return sqrt(inputs[1])
+		9: return log(inputs[1])
+		10: return log(inputs[1]) / log(10.0)
+		11: return exp(inputs[1])
+	return 0.0
+
+## INTERACTION
+
+func inter_pointerX() -> float:
+	return round(gameView.mousePosition.x)
+func inter_pointerY() -> float:
+	return round(gameView.mousePosition.y)
 
 ## TEST
 

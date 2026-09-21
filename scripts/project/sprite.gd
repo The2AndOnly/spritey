@@ -5,17 +5,18 @@ extends BlockDefinitions
 # &"block": StringName | Name of block
 # &"top": bool | True if this block is the top of the stack
 # &"next": int | ID of the block to run next, if missing then no block is next
-# &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 # &"value": bool | True if this block is a value block
 # &"nest": int | ID of the first block in nest, if missing then no nest or blocks in nest
+# &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 ## Read type 0 (raw input): [read type, [input type, input]]
-# - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat
+# - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat, 5=bool
 # - input is string (raw input)
 ## Read type 1 (value block): [read type, [input type, block ID]]
 # - input type is same as read type 0 (raw input)
 # - block ID is int
 ## Read type 2 (options): [read type, option]
 # - option is int (selected option)
+# - also used by empty bool inputs, so option can be false
 
 var spriteScript: Dictionary[int, Dictionary] = {}
 # This holds the compiled script, but only the top-level blocks are listed in their category
@@ -130,11 +131,16 @@ func _process(delta: float) -> void:
 				currentStack.currentBlock = currentStack.currentBlock.firstInNest
 			else:
 				currentStack.currentBlock = currentStack.currentBlock.nextBlock
-		# If no more blocks to execute, terminate this stack or go back to loop
+		# Reached the end of a stack or nest
 		if !currentStack.currentBlock:
 			if !currentStack.loops.is_empty():
 				currentStack.currentBlock = currentStack.loops.back()
 				continue
+			if currentStack.exitNest:
+				currentStack.currentBlock = currentStack.exitNest
+				currentStack.exitNest = null
+				continue
+			# If no more blocks to execute, then terminate this stack
 			activeStacks.remove_at(i)
 
 func finishWaitBlock() -> void:
@@ -147,17 +153,15 @@ func executeBlock(block: CompiledBlock) -> Variant:
 		if block.inputs.is_empty():
 			return block.definition.call()
 		else:
-			# If it's an execute wait, don't re-evaluate inputs
-			if currentStack.executeWait:
+			# If it's an execute wait, don't re-evaluate inputs unless there is no block data
+			if currentStack.executeWait and !currentStack.blockData.is_empty():
 				return block.definition.call(block.inputs)
 			# Build the input data from any potential value blocks
 			var returnedValues: Array = []
 			for i in block.inputs:
 				if i is Array:
 					# Execute value block
-					returnedValues.append(
-						castType(i[0], executeBlock(valueBlocks[i[1]]))
-					)
+					returnedValues.append(castType(i[0], executeBlock(valueBlocks[i[1]])))
 					continue
 				# Raw input or options
 				returnedValues.append(i)
@@ -184,9 +188,11 @@ func castType(type: int, value: Variant) -> Variant:
 		1: # float
 			return float(value)
 		2: # string
-			return value
+			return str(value)
 		3: # positive integer
 			return max(0, int(value))
 		4: # positive float
 			return max(0.0, float(value))
+		5: # bool (has no casting since only bool blocks can be inserted)
+			return value
 	return null

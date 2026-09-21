@@ -78,14 +78,14 @@ func toLocalCoords(position: Vector2) -> Vector2:
 # Input is local coords, output is game coords
 func toGameCoords(position: Vector2) -> Vector2:
 	return Vector2(
-		lerp(-halfBaseSize.x, halfBaseSize.x, position.x / (sizeMinusOne.x)),
-		lerp(halfBaseSize.y, -halfBaseSize.y, position.y / (sizeMinusOne.y))
+		(position.x - halfSize.x) / scaledSize.x,
+		(halfSize.y - position.y) / scaledSize.y
 	)
 func getRandomCoord() -> Vector2:
-	return toLocalCoords(Vector2(
+	return Vector2(
 		randf_range(-halfBaseSize.x, halfBaseSize.x),
 		randf_range(-halfBaseSize.y, halfBaseSize.y)
-	))
+	)
 func setMousePosition() -> void:
 	mousePosition = toGameCoords(get_mouse_position())
 

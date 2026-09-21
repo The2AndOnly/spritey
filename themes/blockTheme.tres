@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bq48o8h1rw4hr" path="res://textures/dropdownArrow.png" id="2_0g56m"]
 [ext_resource type="StyleBox" uid="uid://dmp801j6y02fr" path="res://themes/blockOptionButton.tres" id="3_0g56m"]
 [ext_resource type="Texture2D" uid="uid://bwysmlv10sjeu" path="res://textures/dropdownSelection.png" id="3_cqwqa"]
+[ext_resource type="StyleBox" uid="uid://tkxi8ob6bwxm" path="res://themes/blockBoolPanel.tres" id="4_832mn"]
 [ext_resource type="Texture2D" uid="uid://cfeq0kf1yiimr" path="res://textures/noIcon.png" id="4_m41f8"]
 [ext_resource type="StyleBox" uid="uid://b136o4ympmsgo" path="res://themes/blockOptionsPopupPanel.tres" id="6_cqwqa"]
 
@@ -5209,6 +5210,7 @@ OptionButton/icons/arrow = ExtResource("2_0g56m")
 OptionButton/styles/hover = ExtResource("3_0g56m")
 OptionButton/styles/normal = ExtResource("3_0g56m")
 OptionButton/styles/pressed = ExtResource("3_0g56m")
+Panel/styles/panel = ExtResource("4_832mn")
 PopupMenu/colors/font_accelerator_color = Color(0.7, 0.7, 0.7, 0.8)
 PopupMenu/colors/font_color = Color(1, 1, 1, 1)
 PopupMenu/colors/font_disabled_color = Color(0.4, 0.4, 0.4, 0.8)

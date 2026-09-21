@@ -7,7 +7,6 @@ extends LineEdit
 # 3 = positive integer
 # 4 = positive float
 var type: int = 0
-var inputID: int
 var block: CodeBlock
 var highlight: Panel
 var detectionShape: CollisionShape2D

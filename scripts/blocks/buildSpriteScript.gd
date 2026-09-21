@@ -16,19 +16,18 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 		if i is LineEdit:
 			# If not visible, then a value block is inserted
 			if i.visible:
-				# Type of 5 has to infer between float or integer
-				if i.type == 5:
-					if "." in i.text:
-						inputs.append([0, [1, i.text]])
-					else:
-						inputs.append([0, [0, i.text]])
-				else:
-					inputs.append([0, [i.type, i.text]])
+				inputs.append([0, [i.type, i.text]])
 		if i is CodeBlock:
-			inputs.append([1, [i.parentInput.type, i.blockID]])
+			if i.parentInput is BlockInputEdit:
+				inputs.append([1, [i.parentInput.type, i.blockID]])
+			else:
+				inputs.append([1, [5, i.blockID]])
 			updateBlock(i, sprite)
 		if i is OptionButton:
 			inputs.append([2, i.selected])
+		# Empty bool input
+		if i is BlockBoolPanel and i.visible:
+			inputs.append([2, false])
 	if inputs.size() > 0: spriteScriptBlock[&"inputs"] = inputs
 	# Add this to the sprite
 	sprite.spriteScript[block.blockID] = spriteScriptBlock

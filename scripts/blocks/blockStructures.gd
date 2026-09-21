@@ -10,7 +10,6 @@ extends Node
 ## 2 - string
 ## 3 - positive integer
 ## 4 - positive float
-## 5 - infer between float and integer when building sprite script
 # blockOptions (optionButton):
 # [&"options", 0, 0, ["option1"]] - input type, option addon, default, values
 ## OPTION ADDONS:
@@ -24,6 +23,7 @@ static var categoryColors: Dictionary[StringName, Color] = {
 	&"events": Color("b52a2aff"),
 	&"expressions": Color("a6981eff"),
 	&"control": Color("9e501cff"),
+	&"interaction": Color("1c734dff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -130,6 +130,16 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	&"trans_XPos": {
+		&"structure": ["x position"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"trans_YPos": {
+		&"structure": ["y position"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
 	
 	## EXPRESSIONS
 	
@@ -162,9 +172,10 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"shape": BlockShape.blockShapes.VALUE
 	},
 	&"exp_random": {
-		&"structure": ["random", 0, "to", 1],
-		0: [&"input", 5, "1"],
-		1: [&"input", 5, "5"],
+		&"structure": ["random", 0, 1, "to", 2],
+		0: [&"options", 0, 0, ["integer", "decimal"]],
+		1: [&"input", 1, "1"],
+		2: [&"input", 1, "5"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -173,6 +184,122 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		0: [&"input", 2, "text1"],
 		1: [&"input", 2, "text2"],
 		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_ternary": {
+		&"structure": [0, "if", 1, "else", 2],
+		0: [&"input", 2, ""],
+		1: [&"bool"],
+		2: [&"input", 2, ""],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_equals": {
+		&"structure": [0, "=", 1],
+		0: [&"input", 2, "0"],
+		1: [&"input", 2, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_greater": {
+		&"structure": [0, ">", 1],
+		0: [&"input", 2, "1"],
+		1: [&"input", 2, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_less": {
+		&"structure": [0, "<", 1],
+		0: [&"input", 2, "0"],
+		1: [&"input", 2, "1"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_and": {
+		&"structure": [0, "and", 1],
+		0: [&"bool"],
+		1: [&"bool"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_or": {
+		&"structure": [0, "or", 1],
+		0: [&"bool"],
+		1: [&"bool"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_not": {
+		&"structure": ["not", 0],
+		0: [&"bool"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_charOf": {
+		&"structure": ["char", 0, "of", 1],
+		0: [&"input", 0, "0"],
+		1: [&"input", 2, "text"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_substring": {
+		&"structure": ["chars", 0, "to", 1, "of", 2],
+		0: [&"input", 0, "0"],
+		1: [&"input", 0, "2"],
+		2: [&"input", 2, "text"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_textLength": {
+		&"structure": ["length of", 0],
+		0: [&"input", 2, "text"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_mod": {
+		&"structure": [0, "mod", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "1"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_exponent": {
+		&"structure": [0, "^", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "2"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_abs": {
+		&"structure": ["abs", 0],
+		0: [&"input", 1, "-1"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_round": {
+		&"structure": ["round", 0],
+		0: [&"input", 1, "1.5"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_math": {
+		&"structure": [0, "of", 1],
+		0: [&"options", 0, 0, ["floor", "ceiling", "sin", "cos", "tan", "asin", "acos", "atan", "sqrt", "ln", "log", "e^"]],
+		1: [&"input", 1, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	
+	## INTERACTION
+	
+	&"inter_pointerX": {
+		&"structure": ["pointer x"],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"inter_pointerY": {
+		&"structure": ["pointer y"],
+		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
 	
@@ -184,9 +311,27 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	&"ctrl_waitUntil": {
+		&"structure": ["wait until", 0],
+		0: [&"bool"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_if": {
+		&"structure": ["if   ", 0, "then"],
+		0: [&"bool"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.NEST
+	},
 	&"ctrl_repeat": {
 		&"structure": ["repeat", 0],
 		0: [&"input", 3, "20"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.NEST
+	},
+	&"ctrl_while": {
+		&"structure": ["while", 0],
+		0: [&"bool"],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.NEST
 	},

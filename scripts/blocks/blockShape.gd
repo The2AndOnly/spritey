@@ -6,14 +6,16 @@ enum blockShapes {
 	STACK,
 	EVENT,
 	VALUE,
-	NEST
+	NEST,
+	BOOLEAN
 }
 # The horizontal minimum size
 var minimumSizes: Dictionary[blockShapes, float] = {
 	blockShapes.STACK: 145.0,
 	blockShapes.EVENT: 250.0,
 	blockShapes.VALUE: 100.0,
-	blockShapes.NEST: 250.0
+	blockShapes.NEST: 250.0,
+	blockShapes.BOOLEAN: 100.0
 }
 # Determines which parts of the block can connect
 # [top connector, bottom connector]
@@ -22,7 +24,8 @@ var connectors: Dictionary[blockShapes, Array] = {
 	blockShapes.STACK: [true, true],
 	blockShapes.EVENT: [false, true],
 	blockShapes.VALUE: [false, false],
-	blockShapes.NEST: [true, true]
+	blockShapes.NEST: [true, true],
+	blockShapes.BOOLEAN: [false, false]
 }
 
 @export var blockColor: Color = Color("636363ff"):
@@ -68,6 +71,8 @@ func _draw() -> void:
 		blockShapes.NEST:
 			RenderingServer.canvas_item_set_custom_rect(get_canvas_item(), true, Rect2(0.0, -INF, size.x, INF))
 			shapeNest()
+		blockShapes.BOOLEAN:
+			shapeBoolean()
 	if !Engine.is_editor_hint():
 		if grabShape: grabShape.polygon = points
 
@@ -152,6 +157,24 @@ func shapeValue() -> void:
 	points.append_array(drawArc(Vector2(size.x - cr, size.y - cr), cr, 0.0, angleLeft))
 	# Bottom left corner
 	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
+	
+	# Fill and outline
+	draw_polygon(points, PackedColorArray([blockColor]))
+	points.append(points[0])
+	draw_polyline(points, blockColor.darkened(0.2), 2.0)
+
+func shapeBoolean() -> void:
+	var halfSizeY: float = size.y / 2.0
+	points.clear()
+	
+	# Top left corner
+	points.append_array(drawArc(Vector2(halfSizeY, halfSizeY), halfSizeY, PI, angleRight, 10))
+	# Top right corner
+	points.append_array(drawArc(Vector2(size.x - halfSizeY, halfSizeY), halfSizeY, angleRight, angleDown, 10))
+	# Bottom right corner
+	points.append_array(drawArc(Vector2(size.x - halfSizeY, size.y - halfSizeY), halfSizeY, 0.0, angleLeft, 10))
+	# Bottom left corner
+	points.append_array(drawArc(Vector2(halfSizeY, size.y - halfSizeY), halfSizeY, angleLeft, PI, 10))
 	
 	# Fill and outline
 	draw_polygon(points, PackedColorArray([blockColor]))

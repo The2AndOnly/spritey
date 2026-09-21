@@ -10,17 +10,19 @@ size = Vector2(68, 45)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cp11l"]
 size = Vector2(63, 100)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "topDetection", "bottomDetection", "valueDrop", "nestDetection", "shapeNode", "grabArea")]
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "contentMargin", "topDetection", "bottomDetection", "valueDrop", "nestDetection", "shapeNode", "grabArea")]
 custom_minimum_size = Vector2(145, 85)
 anchors_preset = -1
 anchor_right = 0.076000005
 anchor_bottom = 0.079
 offset_right = -0.9200134
 offset_bottom = -0.32000732
+size_flags_vertical = 4
 offset_transform_enabled = true
 mouse_filter = 2
 script = ExtResource("1_avub8")
 content = NodePath("MarginContainer/content")
+contentMargin = NodePath("MarginContainer")
 topDetection = NodePath("top")
 bottomDetection = NodePath("bottom")
 valueDrop = NodePath("valueDrop")
