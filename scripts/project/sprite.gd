@@ -44,6 +44,8 @@ func compileAll() -> void:
 	# First, clear previous compilation
 	topLevelBlocks = {}
 	valueBlocks = {}
+	# Stop all execution
+	activeStacks.clear()
 	for i: int in spriteScript:
 		# Value blocks are all a singular stack
 		if spriteScript[i][&"value"]:
@@ -80,8 +82,8 @@ func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> 
 	# Clear any previous running stacks from this event
 	# Iterate backwards so stacks can be removed
 	for i: int in range(activeStacks.size() - 1, -1, -1):
-			if activeStacks[i].startEvent == startBlock:
-				activeStacks.remove_at(i)
+		if activeStacks[i].startEvent == startBlock:
+			activeStacks.remove_at(i)
 	activeStacks.append(ScriptStack.new(startBlock.nextBlock, startBlock))
 
 func _process(delta: float) -> void:
