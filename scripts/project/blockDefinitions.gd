@@ -16,6 +16,7 @@ extends Sprite2D
 # -1.0 - Move to next block / stop executing
 # 0.0 - Pause the stack for 1 frame
 # -2.0 - Terminate stack
+# -3.0 - Enter nest
 
 var gameView: GameView
 var currentStack: ScriptStack
@@ -91,7 +92,22 @@ func ctrl_wait(inputs: Array) -> float:
 	return inputs[0]
 
 func ctrl_repeat(inputs: Array) -> float:
-	return -1.0
+	if currentStack.currentBlock in currentStack.loops:
+		# While looping
+		currentStack.loopData[-1] -= 1
+		if currentStack.loopData[-1] <= 0:
+			# Loop finished
+			currentStack.loops.remove_at(-1)
+			currentStack.loopData.remove_at(-1)
+			return -1.0
+		else:
+			# Continue loop
+			return -3.0
+	else:
+		# Initial call
+		currentStack.loops.append(currentStack.currentBlock)
+		currentStack.loopData.append(inputs[0])
+		return -3.0
 
 ## EXPRESSIONS
 

@@ -124,9 +124,16 @@ func _process(delta: float) -> void:
 				currentStack.waitTime = result if result > 0.0 else 0.0
 				break
 			# If the result didn't catch anything, then execute the next block on this frame
-			currentStack.currentBlock = currentStack.currentBlock.nextBlock
-		# If no more blocks to execute, terminate this stack
-		if !currentStack.currentBlock: activeStacks.remove_at(i)
+			if result == -3.0:
+				currentStack.currentBlock = currentStack.currentBlock.firstInNest
+			else:
+				currentStack.currentBlock = currentStack.currentBlock.nextBlock
+		# If no more blocks to execute, terminate this stack or go back to loop
+		if !currentStack.currentBlock:
+			if !currentStack.loops.is_empty():
+				currentStack.currentBlock = currentStack.loops.back()
+				continue
+			activeStacks.remove_at(i)
 
 func finishWaitBlock() -> void:
 	currentStack.executeWait = false

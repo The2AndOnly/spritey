@@ -7,6 +7,10 @@ var startEvent: CompiledBlock
 var waitTime: float = -1.0
 # If true, then it keeps calling the waiting block every frame
 var executeWait := false
+# Go back to this block instead of terminating when reached the end of a stack
+var loops: Array[CompiledBlock] = []
+# For looping blocks to count their iterations
+var loopData: Array[int] = []
 # Any data used by the execute wait block
 var blockData: Array[Variant] = []
 

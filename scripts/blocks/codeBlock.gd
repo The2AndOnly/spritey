@@ -214,10 +214,14 @@ func disconnectFromParent() -> void:
 			updateSpriteScript()
 	# If removed the first block in a nest
 	elif parentNest:
+		var previousParentNest: CodeBlock = parentNest
 		parentNest.setNestEnd(DefaultNestEnd, true)
 		parentNest.childNest = null
 		parentNest = null
 		setChildrenParentNests()
+		# After disconnecting, update the spriteScript for the two new stacks that were formed
+		previousParentNest.getHighestInStack().updateSpriteScript()
+		updateSpriteScript()
 
 # topToBottom: If true, child blocks move when snapped
 # If false, parent blocks move when snapped
@@ -291,7 +295,10 @@ func released(topToBottom: bool) -> void:
 			if parentNest:
 				parentNest.setNestEnd(calculateStackHeight(parentNest.childNest), true)
 		# If any block was detected on release, update the sprite's script
-		getHighestInStack().updateSpriteScript()
+		if parentNest:
+			parentNest.getHighestInStack().updateSpriteScript()
+		else:
+			getHighestInStack().updateSpriteScript()
 	# Layering
 	getHighestInStack().setToFront()
 	# Fix any offset from preview if dropping in middle of stack
