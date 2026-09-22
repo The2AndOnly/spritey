@@ -33,3 +33,4 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	sprite.spriteScript[block.blockID] = spriteScriptBlock
 	# Require the sprite to re-compile once an event is received
 	sprite.scriptsCompiled = false
+	sprite.stopAllStacks()

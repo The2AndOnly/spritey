@@ -24,6 +24,7 @@ static var categoryColors: Dictionary[StringName, Color] = {
 	&"expressions": Color("a6981eff"),
 	&"control": Color("9e501cff"),
 	&"interaction": Color("1c734dff"),
+	&"visuals": Color("7a1d4dff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -368,6 +369,61 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	
+	## VISUALS
+	
+	&"vis_show": {
+		&"structure": ["show"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_hide": {
+		&"structure": ["hide"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_visible": {
+		&"structure": ["visible?"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"vis_setSize": {
+		&"structure": ["set size to", 0, "%"],
+		0: [&"input", 1, "100"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_changeSize": {
+		&"structure": ["change size by", 0],
+		0: [&"input", 1, "5"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_size": {
+		&"structure": ["size"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"vis_setStretch": {
+		&"structure": ["set", 0, "stretch to", 1],
+		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		1: [&"input", 1, "0"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_changeStretch": {
+		&"structure": ["change", 0, "stretch by", 1],
+		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		1: [&"input", 1, "5"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_stretch": {
+		&"structure": [0, "stretch"],
+		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	
 	## TESTS
 	
 	&"test_print": {
@@ -375,30 +431,5 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		0: [&"input", 2, ""],
 		&"color": &"unknown",
 		&"shape": BlockShape.blockShapes.STACK
-	},
-	&"test_process": {
-		&"structure": ["process"],
-		&"color": &"unknown",
-		&"shape": BlockShape.blockShapes.EVENT
-	},
-	&"test_emptyStack": {
-		&"structure": [],
-		&"color": &"unknown",
-		&"shape": BlockShape.blockShapes.STACK
-	},
-	&"test_emptyEvent": {
-		&"structure": [],
-		&"color": &"unknown",
-		&"shape": BlockShape.blockShapes.EVENT
-	},
-	&"test_emptyValue": {
-		&"structure": [],
-		&"color": &"unknown",
-		&"shape": BlockShape.blockShapes.VALUE
-	},
-	&"test_emptyNest": {
-		&"structure": [],
-		&"color": &"unknown",
-		&"shape": BlockShape.blockShapes.NEST
 	}
 }

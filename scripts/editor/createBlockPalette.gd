@@ -23,6 +23,30 @@ var blockOrder: Array[StringName] = [
 	&"ctrl_stopOther",
 	&"ctrl_stopStacks",
 	
+	&"inter_pointerX",
+	&"inter_pointerY",
+	
+	&"vis_show",
+	&"vis_hide",
+	&"vis_visible",
+	&"vis_setSize",
+	&"vis_changeSize",
+	&"vis_size",
+	&"vis_setStretch",
+	&"vis_changeStretch",
+	&"vis_stretch",
+	
+	&"trans_setPosition",
+	&"trans_setPositionOption",
+	&"trans_setX",
+	&"trans_setY",
+	&"trans_changeX",
+	&"trans_changeY",
+	&"trans_glideToPosition",
+	&"trans_glideToOption",
+	&"trans_XPos",
+	&"trans_YPos",
+	
 	&"exp_add",
 	&"exp_subtract",
 	&"exp_multiply",
@@ -45,26 +69,7 @@ var blockOrder: Array[StringName] = [
 	&"exp_round",
 	&"exp_math",
 	
-	&"inter_pointerX",
-	&"inter_pointerY",
-	
-	&"trans_setPosition",
-	&"trans_setPositionOption",
-	&"trans_setX",
-	&"trans_setY",
-	&"trans_changeX",
-	&"trans_changeY",
-	&"trans_glideToPosition",
-	&"trans_glideToOption",
-	&"trans_XPos",
-	&"trans_YPos",
-	
-	&"test_print",
-	&"test_process",
-	&"test_emptyStack",
-	&"test_emptyEvent",
-	&"test_emptyValue",
-	&"test_emptyNest"
+	&"test_print"
 ]
 
 # Negative: Spacing before

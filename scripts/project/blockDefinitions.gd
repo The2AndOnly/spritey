@@ -297,6 +297,17 @@ func exp_math(inputs: Array) -> float:
 		11: return exp(inputs[1])
 	return 0.0
 
+## VISUALS
+
+func vis_show() -> float:
+	visible = true
+	return -1.0
+func vis_hide() -> float:
+	visible = false
+	return -1.0
+func vis_visible() -> bool:
+	return visible
+
 ## INTERACTION
 
 func inter_pointerX() -> float:
