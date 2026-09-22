@@ -335,6 +335,27 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.NEST
 	},
+	&"ctrl_forever": {
+		&"structure": ["forever"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.NEST
+	},
+	&"ctrl_break": {
+		&"structure": ["break"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STOP
+	},
+	&"ctrl_continue": {
+		&"structure": ["continue"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STOP
+	},
+	&"ctrl_stopStacks": {
+		&"structure": ["stop", 0],
+		0: [&"options", 0, 0, ["this stack", "other stacks in sprite", "project"]],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STOP
+	},
 	
 	## TESTS
 	

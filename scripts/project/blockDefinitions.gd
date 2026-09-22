@@ -140,6 +140,11 @@ func ctrl_while(inputs: Array) -> float:
 		else:
 			return -1.0
 
+func ctrl_forever() -> float:
+	if !(currentStack.currentBlock in currentStack.loops):
+		currentStack.loops.append(currentStack.currentBlock)
+	return -3.0
+
 func ctrl_if(inputs: Array) -> float:
 	if inputs[0]:
 		currentStack.exitNest = currentStack.currentBlock.nextBlock

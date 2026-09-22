@@ -4,6 +4,7 @@ extends Control
 
 enum blockShapes {
 	STACK,
+	STOP,
 	EVENT,
 	VALUE,
 	NEST,
@@ -12,6 +13,7 @@ enum blockShapes {
 # The horizontal minimum size
 var minimumSizes: Dictionary[blockShapes, float] = {
 	blockShapes.STACK: 145.0,
+	blockShapes.STOP: 145.0,
 	blockShapes.EVENT: 250.0,
 	blockShapes.VALUE: 100.0,
 	blockShapes.NEST: 250.0,
@@ -22,6 +24,7 @@ var minimumSizes: Dictionary[blockShapes, float] = {
 # Both false means the block is a value
 var connectors: Dictionary[blockShapes, Array] = {
 	blockShapes.STACK: [true, true],
+	blockShapes.STOP: [true, false],
 	blockShapes.EVENT: [false, true],
 	blockShapes.VALUE: [false, false],
 	blockShapes.NEST: [true, true],
@@ -48,6 +51,8 @@ var notchHeight: float = 15.0
 var notchDistance: float = 30.0 # Distance from left of block
 var nestSideWidth: float = 30.0
 var nestEndHeight: float = 55.0
+var drawBottomNotch := true
+var drawNestEndIndent := true
 # I don't know about math so I just use random angles until it works
 const angleRight: float = PI * 1.5
 const angleDown: float = PI * 2.0
@@ -60,7 +65,7 @@ func _ready() -> void:
 func _draw() -> void:
 	# Most blocks are drawn outside the screen (vertically) since they go beyond the bounds of the control node
 	match blockShape:
-		blockShapes.STACK:
+		blockShapes.STACK, blockShapes.STOP:
 			RenderingServer.canvas_item_set_custom_rect(get_canvas_item(), true, Rect2(0.0, -1000, size.x, 2000))
 			shapeStack()
 		blockShapes.EVENT:
@@ -103,10 +108,11 @@ func shapeStack() -> void:
 	points.append_array(drawArc(Vector2(size.x - cr, size.y - cr), cr, 0.0, angleLeft))
 	
 	# Bottom notch (protrusion)
-	points.append(Vector2(notchDistance + notchWidth, size.y))
-	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), size.y + notchHeight))
-	points.append(Vector2(notchDistance + notchWidth / 3.0, size.y + notchHeight))
-	points.append(Vector2(notchDistance, size.y))
+	if drawBottomNotch:
+		points.append(Vector2(notchDistance + notchWidth, size.y))
+		points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), size.y + notchHeight))
+		points.append(Vector2(notchDistance + notchWidth / 3.0, size.y + notchHeight))
+		points.append(Vector2(notchDistance, size.y))
 	
 	# Bottom left corner
 	points.append_array(drawArc(Vector2(cr, size.y - cr), cr, angleLeft, PI))
@@ -213,10 +219,11 @@ func shapeNest() -> void:
 	points.append_array(drawArc(Vector2(nestSideWidth + cr, (nestEndTop) - cr), cr, PI, angleLeft))
 	
 	# Nest end top notch (indent)
-	points.append(Vector2(notchDistanceFromNest, nestEndTop))
-	points.append(Vector2(notchDistanceFromNest + notchWidth / 3.0, nestEndTop + notchHeight))
-	points.append(Vector2(notchDistanceFromNest + ((notchWidth / 3.0) * 2.0), nestEndTop + notchHeight))
-	points.append(Vector2(notchDistanceFromNest + notchWidth, nestEndTop))
+	if drawNestEndIndent:
+		points.append(Vector2(notchDistanceFromNest, nestEndTop))
+		points.append(Vector2(notchDistanceFromNest + notchWidth / 3.0, nestEndTop + notchHeight))
+		points.append(Vector2(notchDistanceFromNest + ((notchWidth / 3.0) * 2.0), nestEndTop + notchHeight))
+		points.append(Vector2(notchDistanceFromNest + notchWidth, nestEndTop))
 	
 	# Nest end top right corner
 	points.append_array(drawArc(Vector2(size.x - cr, nestEndTop + cr), cr, angleRight, angleDown))
@@ -225,10 +232,11 @@ func shapeNest() -> void:
 	points.append_array(drawArc(Vector2(size.x - cr, nestEndBottom - cr), cr, 0.0, angleLeft))
 	
 	# Nest end bottom notch (protrusion)
-	points.append(Vector2(notchDistance + notchWidth, nestEndBottom))
-	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), nestEndBottom + notchHeight))
-	points.append(Vector2(notchDistance + notchWidth / 3.0, nestEndBottom + notchHeight))
-	points.append(Vector2(notchDistance, nestEndBottom))
+	if drawBottomNotch:
+		points.append(Vector2(notchDistance + notchWidth, nestEndBottom))
+		points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), nestEndBottom + notchHeight))
+		points.append(Vector2(notchDistance + notchWidth / 3.0, nestEndBottom + notchHeight))
+		points.append(Vector2(notchDistance, nestEndBottom))
 	
 	# Stack end bottom left corner
 	points.append_array(drawArc(Vector2(cr, nestEndBottom - cr), cr, angleLeft, PI))

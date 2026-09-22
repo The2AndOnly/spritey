@@ -16,6 +16,10 @@ var blockOrder: Array[StringName] = [
 	&"ctrl_if",
 	&"ctrl_repeat",
 	&"ctrl_while",
+	&"ctrl_forever",
+	&"ctrl_break",
+	&"ctrl_continue",
+	&"ctrl_stopStacks",
 	
 	&"exp_add",
 	&"exp_subtract",
