@@ -61,6 +61,8 @@ func keyToString(key: Key) -> StringName:
 
 @warning_ignore("unused_signal")
 signal event(blockName: StringName, eventData: Array[Variant])
+@warning_ignore("unused_signal")
+signal stopProject()
 
 func _ready() -> void:
 	if editor: editor.setMousePosition()

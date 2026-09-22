@@ -27,11 +27,10 @@ var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var scriptsCompiled := false
 # Return result from execute block
 var result: Variant
-# This stores all of the actively running compiled stacks in the sprite
-var activeStacks: Array[ScriptStack] = []
 
 func _ready() -> void:
 	gameView.event.connect(receivedEvent)
+	gameView.stopProject.connect(stopAllStacks)
 
 func receivedEvent(eventBlockName: StringName, eventData: Array[Variant]) -> void:
 	if !scriptsCompiled: compileAll()
@@ -39,7 +38,9 @@ func receivedEvent(eventBlockName: StringName, eventData: Array[Variant]) -> voi
 	for i: CompiledBlock in topLevelBlocks[eventBlockName]:
 		runStackFromEvent(i, eventData)
 
-# For block parsing
+func stopAllStacks() -> void:
+	for i: ScriptStack in activeStacks:
+		i.terminate()
 
 func compileAll() -> void:
 	# First, clear previous compilation
@@ -50,7 +51,7 @@ func compileAll() -> void:
 	for i: int in spriteScript:
 		# Value blocks are all a singular stack
 		if spriteScript[i][&"value"]:
-			valueBlocks[i] = compileStack(i)
+			valueBlocks[i] = compileStack(i, null)
 			continue
 		# Skips all blocks that aren't top-level
 		if !spriteScript[i][&"top"]: continue
@@ -59,20 +60,21 @@ func compileAll() -> void:
 		if !topLevelBlocks.has(blockName):
 			topLevelBlocks[blockName] = []
 		# Top-level block will be added to the category while it compiles the stack
-		topLevelBlocks[blockName].append(compileStack(i))
+		topLevelBlocks[blockName].append(compileStack(i, null))
 	scriptsCompiled = true
 
-func compileStack(blockID: int) -> CompiledBlock:
+func compileStack(blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = spriteScript[blockID]
 	var compiledBlock: CompiledBlock = CompiledBlock.new()
 	compiledBlock.definition = Callable(self, rawBlock[&"block"])
 	if rawBlock.has(&"inputs"): compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
 	# Compile next block in stack
 	if rawBlock.has(&"next"):
-		compiledBlock.nextBlock = compileStack(rawBlock[&"next"])
+		compiledBlock.nextBlock = compileStack(rawBlock[&"next"], null)
 	# Compile any nest
 	if rawBlock.has(&"nest"):
-		compiledBlock.firstInNest = compileStack(rawBlock[&"nest"])
+		compiledBlock.firstInNest = compileStack(rawBlock[&"nest"], compiledBlock)
+	if parentNest: compiledBlock.parentNest = parentNest
 	return compiledBlock
 
 func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
@@ -81,16 +83,17 @@ func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> 
 		# If the event block returns false, then don't continue
 		if !startBlock.definition.call(startBlock.inputs, eventData): return
 	# Clear any previous running stacks from this event
-	# Iterate backwards so stacks can be removed
-	for i: int in range(activeStacks.size() - 1, -1, -1):
-		if activeStacks[i].startEvent == startBlock:
-			activeStacks.remove_at(i)
+	for i: ScriptStack in activeStacks:
+		if i.startEvent == startBlock: i.terminate()
 	activeStacks.append(ScriptStack.new(startBlock.nextBlock, startBlock))
 
 func _process(delta: float) -> void:
 	# Iterate backwards so stacks can be removed
 	for i: int in range(activeStacks.size() - 1, -1, -1):
 		currentStack = activeStacks[i]
+		if currentStack.terminated:
+			activeStacks.remove_at(i)
+			continue
 		# Skip processing this stack if there is wait time
 		if currentStack.waitTime > 0.0:
 			currentStack.waitTime -= delta
@@ -117,28 +120,30 @@ func _process(delta: float) -> void:
 		# Process stack
 		while currentStack.currentBlock:
 			result = executeBlock(currentStack.currentBlock)
-			# If a block returns -2.0, terminate this stack
-			if result == -2.0:
-				activeStacks.remove_at(i)
-				break
-			# If a block returns > 0.0, wait for that many seconds
-			# If the wait time is zero, then it will wait one frame
-			if result >= 0.0:
-				currentStack.waitTime = result if result > 0.0 else 0.0
-				break
-			# If the result didn't catch anything, then execute the next block on this frame
-			if result == -3.0:
-				currentStack.currentBlock = currentStack.currentBlock.firstInNest
-			else:
-				currentStack.currentBlock = currentStack.currentBlock.nextBlock
-		# Reached the end of a stack or nest
+			match result:
+				-1.0: # Go to next block
+					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+				# Enter nest/loop
+				-3.0:
+					currentStack.currentBlock = currentStack.currentBlock.firstInNest
+				# Do nothing / The block set which block is next
+				-5.0: pass
+				# Exit frame process
+				-6.0: break
+				# If a block returns >= 0.0, wait for that many seconds
+				# If the wait time is zero, then it will wait one frame
+				_:
+					currentStack.waitTime = result
+					break
+			# After finding next block to run
+			if !currentStack.currentBlock:
+				if !currentStack.exitNest.is_empty():
+					currentStack.currentBlock = currentStack.exitNest.back()
+					currentStack.exitNest.remove_at(-1)
+		# Reached end of stack after end of process
 		if !currentStack.currentBlock:
 			if !currentStack.loops.is_empty():
 				currentStack.currentBlock = currentStack.loops.back()
-				continue
-			if currentStack.exitNest:
-				currentStack.currentBlock = currentStack.exitNest
-				currentStack.exitNest = null
 				continue
 			# If no more blocks to execute, then terminate this stack
 			activeStacks.remove_at(i)

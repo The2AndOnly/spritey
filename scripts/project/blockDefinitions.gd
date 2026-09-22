@@ -15,8 +15,9 @@ extends SpriteData
 # > 0.0 - Pause the stack for that many seconds
 # -1.0 - Move to next block / stop executing
 # 0.0 - Pause the stack for 1 frame
-# -2.0 - Terminate stack
 # -3.0 - Enter nest
+# -5.0 - Does nothing
+# -6.0 - Exit process this frame
 
 var currentStack: ScriptStack
 
@@ -107,8 +108,8 @@ func ctrl_waitUntil(inputs: Array) -> float:
 func ctrl_repeat(inputs: Array) -> float:
 	if currentStack.currentBlock in currentStack.loops:
 		# While looping
-		currentStack.loopData[-1] -= 1
-		if currentStack.loopData[-1] <= 0:
+		currentStack.loopData[-1] -= 1.0
+		if currentStack.loopData[-1] <= 0.0:
 			# Loop finished
 			currentStack.loops.remove_at(-1)
 			currentStack.loopData.remove_at(-1)
@@ -118,6 +119,25 @@ func ctrl_repeat(inputs: Array) -> float:
 			return -3.0
 	else:
 		# Initial call
+		if inputs[0] <= 0: return -1.0
+		currentStack.loops.append(currentStack.currentBlock)
+		currentStack.loopData.append(inputs[0])
+		return -3.0
+func ctrl_repeatSeconds(inputs: Array) -> float:
+	if currentStack.currentBlock in currentStack.loops:
+		# While looping
+		currentStack.loopData[-1] -= get_process_delta_time()
+		if currentStack.loopData[-1] <= 0.0:
+			# Loop finished
+			currentStack.loops.remove_at(-1)
+			currentStack.loopData.remove_at(-1)
+			return -1.0
+		else:
+			# Continue loop
+			return -3.0
+	else:
+		# Initial call
+		if inputs[0] <= 0.0: return -1.0
 		currentStack.loops.append(currentStack.currentBlock)
 		currentStack.loopData.append(inputs[0])
 		return -3.0
@@ -147,10 +167,39 @@ func ctrl_forever() -> float:
 
 func ctrl_if(inputs: Array) -> float:
 	if inputs[0]:
-		currentStack.exitNest = currentStack.currentBlock.nextBlock
+		currentStack.exitNest.append(currentStack.currentBlock.nextBlock)
 		return -3.0
 	else:
 		return -1.0
+
+func ctrl_break() -> float:
+	if !currentStack.loops.is_empty():
+		currentStack.currentBlock.exitNests(currentStack)
+		currentStack.currentBlock = currentStack.loops.back().nextBlock
+		currentStack.loops.remove_at(-1)
+		return -5.0
+	else:
+		return -1.0
+
+func ctrl_continue() -> float:
+	if !currentStack.loops.is_empty():
+		currentStack.currentBlock.exitNests(currentStack)
+		currentStack.currentBlock = currentStack.loops.back()
+		return -6.0
+	else:
+		return -1.0
+
+func ctrl_stopStacks(inputs: Array) -> float:
+	if inputs[0] == 1: # Stop project
+		gameView.stopProject.emit()
+	currentStack.terminate()
+	return -5.0
+
+func ctrl_stopOther() -> float:
+	for i: ScriptStack in activeStacks:
+		if i == currentStack: continue
+		i.terminate()
+	return -1.0
 
 ## EXPRESSIONS
 
@@ -182,9 +231,17 @@ func exp_equals(inputs: Array) -> bool:
 		return float(val1) == float(val2)
 	return val1 == val2
 func exp_greater(inputs: Array) -> bool:
-	return inputs[0] > inputs[1]
+	var val1: String = inputs[0]
+	var val2: String = inputs[1]
+	if val1.is_valid_float() and val2.is_valid_float():
+		return float(val1) > float(val2)
+	return val1 == val2
 func exp_less(inputs: Array) -> bool:
-	return inputs[0] < inputs[1]
+	var val1: String = inputs[0]
+	var val2: String = inputs[1]
+	if val1.is_valid_float() and val2.is_valid_float():
+		return float(val1) < float(val2)
+	return val1 == val2
 
 func exp_random(inputs: Array) -> Variant:
 	if inputs[0] == 0:

@@ -329,6 +329,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.NEST
 	},
+	&"ctrl_repeatSeconds": {
+		&"structure": ["repeat for", 0, "seconds"],
+		0: [&"input", 4, "1"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.NEST
+	},
 	&"ctrl_while": {
 		&"structure": ["while", 0],
 		0: [&"bool"],
@@ -352,9 +358,14 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"ctrl_stopStacks": {
 		&"structure": ["stop", 0],
-		0: [&"options", 0, 0, ["this stack", "other stacks in sprite", "project"]],
+		0: [&"options", 0, 0, ["this stack", "project"]],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STOP
+	},
+	&"ctrl_stopOther": {
+		&"structure": ["stop other stacks in sprite"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	
 	## TESTS
