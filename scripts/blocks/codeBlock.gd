@@ -267,8 +267,6 @@ func released(topToBottom: bool) -> void:
 			global_position.x += NestSideWidth
 			parentNest = detectedBlock
 			setChildrenParentNests()
-			# Adjust nestEnd of parent nest
-			parentNest.setNestEnd((calculateStackHeight(self) + calculateStackHeight(parentNest.childNest)) - NestEndHeight, true)
 			# If there were already blocks in the nest, then set that as child of this stack
 			if parentNest.childNest:
 				# For empty nest blocks, this means nesting everything
@@ -277,7 +275,6 @@ func released(topToBottom: bool) -> void:
 					childNest.parentNest = self
 					childNest.setChildrenParentNests()
 					setNestEnd(calculateStackHeight(childNest), true)
-					parentNest.setNestEnd(height + NestEndHeight, true)
 					if !childNest.getLowestInStack().bottomDetection.monitoring:
 						shapeNode.drawNestEndIndent = false
 						parentNest.shapeNode.drawNestEndIndent = true
@@ -288,6 +285,7 @@ func released(topToBottom: bool) -> void:
 			if !getLowestInStack().bottomDetection.monitoring:
 				parentNest.shapeNode.drawNestEndIndent = false
 			parentNest.childNest = self
+			parentNest.setNestEnd(calculateStackHeight(parentNest.childNest), true)
 		# Nest block nesting entire stack
 		elif detectedSnapPos == 2:
 			global_position.y -= size.y + 2.0
@@ -565,17 +563,17 @@ func detectBlockSnap() -> void:
 		for i: Area2D in topDetection.get_overlapping_areas():
 			if i.is_in_group(&"blockSnapBottom"):
 				detectedBlock = i.get_parent()
-				# Don't snap in middle of stacks if this is an end block
+				# Don't snap in middle of stacks if this is an end block (unless nest block)
 				if (!getLowestInStack().bottomDetection.monitoring) and detectedBlock.childBlock:
-					break
+					if !nestDetection: break
 				detectedSnapPos = -1
 				showPreview()
 				return
 			elif i.is_in_group(&"blockSnapNest"):
 				detectedBlock = i.get_parent()
-				# Don't snap into top of nest if this is an end block
+				# Don't snap into top of nest if this is an end block (unless nest block)
 				if (!getLowestInStack().bottomDetection.monitoring) and detectedBlock.childNest:
-					break
+					if !nestDetection: break
 				detectedSnapPos = -2
 				showPreview()
 				return
