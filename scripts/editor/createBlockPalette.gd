@@ -35,6 +35,11 @@ var blockOrder: Array[StringName] = [
 	&"vis_setStretch",
 	&"vis_changeStretch",
 	&"vis_stretch",
+	&"vis_setFlip",
+	&"vis_flip",
+	&"vis_setOpacity",
+	&"vis_changeOpacity",
+	&"vis_opacity",
 	
 	&"trans_setPosition",
 	&"trans_setPositionOption",
@@ -46,6 +51,10 @@ var blockOrder: Array[StringName] = [
 	&"trans_glideToOption",
 	&"trans_XPos",
 	&"trans_YPos",
+	&"trans_setDirection",
+	&"trans_turnDegrees",
+	&"trans_pointTowards",
+	&"trans_direction",
 	
 	&"exp_add",
 	&"exp_subtract",

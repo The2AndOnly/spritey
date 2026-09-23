@@ -48,6 +48,11 @@ func trans_changeY(inputs: Array) -> float:
 	spritePos.y -= inputs[0]
 	return -1.0
 
+func trans_XPos() -> float:
+	return round(spritePos.x)
+func trans_YPos() -> float:
+	return round(spritePos.y)
+
 func trans_setPosition(inputs: Array) -> float:
 	spritePos = Vector2(inputs[0], inputs[1])
 	return -1.0
@@ -87,10 +92,21 @@ func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
 		)
 		return currentStack.waitTime
 
-func trans_XPos() -> float:
-	return round(spritePos.x)
-func trans_YPos() -> float:
-	return round(spritePos.y)
+func trans_setDirection(inputs: Array) -> float:
+	direction = inputs[0]
+	return -1.0
+func trans_turnDegrees(inputs: Array) -> float:
+	direction += inputs[0]
+	return -1.0
+func trans_pointTowards(inputs: Array) -> float:
+	if inputs[0] == 0:
+		look_at(get_global_mouse_position())
+		direction = rotation_degrees + 90.0
+	else:
+		direction = randi_range(-179, 180)
+	return -1.0
+func trans_direction() -> float:
+	return direction
 
 ## CONTROL
 
@@ -305,8 +321,56 @@ func vis_show() -> float:
 func vis_hide() -> float:
 	visible = false
 	return -1.0
+
 func vis_visible() -> bool:
 	return visible
+func vis_setSize(inputs: Array) -> float:
+	size = inputs[0]
+	return -1.0
+func vis_changeSize(inputs: Array) -> float:
+	size += inputs[0]
+	return -1.0
+func vis_size() -> float:
+	return size
+
+func vis_setStretch(inputs: Array) -> float:
+	if inputs[0] == 0:
+		stretch.x = inputs[1]
+	else:
+		stretch.y = inputs[1]
+	return -1.0
+func vis_changeStretch(inputs: Array) -> float:
+	if inputs[0] == 0:
+		stretch.x += inputs[1]
+	else:
+		stretch.y += inputs[1]
+	return -1.0
+func vis_stretch(inputs: Array) -> float:
+	if inputs[0] == 0:
+		return stretch.x
+	else:
+		return stretch.y
+
+func vis_setFlip(inputs: Array) -> float:
+	if inputs[0] == 0:
+		flip_h = inputs[1] == 0
+	else:
+		flip_v = inputs[1] == 0
+	return -1.0
+func vis_flip(inputs: Array) -> bool:
+	if inputs[0] == 0:
+		return flip_h
+	else:
+		return flip_v
+
+func vis_setOpacity(inputs: Array) -> float:
+	opacity = inputs[0]
+	return -1.0
+func vis_changeOpacity(inputs: Array) -> float:
+	opacity += inputs[0]
+	return -1.0
+func vis_opacity() -> float:
+	return opacity
 
 ## INTERACTION
 

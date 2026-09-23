@@ -141,6 +141,29 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
+	&"trans_setDirection": {
+		&"structure": ["set direction to", 0],
+		0: [&"input", 1, "90"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"trans_turnDegrees": {
+		&"structure": ["turn", 0, "degrees"],
+		0: [&"input", 1, "15"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"trans_pointTowards": {
+		&"structure": ["point towards", 0],
+		0: [&"options", 1, 0, ["pointer", "random"]],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"trans_direction": {
+		&"structure": ["direction"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
 	
 	## EXPRESSIONS
 	
@@ -382,7 +405,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"vis_visible": {
-		&"structure": ["visible?"],
+		&"structure": ["visible"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
@@ -394,7 +417,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_changeSize": {
 		&"structure": ["change size by", 0],
-		0: [&"input", 1, "5"],
+		0: [&"input", 1, "2"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -413,13 +436,43 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"vis_changeStretch": {
 		&"structure": ["change", 0, "stretch by", 1],
 		0: [&"options", 0, 0, ["horizontal", "vertical"]],
-		1: [&"input", 1, "5"],
+		1: [&"input", 1, "2"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"vis_stretch": {
 		&"structure": [0, "stretch"],
 		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"vis_setFlip": {
+		&"structure": ["set", 0, "flip to", 1],
+		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		1: [&"options", 0, 0, ["enabled", "disabled"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_flip": {
+		&"structure": [0, "flipped"],
+		0: [&"options", 0, 0, ["horizontal", "vertical"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"vis_setOpacity": {
+		&"structure": ["set opacity to", 0, "%"],
+		0: [&"input", 1, "100"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_changeOpacity": {
+		&"structure": ["change opacity by", 0],
+		0: [&"input", 1, "-2"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_opacity": {
+		&"structure": ["opacity"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
