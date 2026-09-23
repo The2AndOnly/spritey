@@ -7,10 +7,13 @@
 [ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/guiButtons/buttonEditorView.gd" id="5_xg7d5"]
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
-[ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/scriptAreaBG.png" id="7_5tm2q"]
+[ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5tm2q"]
+size = Vector2(7000, 4500)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
@@ -76,6 +79,7 @@ editor = NodePath("..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -102,7 +106,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 
@@ -195,7 +199,6 @@ text = "0, 0"
 metadata/_edit_use_anchors_ = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -219,17 +222,40 @@ stretch = true
 mouse_target = true
 metadata/_edit_use_anchors_ = true
 
-[node name="ScriptView" type="SubViewport" parent="scripts/SubViewportContainer" unique_id=1227163633]
+[node name="ScriptView" type="SubViewport" parent="scripts/SubViewportContainer" unique_id=1227163633 node_paths=PackedStringArray("camera", "grid", "dragDetector")]
 disable_3d = true
 handle_input_locally = false
 physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1354, 859)
-render_target_update_mode = 0
+render_target_update_mode = 4
 script = ExtResource("6_j8y2p")
+camera = NodePath("Camera2D")
+grid = NodePath("Sprite2D")
+dragDetector = NodePath("Camera2D/drag")
 
 [node name="Camera2D" type="Camera2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1134382404]
+position = Vector2(400, 200)
+zoom = Vector2(0.8, 0.8)
+
+[node name="drag" type="Area2D" parent="scripts/SubViewportContainer/ScriptView/Camera2D" unique_id=1812885411]
+collision_layer = 16
+collision_mask = 16
+monitorable = false
+priority = -999
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="scripts/SubViewportContainer/ScriptView/Camera2D/drag" unique_id=1890098193]
+shape = SubResource("RectangleShape2D_5tm2q")
+
+[node name="Sprite2D" type="Sprite2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1974338185]
+z_index = -999
+texture_repeat = 2
+position = Vector2(679.5, 433)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("7_5tm2q")
+region_enabled = true
+region_rect = Rect2(0, 0, 20000, 20000)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="scripts/SubViewportContainer/ScriptView" unique_id=896693586]
 layer = -1
@@ -243,14 +269,6 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 metadata/_edit_lock_ = true
-
-[node name="Sprite2D" type="Sprite2D" parent="scripts/SubViewportContainer/ScriptView/CanvasLayer" unique_id=1974338185]
-texture_repeat = 2
-position = Vector2(679.5, 433)
-scale = Vector2(0.5, 0.5)
-texture = ExtResource("7_5tm2q")
-region_enabled = true
-region_rect = Rect2(0, 0, 20000, 20000)
 
 [node name="blockSelector" type="ScrollContainer" parent="scripts" unique_id=1761487375]
 layout_mode = 1

@@ -79,7 +79,6 @@ func _ready() -> void:
 			set_deferred(&"size:y", 0.0)
 		BlockShape.blockShapes.BOOLEAN:
 			nestDetection.queue_free()
-			valueDrop.set_collision_mask_value(3, false)
 			valueDrop.set_collision_mask_value(4, true)
 			custom_minimum_size.y = 75.0
 			boolBlock = true

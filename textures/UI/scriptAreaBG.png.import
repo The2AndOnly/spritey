@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bwysmlv10sjeu"
-path="res://.godot/imported/dropdownSelection.png-0803c4dcc3dbc665bf22b3fb1bcf4248.ctex"
+uid="uid://b3pautysdg03k"
+path="res://.godot/imported/scriptAreaBG.png-ce4ceea0922ca366e6a08a8424c9d8f1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/dropdownSelection.png"
-dest_files=["res://.godot/imported/dropdownSelection.png-0803c4dcc3dbc665bf22b3fb1bcf4248.ctex"]
+source_file="res://textures/UI/scriptAreaBG.png"
+dest_files=["res://.godot/imported/scriptAreaBG.png-ce4ceea0922ca366e6a08a8424c9d8f1.ctex"]
 
 [params]
 

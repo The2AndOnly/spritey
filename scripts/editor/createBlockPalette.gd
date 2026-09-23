@@ -25,6 +25,7 @@ var blockOrder: Array[StringName] = [
 	
 	&"inter_pointerX",
 	&"inter_pointerY",
+	&"inter_keyPressed",
 	
 	&"vis_show",
 	&"vis_hide",

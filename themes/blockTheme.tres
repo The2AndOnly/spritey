@@ -1,11 +1,11 @@
 [gd_resource type="Theme" format=4 uid="uid://bxh8j3gnclchu"]
 
 [ext_resource type="StyleBox" uid="uid://c8rhkk0ropejo" path="res://themes/blockLineEdit.tres" id="1_y8k2e"]
-[ext_resource type="Texture2D" uid="uid://bq48o8h1rw4hr" path="res://textures/dropdownArrow.png" id="2_0g56m"]
+[ext_resource type="Texture2D" uid="uid://bq48o8h1rw4hr" path="res://textures/UI/dropdownArrow.png" id="2_0g56m"]
 [ext_resource type="StyleBox" uid="uid://dmp801j6y02fr" path="res://themes/blockOptionButton.tres" id="3_0g56m"]
-[ext_resource type="Texture2D" uid="uid://bwysmlv10sjeu" path="res://textures/dropdownSelection.png" id="3_cqwqa"]
+[ext_resource type="Texture2D" uid="uid://bwysmlv10sjeu" path="res://textures/UI/dropdownSelection.png" id="3_cqwqa"]
 [ext_resource type="StyleBox" uid="uid://tkxi8ob6bwxm" path="res://themes/blockBoolPanel.tres" id="4_832mn"]
-[ext_resource type="Texture2D" uid="uid://cfeq0kf1yiimr" path="res://textures/noIcon.png" id="4_m41f8"]
+[ext_resource type="Texture2D" uid="uid://cfeq0kf1yiimr" path="res://textures/UI/noIcon.png" id="4_m41f8"]
 [ext_resource type="StyleBox" uid="uid://b136o4ympmsgo" path="res://themes/blockOptionsPopupPanel.tres" id="6_cqwqa"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cp11l"]

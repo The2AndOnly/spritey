@@ -45,7 +45,7 @@ func trans_changeX(inputs: Array) -> float:
 	spritePos.x += inputs[0]
 	return -1.0
 func trans_changeY(inputs: Array) -> float:
-	spritePos.y -= inputs[0]
+	spritePos.y += inputs[0]
 	return -1.0
 
 func trans_XPos() -> float:
@@ -378,6 +378,11 @@ func inter_pointerX() -> float:
 	return round(gameView.mousePosition.x)
 func inter_pointerY() -> float:
 	return round(gameView.mousePosition.y)
+func inter_keyPressed(inputs: Array) -> bool:
+	var index: int = inputs[0]
+	if index == 0:
+		return Input.is_action_pressed(&"any") or Input.is_action_pressed(&"any2") or Input.is_action_pressed(&"any3")
+	return Input.is_action_pressed(BlockStructures.keyOptions[index])
 
 ## TEST
 

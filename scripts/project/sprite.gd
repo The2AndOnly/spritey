@@ -193,6 +193,11 @@ func castType(type: int, value: Variant) -> Variant:
 		1: # float
 			return float(value)
 		2: # string
+			if value is float:
+				if is_equal_approx(value, floorf(value)):
+					return str(int(value))
+				else:
+					return str(snappedf(float(value), 0.01))
 			return str(value)
 		3: # positive integer
 			return max(0, int(value))

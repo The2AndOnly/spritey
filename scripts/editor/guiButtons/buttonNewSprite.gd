@@ -4,7 +4,7 @@ extends Button
 @export var gameView: GameView
 @export var editor: Editor
 
-const ICON = preload("uid://d0v5t1dg4hf3k")
+const ICON: Texture2D = preload("uid://tixr4qmml0y4")
 
 func _ready() -> void:
 	pressed.connect(onPress)

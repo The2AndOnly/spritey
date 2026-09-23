@@ -13,51 +13,8 @@ const halfBaseSize: Vector2 = baseSize / 2.0
 @onready var sizeMinusOne: Vector2 = size - Vector2i(1, 1)
 
 var mousePosition: Vector2
-func keyToString(key: Key) -> StringName:
-	match key:
-		KEY_SPACE: return &"space"
-		KEY_UP: return &"up arrow"
-		KEY_DOWN: return &"down arrow"
-		KEY_LEFT: return &"left arrow"
-		KEY_RIGHT: return &"right arrow"
-		KEY_ENTER: return &"enter"
-		KEY_Q: return &"Q"
-		KEY_W: return &"W"
-		KEY_E: return &"E"
-		KEY_R: return &"R"
-		KEY_T: return &"T"
-		KEY_Y: return &"Y"
-		KEY_U: return &"U"
-		KEY_I: return &"I"
-		KEY_O: return &"O"
-		KEY_P: return &"P"
-		KEY_A: return &"A"
-		KEY_S: return &"S"
-		KEY_D: return &"D"
-		KEY_F: return &"F"
-		KEY_G: return &"G"
-		KEY_H: return &"H"
-		KEY_J: return &"J"
-		KEY_K: return &"K"
-		KEY_L: return &"L"
-		KEY_Z: return &"Z"
-		KEY_X: return &"X"
-		KEY_C: return &"C"
-		KEY_V: return &"V"
-		KEY_B: return &"B"
-		KEY_N: return &"N"
-		KEY_M: return &"M"
-		KEY_0: return &"0"
-		KEY_1: return &"1"
-		KEY_2: return &"2"
-		KEY_3: return &"3"
-		KEY_4: return &"4"
-		KEY_5: return &"5"
-		KEY_6: return &"6"
-		KEY_7: return &"7"
-		KEY_8: return &"8"
-		KEY_9: return &"9"
-		_: return &"any"
+# Stores key names to their index in BlockStructures.keyOptions
+var actionToIndex: Dictionary[StringName, int] = {}
 
 @warning_ignore("unused_signal")
 signal event(blockName: StringName, eventData: Array[Variant])
@@ -67,6 +24,8 @@ signal stopProject()
 func _ready() -> void:
 	if editor: editor.setMousePosition()
 	else: setMousePosition()
+	for i: int in range(BlockStructures.keyOptions.size()):
+		actionToIndex[BlockStructures.keyOptions[i]] = i
 
 # Input is game coords, output is local coords
 func toLocalCoords(position: Vector2) -> Vector2:
@@ -94,10 +53,14 @@ func _input(inputEvent: InputEvent) -> void:
 	
 	if inputEvent is InputEventKey:
 		if inputEvent.is_echo(): return
-		event.emit(&"event_keyboard", [
-			BlockStructures.keyOptions.find(keyToString(inputEvent.physical_keycode)),
-			0 if inputEvent.pressed else 1
-		])
+		event.emit(&"event_keyboard", [0, 0 if inputEvent.pressed else 1]) # Any key
+		for i: StringName in actionToIndex:
+			if inputEvent.is_action(i) and (i != &"any"):
+				event.emit(&"event_keyboard", [
+					actionToIndex[i],
+					0 if inputEvent.pressed else 1
+				])
+				break
 		return
 	
 	if inputEvent is InputEventMouseButton:

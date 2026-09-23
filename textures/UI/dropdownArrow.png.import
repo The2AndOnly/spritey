@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3pautysdg03k"
-path="res://.godot/imported/scriptAreaBG.png-69ab8d3344871afec255fb98f02e5745.ctex"
+uid="uid://bq48o8h1rw4hr"
+path="res://.godot/imported/dropdownArrow.png-74699f8579066af85a6439a4c9f4f5e8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/scriptAreaBG.png"
-dest_files=["res://.godot/imported/scriptAreaBG.png-69ab8d3344871afec255fb98f02e5745.ctex"]
+source_file="res://textures/UI/dropdownArrow.png"
+dest_files=["res://.godot/imported/dropdownArrow.png-74699f8579066af85a6439a4c9f4f5e8.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

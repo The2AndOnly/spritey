@@ -5,12 +5,12 @@ var gameView: GameView
 # This stores all of the actively running compiled stacks in the sprite
 var activeStacks: Array[ScriptStack] = []
 
-var spritePos: Vector2:
+var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
 		spritePos = value
 		position = gameView.toLocalCoords(value)
 
-var direction: float:
+var direction: float = 90.0:
 	set(value):
 		direction = wrapf(value, -180.0, 180.0)
 		rotation_degrees = direction - 90.0
