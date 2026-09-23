@@ -6,7 +6,11 @@ extends Node
 static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	var spriteScriptBlock: Dictionary[StringName, Variant] = {}
 	spriteScriptBlock[&"block"] = block.blockName
-	spriteScriptBlock[&"top"] = block.parentBlock == null
+	if (block.parentBlock == null) and !block.parentNest:
+		spriteScriptBlock[&"top"] = true
+		spriteScriptBlock[&"pos"] = block.global_position
+	else:
+		spriteScriptBlock[&"top"] = false
 	spriteScriptBlock[&"value"] = block.parentInput != null
 	if block.childBlock: spriteScriptBlock[&"next"] = block.childBlock.blockID
 	if block.childNest: spriteScriptBlock[&"nest"] = block.childNest.blockID
@@ -27,7 +31,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 			inputs.append([2, i.selected])
 		# Empty bool input
 		if i is BlockBoolPanel and i.visible:
-			inputs.append([2, false])
+			inputs.append([3, false])
 	if inputs.size() > 0: spriteScriptBlock[&"inputs"] = inputs
 	# Add this to the sprite
 	sprite.spriteScript[block.blockID] = spriteScriptBlock

@@ -79,7 +79,6 @@ editor = NodePath("..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -106,7 +105,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 0
+render_target_update_mode = 4
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 
@@ -199,6 +198,7 @@ text = "0, 0"
 metadata/_edit_use_anchors_ = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -229,7 +229,7 @@ physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1354, 859)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("6_j8y2p")
 camera = NodePath("Camera2D")
 grid = NodePath("Sprite2D")

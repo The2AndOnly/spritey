@@ -59,6 +59,15 @@ var height: float = 0.0
 var detectPosition: Vector2 = Vector2.ZERO
 ## Just so you don't have to check the block shape
 var boolBlock := false
+## Index is input ID
+var inputIds: Array[Control] = []
+
+# For loading
+var loading := false
+var parentInputLoadID: int = -1
+var childValueBlocksToLoad: Array[CodeBlock] = []
+var loadPosition: Vector2 = Vector2.ZERO
+var valuesToLoad: Array[Variant] = []
 
 signal clicked()
 
@@ -90,6 +99,7 @@ func _ready() -> void:
 		_:
 			shapeNode.drawBottomNotch = blockStructure[&"shape"] != BlockShape.blockShapes.STOP
 			valueDrop.queue_free()
+			valueDrop = null # Necessary for loading
 			nestDetection.queue_free()
 	
 	# Read the structure to build the block's labels and inputs
@@ -105,8 +115,12 @@ func _ready() -> void:
 				&"input":
 					var input: BlockInputEdit = BlockInputEdit.new()
 					input.type = blockStructure[i][1]
-					input.text = blockStructure[i][2]
+					if !valuesToLoad.is_empty():
+						input.text = valuesToLoad[i]
+					else:
+						input.text = blockStructure[i][2]
 					input.block = self
+					inputIds.append(input)
 					content.add_child(input)
 					if preview:
 						input.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -123,7 +137,11 @@ func _ready() -> void:
 					options.block = self
 					options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					# It switches back to 0 if not deferred
-					options.select.call_deferred(blockStructure[i][2])
+					if !valuesToLoad.is_empty():
+						options.select.call_deferred(valuesToLoad[i])
+					else:
+						options.select.call_deferred(blockStructure[i][2])
+					inputIds.append(options)
 					content.add_child(options)
 					if preview:
 						options.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -133,6 +151,7 @@ func _ready() -> void:
 					var boolean: BlockBoolPanel = BlockBoolPanel.new()
 					boolean.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					boolean.block = self
+					inputIds.append(boolean)
 					content.add_child(boolean)
 					if !preview: addInputArea(boolean)
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
@@ -149,8 +168,17 @@ func _ready() -> void:
 	content.blockColor = defaultColor
 	content.configureProperties()
 	onResize.call_deferred()
-	# Finally, add this block to the sprite's code
-	if sprite: BuildSpriteScript.updateBlock(self, sprite)
+	# Finish up connections after the editor loads this block
+	if loading:
+		if nestDetection: loadNestEnd.call_deferred()
+		for i: CodeBlock in childValueBlocksToLoad:
+			i.detectedInput = inputIds[i.parentInputLoadID]
+			i.insertValueBlock.call_deferred()
+		global_position = loadPosition
+		loading = false
+	else:
+		# If not loading, it was created from the palette
+		if sprite: BuildSpriteScript.updateBlock(self, sprite)
 
 # Create collision for the input so the mouse/value blocks can detect it
 func addInputArea(blockInput: Control) -> void:
@@ -328,6 +356,8 @@ func released(topToBottom: bool) -> void:
 			parentNest.getHighestInStack().updateSpriteScript()
 		else:
 			getHighestInStack().updateSpriteScript()
+	else: # No detected block, update this block's position in the sprite script
+		updateSpriteScript(true)
 	# Layering
 	getHighestInStack().setToFront()
 	# Fix any offset from preview if dropping in middle of stack
@@ -383,7 +413,8 @@ func fixMinimumSize() -> void:
 		shapeNode.minimumSizes[blockStructure[&"shape"]],
 		75.0 if valueDrop else 85.0
 	)
-	size = Vector2(0.0, 0.0)
+	# It's obsessed with giving me warnings unless I set deferred
+	set_deferred(&"size", Vector2(0.0, 0.0))
 	if parentBlock: parentBlock.fixMinimumSize()
 
 # Release is for the purpose of the bottom block detecting if the stack should connect on release
@@ -457,8 +488,9 @@ func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
 	if childNest: childNest.setToFront()
-func updateSpriteScript() -> void:
+func updateSpriteScript(thisBlockOnly: bool = false) -> void:
 	BuildSpriteScript.updateBlock(self, sprite)
+	if thisBlockOnly: return
 	if childBlock: childBlock.updateSpriteScript()
 	if childNest: childNest.updateSpriteScript()
 
@@ -632,8 +664,8 @@ func nestedNestPreviewHeight(nesting: CodeBlock) -> float:
 	else:
 		return size.y + snapPreview.nestEnd + 2.0
 
-func setNestEnd(newEnd: float, setFallback: bool) -> void:
-	if parentNest:
+func setNestEnd(newEnd: float, setFallback: bool, setParentNest: bool = true) -> void:
+	if parentNest and setParentNest:
 		parentNest.setNestEnd(parentNest.nestEnd + (newEnd - nestEnd), setFallback)
 	nestEnd = newEnd
 	shapeNode.nestEnd = newEnd
@@ -645,6 +677,14 @@ func setChildrenParentNests() -> void:
 	if childBlock:
 		childBlock.parentNest = parentNest
 		childBlock.setChildrenParentNests()
+
+# When loading a sprite's blocks
+func loadNestEnd() -> void:
+	if childNest:
+		childNest.loadNestEnd()
+		setNestEnd(calculateStackHeight(childNest), true, false)
+	elif childBlock:
+		childBlock.loadNestEnd()
 
 func mouseEntered() -> void:
 	# Don't allow interaction if initial click was outside block

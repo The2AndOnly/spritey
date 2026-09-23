@@ -4,6 +4,7 @@ extends BlockDefinitions
 # SPRITE SCRIPT BLOCK DOCS:
 # &"block": StringName | Name of block
 # &"top": bool | True if this block is the top of the stack
+# &"pos": Vector2 | Position of the block, only for top-level blocks
 # &"next": int | ID of the block to run next, if missing then no block is next
 # &"value": bool | True if this block is a value block
 # &"nest": int | ID of the first block in nest, if missing then no nest or blocks in nest
@@ -17,6 +18,7 @@ extends BlockDefinitions
 ## Read type 2 (options): [read type, option]
 # - option is int (selected option)
 # - also used by empty bool inputs, so option can be false
+## Empty bool panel: [3, false]
 
 var spriteScript: Dictionary[int, Dictionary] = {}
 # This holds the compiled script, but only the top-level blocks are listed in their category
@@ -184,6 +186,8 @@ func parseInput(inputs: Array) -> Array:
 			1: parsed.append([valueOne[0], valueOne[1]])
 			# Options
 			2: parsed.append(valueOne)
+			# Empty bool
+			3: parsed.append(false)
 	return parsed
 
 func castType(type: int, value: Variant) -> Variant:

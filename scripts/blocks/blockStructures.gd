@@ -2,6 +2,7 @@ class_name BlockStructures
 extends Node
 
 # INPUT DOCS:
+# Inputs are expected to start from 0 and increment by 1 from left to right
 # blockInputEdit (lineEdit):
 # [&"input", 0, "0"] - input type, value type, default
 ## VALUE TYPES:

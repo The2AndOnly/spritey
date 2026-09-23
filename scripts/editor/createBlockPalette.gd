@@ -122,10 +122,8 @@ func blockClicked(blockName: StringName) -> void:
 	block.sprite = editor.selectedSprite
 	# Assign this new block an ID
 	var i: int = 0
-	var takenIds: Array[int] = editor.selectedSprite.spriteScript.keys()
-	while true:
-		if i in takenIds: i += 1
-		else:
-			block.blockID = i
-			break
+	var spriteScript: Dictionary[int, Dictionary] = editor.selectedSprite.spriteScript
+	while spriteScript.has(i):
+		i += 1
+	block.blockID = i
 	editor.scriptView.add_child(block)
