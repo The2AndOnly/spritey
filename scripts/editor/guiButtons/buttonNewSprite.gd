@@ -14,11 +14,18 @@ func onPress() -> void:
 	spriteEntry.previewTexture = ICON
 	spriteEntry.editor = editor
 	spriteEntryContainer.add_child(spriteEntry)
+	
 	var sprite: Sprite = Sprite.new()
 	sprite.texture = ICON
 	sprite.gameView = gameView
 	gameView.add_child(sprite)
 	sprite.spritePos = Vector2.ZERO
-	
 	spriteEntry.sprite = sprite
+	
+	var names: Array[String] = []
+	for i: Sprite in editor.sprites:
+		names.append(i.name)
+	sprite.name = editor.findUniqueName("sprite1", names)
+	
+	editor.sprites.append(sprite)
 	editor.selectedSprite = sprite

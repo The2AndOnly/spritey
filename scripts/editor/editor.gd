@@ -7,6 +7,7 @@ extends Control
 const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
+var sprites: Array[Sprite] = []
 var selectedSprite: Sprite:
 	set(value):
 		selectedSprite = value
@@ -15,13 +16,10 @@ var currentView: StringName = &"sprites":
 	set(value):
 		currentView = value
 		if value == &"scripts":
-			if !spriteBlocksLoaded:
-				loadSpriteBlocks()
-				spriteBlocksLoaded = true
-		else:
-			if spriteBlocksLoaded:
+			if spriteBlocksLoaded != selectedSprite:
 				unloadSpriteBlocks()
-				spriteBlocksLoaded = false
+				loadSpriteBlocks()
+				spriteBlocksLoaded = selectedSprite
 		changedView.emit(value)
 var clampedMousePos: Vector2 = Vector2.ZERO
 # Having this set disables interaction with several things
@@ -29,7 +27,7 @@ var uiFocused: Control = null:
 	set(value):
 		uiFocused = value
 		changedFocus.emit(value)
-var spriteBlocksLoaded := false
+var spriteBlocksLoaded: Sprite = null
 
 var signals: Array[String] = ["signal1"]
 
@@ -95,3 +93,41 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		setMousePosition()
+
+func findUniqueName(desired_name: String, existing_names: Array[String]) -> String:
+	# Convert array to a Dictionary for O(1) fast lookup
+	var taken_set := {}
+	for name_item in existing_names:
+		taken_set[name_item] = true
+
+	# 1. Parse base name and trailing number using RegEx
+	var regex := RegEx.new()
+	regex.compile("^(.*?)\\s*(\\d+)?$")
+	var result := regex.search(desired_name)
+
+	var base_name: String = desired_name
+	var start_num: int = 1
+
+	if result:
+		var parsed_base := result.get_string(1).strip_edges()
+		var parsed_num := result.get_string(2)
+
+		if parsed_num != "":
+			start_num = parsed_num.to_int()
+			base_name = parsed_base if parsed_base != "" else "Item"
+		else:
+			base_name = desired_name
+
+	# 2. Check if the initial desired name is already free
+	if not taken_set.has(desired_name):
+		return desired_name
+
+	# 3. Increment counter until an untaken name/number is found
+	var current_num := start_num
+	var candidate_name := "%s%d" % [base_name, current_num]
+
+	while taken_set.has(candidate_name):
+		current_num += 1
+		candidate_name = "%s%d" % [base_name, current_num]
+
+	return candidate_name

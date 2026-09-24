@@ -24,12 +24,15 @@ func _ready() -> void:
 	sizeField.text_changed.connect(sizeTextChanged)
 	visibleTrue.pressed.connect(visibleChanged.bind(true))
 	visibleFalse.pressed.connect(visibleChanged.bind(false))
-	# Direction field has extra signals because it gets adjusted after changing it
+	# Extra signals for fields that react after submitting
 	directionField.text_submitted.connect(directionSubmitted)
 	directionField.focus_exited.connect(directionFocusExit)
+	nameField.text_submitted.connect(nameSubmitted)
+	nameField.focus_exited.connect(nameFocusExit)
 
 func newSelectedSprite(sprite: Sprite) -> void:
 	currentSprite = sprite
+	nameField.text = sprite.name
 	setDisplays()
 
 func _process(_delta: float) -> void:
@@ -46,6 +49,11 @@ func setDisplays() -> void:
 	if yposField.text != ypos: yposField.text = ypos
 	if directionField.text != direction: directionField.text = direction
 	if sizeField.text != spriteSize: sizeField.text = spriteSize
+	
+	if currentSprite.visible:
+		visibleTrue.button_pressed = true
+	else:
+		visibleFalse.button_pressed = true
 
 func displayNumber(value: float) -> String:
 	if is_equal_approx(value, floorf(value)):
@@ -71,3 +79,15 @@ func sizeTextChanged(newText: String) -> void:
 
 func visibleChanged(visibility: bool) -> void:
 	currentSprite.visible = visibility
+
+func nameSubmitted(newText: String) -> void:
+	if newText == "":
+		nameField.text = currentSprite.name
+		return
+	var names: Array[String] = []
+	for i: Sprite in editor.sprites:
+		if i != currentSprite: names.append(i.name)
+	currentSprite.name = editor.findUniqueName(newText, names)
+	nameField.text = currentSprite.name
+func nameFocusExit() -> void:
+	nameSubmitted(nameField.text)
