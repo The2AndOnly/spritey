@@ -49,9 +49,9 @@ func trans_changeY(inputs: Array) -> float:
 	return -1.0
 
 func trans_XPos() -> float:
-	return round(spritePos.x)
+	return spritePos.x
 func trans_YPos() -> float:
-	return round(spritePos.y)
+	return spritePos.y
 
 func trans_setPosition(inputs: Array) -> float:
 	spritePos = Vector2(inputs[0], inputs[1])

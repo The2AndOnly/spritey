@@ -9,6 +9,8 @@ const BLOCK_OPTION_BUTTON: StyleBoxFlat = preload("uid://dmp801j6y02fr")
 const BLOCK_OPTIONS_POPUP_PANEL: StyleBoxFlat = preload("uid://b136o4ympmsgo")
 const BLOCK_VALUE_HIGHLIGHT: StyleBoxFlat = preload("uid://b0mbrqntfnjk6")
 const BLOCK_BOOL_HIGHLIGHT: StyleBoxFlat = preload("uid://b88x671nrtn4d")
+const BLOCK_POPUP_SEARCH: StyleBoxFlat = preload("uid://dl83sbry4at1n")
+var searchStyle: StyleBoxFlat
 
 func configureProperties() -> void:
 	var newTheme: Theme = BLOCK_THEME.duplicate()
@@ -16,9 +18,11 @@ func configureProperties() -> void:
 	var newBoolPanel: StyleBoxFlat = BLOCK_BOOL_PANEL.duplicate()
 	var newOptionButton: StyleBoxFlat = BLOCK_OPTION_BUTTON.duplicate()
 	var newPopupPanel: StyleBoxFlat = BLOCK_OPTIONS_POPUP_PANEL.duplicate()
+	searchStyle = BLOCK_POPUP_SEARCH.duplicate()
 	
 	var darkenedColor: Color = blockColor.darkened(0.2)
 	newLineEdit.border_color = darkenedColor
+	searchStyle.border_color = darkenedColor
 	newOptionButton.border_color = blockColor.darkened(0.3)
 	newOptionButton.bg_color = darkenedColor
 	newBoolPanel.border_color = blockColor.darkened(0.3)
@@ -37,14 +41,14 @@ func configureProperties() -> void:
 	
 	for i: Control in get_children():
 		if i is BlockInputEdit:
-			setLineEditProperties(i, false)
+			setLineEditProperties(i)
 		if i is BlockOptions:
 			setOptionButtonProperties(i)
 			i.get_popup().about_to_popup.connect(optionsOpened.bind(i))
 		if i is BlockBoolPanel:
 			setBooleanPanelProperties(i)
 
-func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
+func setLineEditProperties(lineEdit: LineEdit) -> void:
 	lineEdit.context_menu_enabled = false
 	lineEdit.emoji_menu_enabled = false
 	lineEdit.middle_mouse_paste_enabled = false
@@ -53,12 +57,11 @@ func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
 	lineEdit.clear_button_enabled = false
 	lineEdit.caret_blink = true
 	lineEdit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	if !searchBar:
+	if lineEdit is BlockInputEdit:
 		lineEdit.expand_to_text_length = true
 		lineEdit.custom_minimum_size = Vector2(60.0, 55.0)
 		lineEdit.custom_maximum_size = Vector2(-1.0, 55.0)
-	# Create a highlight for if a value block is dragged over it
-	if lineEdit is BlockInputEdit:
+		# Create a highlight for if a value block is dragged over it
 		var highlight: Panel = Panel.new()
 		highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
 		highlight.add_theme_stylebox_override(&"panel", BLOCK_VALUE_HIGHLIGHT)
@@ -67,6 +70,9 @@ func setLineEditProperties(lineEdit: LineEdit, searchBar: bool) -> void:
 		highlight.visible = false
 		lineEdit.add_child(highlight)
 		lineEdit.highlight = highlight
+	# Search bar in popup
+	else:
+		lineEdit.add_theme_stylebox_override(&"normal", searchStyle)
 
 func setBooleanPanelProperties(boolPanel: BlockBoolPanel) -> void:
 	boolPanel.custom_minimum_size = Vector2(80.0, 55.0)
@@ -95,7 +101,7 @@ func setOptionButtonProperties(optionButton: BlockOptions) -> void:
 func optionsOpened(optionButton: BlockOptions) -> void:
 	# Get the search bar of the options popup
 	var lineEdits: Array[Node] = optionButton.get_popup().find_children("*", "LineEdit", true, false)
-	setLineEditProperties(lineEdits[0], true)
+	setLineEditProperties(lineEdits[0])
 	#optionButton.block.editor.uiFocused = lineEdits[0]
 	optionButton.get_popup().min_size.x = 200
 	optionButton.get_popup().max_size.y = 500

@@ -7,7 +7,10 @@ extends Control
 const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
-var selectedSprite: Sprite
+var selectedSprite: Sprite:
+	set(value):
+		selectedSprite = value
+		changedSelectedSprite.emit(value)
 var currentView: StringName = &"sprites":
 	set(value):
 		currentView = value
@@ -32,6 +35,7 @@ var signals: Array[String] = ["signal1"]
 
 signal changedView(view: StringName)
 signal changedFocus(newFocus: Control)
+signal changedSelectedSprite(newSprite: Sprite)
 
 func setMousePosition() -> void:
 	gameView.setMousePosition()
