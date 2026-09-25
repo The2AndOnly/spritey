@@ -128,7 +128,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"trans_glideToOption": {
 		&"structure": ["glide", 0, "seconds to", 1],
 		0: [&"input", 4, "1"],
-		1: [&"options", 1, 0, ["pointer", "random position"]],
+		1: [&"options", 1, 0, ["pointer", "random"]],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},

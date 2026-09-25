@@ -1,6 +1,8 @@
 class_name UISpriteEntry
 extends Button
 
+const SPRITE_SELECTOR_GROUP: ButtonGroup = preload("uid://g30w58c26scg")
+
 var previewTexture: Texture2D
 var sprite: Sprite
 var editor: Editor
@@ -21,6 +23,10 @@ func _ready() -> void:
 	texture.texture = previewTexture
 	texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	
+	button_group = SPRITE_SELECTOR_GROUP
+	toggle_mode = true
+	button_pressed = true
 	
 	pressed.connect(onPress)
 

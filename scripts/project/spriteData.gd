@@ -5,6 +5,8 @@ var gameView: GameView
 # This stores all of the actively running compiled stacks in the sprite
 var activeStacks: Array[ScriptStack] = []
 
+var spriteID: int
+
 var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
 		spritePos = value

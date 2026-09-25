@@ -12,6 +12,7 @@ const halfBaseSize: Vector2 = baseSize / 2.0
 @onready var scaledSize: Vector2 = Vector2(size.x / baseSize.x, size.y / baseSize.y)
 @onready var sizeMinusOne: Vector2 = size - Vector2i(1, 1)
 
+var sprites: Dictionary[int, Sprite] = {}
 var mousePosition: Vector2
 # Stores key names to their index in BlockStructures.keyOptions
 var actionToIndex: Dictionary[StringName, int] = {}

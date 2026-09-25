@@ -3,6 +3,7 @@ extends VBoxContainer
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
 @export var editor: Editor
+@export var gameView: GameView
 
 var blockOrder: Array[StringName] = [
 	&"event_start",
@@ -103,6 +104,7 @@ func _ready() -> void:
 		block.blockName = i
 		block.preview = true
 		block.editor = editor
+		block.gameView = gameView
 		block.clicked.connect(blockClicked.bind(i))
 		add_child(block)
 		if extraSpacing > 0.0:
@@ -119,6 +121,7 @@ func blockClicked(blockName: StringName) -> void:
 	var block: CodeBlock = CODE_BLOCK.instantiate()
 	block.blockName = blockName
 	block.editor = editor
+	block.gameView = gameView
 	block.sprite = editor.selectedSprite
 	# Assign this new block an ID
 	var i: int = 0

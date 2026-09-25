@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 @export var editor: Editor
+@export var gameView: GameView
 @export var nameField: LineEdit
 @export var xposField: LineEdit
 @export var yposField: LineEdit
@@ -41,10 +42,10 @@ func _process(_delta: float) -> void:
 		setDisplays()
 
 func setDisplays() -> void:
-	xpos = displayNumber(currentSprite.spritePos.x)
-	ypos = displayNumber(currentSprite.spritePos.y)
-	direction = displayNumber(currentSprite.direction)
-	spriteSize = displayNumber(currentSprite.size)
+	xpos = ParseData.stringNumber(currentSprite.spritePos.x)
+	ypos = ParseData.stringNumber(currentSprite.spritePos.y)
+	direction = ParseData.stringNumber(currentSprite.direction)
+	spriteSize = ParseData.stringNumber(currentSprite.size)
 	if xposField.text != xpos: xposField.text = xpos
 	if yposField.text != ypos: yposField.text = ypos
 	if directionField.text != direction: directionField.text = direction
@@ -55,12 +56,6 @@ func setDisplays() -> void:
 	else:
 		visibleFalse.button_pressed = true
 
-func displayNumber(value: float) -> String:
-	if is_equal_approx(value, floorf(value)):
-		return str(int(value))
-	else:
-		return "%.1f" % value
-
 func xposTextChanged(newText: String) -> void:
 	currentSprite.spritePos.x = float(newText)
 
@@ -70,7 +65,7 @@ func yposTextChanged(newText: String) -> void:
 func directionTextChanged(newText: String) -> void:
 	currentSprite.direction = float(newText)
 func directionSubmitted(newText: String) -> void:
-	directionField.text = displayNumber(wrapf(float(newText), -180.0, 180.0))
+	directionField.text = ParseData.stringNumber(wrapf(float(newText), -180.0, 180.0))
 func directionFocusExit() -> void:
 	directionSubmitted(directionField.text)
 
@@ -81,13 +76,13 @@ func visibleChanged(visibility: bool) -> void:
 	currentSprite.visible = visibility
 
 func nameSubmitted(newText: String) -> void:
-	if newText == "":
+	if newText.strip_edges() == "":
 		nameField.text = currentSprite.name
 		return
 	var names: Array[String] = []
-	for i: Sprite in editor.sprites:
+	for i: Sprite in gameView.sprites.values():
 		if i != currentSprite: names.append(i.name)
-	currentSprite.name = editor.findUniqueName(newText, names)
+	currentSprite.name = ParseData.findUniqueName(newText, names)
 	nameField.text = currentSprite.name
 func nameFocusExit() -> void:
 	nameSubmitted(nameField.text)

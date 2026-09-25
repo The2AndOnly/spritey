@@ -9,14 +9,16 @@ extends BlockDefinitions
 # &"value": bool | True if this block is a value block
 # &"nest": int | ID of the first block in nest, if missing then no nest or blocks in nest
 # &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
-## Read type 0 (raw input): [read type, [input type, input]]
+## Read type 0 (raw input): [read type, input type, input]
 # - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat, 5=bool
 # - input is string (raw input)
-## Read type 1 (value block): [read type, [input type, block ID]]
+## Read type 1 (value block): [read type, input type, block ID]
 # - input type is same as read type 0 (raw input)
 # - block ID is int
-## Read type 2 (options): [read type, option]
+## Read type 2 (options): [read type, option, ID]
 # - option is int (selected option)
+# - ID is int, and if it's not -1 then it gets passed as the input for the block
+#        - It gets passed as negative so the block knows it's an ID
 # - also used by empty bool inputs, so option can be false
 ## Empty bool panel: [3, false]
 
@@ -168,7 +170,7 @@ func executeBlock(block: CompiledBlock) -> Variant:
 			for i in block.inputs:
 				if i is Array:
 					# Execute value block
-					returnedValues.append(castType(i[0], executeBlock(valueBlocks[i[1]])))
+					returnedValues.append(ParseData.castType(i[0], executeBlock(valueBlocks[i[1]])))
 					continue
 				# Raw input or options
 				returnedValues.append(i)
@@ -178,35 +180,15 @@ func executeBlock(block: CompiledBlock) -> Variant:
 func parseInput(inputs: Array) -> Array:
 	var parsed: Array = []
 	for i: Array in inputs:
-		var valueOne: Variant = i[1]
 		match i[0]:
 			# Raw input
-			0: parsed.append(castType(valueOne[0], valueOne[1]))
+			0: parsed.append(ParseData.castType(i[1], i[2]))
 			# Value block
-			1: parsed.append([valueOne[0], valueOne[1]])
+			1: parsed.append([i[1], i[2]])
 			# Options
-			2: parsed.append(valueOne)
+			2:
+				var id: int = i[2]
+				parsed.append(i[1] if id == -1 else -id)
 			# Empty bool
 			3: parsed.append(false)
 	return parsed
-
-func castType(type: int, value: Variant) -> Variant:
-	match type:
-		0: # integer
-			return int(value)
-		1: # float
-			return float(value)
-		2: # string
-			if value is float:
-				if is_equal_approx(value, floorf(value)):
-					return str(int(value))
-				else:
-					return str(snappedf(float(value), 0.01))
-			return str(value)
-		3: # positive integer
-			return max(0, int(value))
-		4: # positive float
-			return max(0.0, float(value))
-		5: # bool (has no casting since only bool blocks can be inserted)
-			return value
-	return null

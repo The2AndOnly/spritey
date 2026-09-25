@@ -17,6 +17,7 @@ const NestSideWidth: float = 32.0
 ## If true, the block acts as a preview in the block selector palette
 var preview := false
 var editor: Editor
+var gameView: GameView
 ## Which sprite's script this block is a part of
 var sprite: Sprite
 ## The ID of the block in a spriteScript
@@ -76,6 +77,7 @@ func _ready() -> void:
 	grabArea.mouse_exited.connect(mouseExited)
 	grabArea.input_event.connect(inputEvent)
 	editor.changedFocus.connect(changedFocus)
+	editor.updateBlockOptions.connect(updateBlockOptions)
 	resized.connect(onResize)
 	
 	blockStructure = BlockStructures.structures[blockName]
@@ -128,19 +130,15 @@ func _ready() -> void:
 						addInputArea(input)
 				&"options":
 					var options: BlockOptions = BlockOptions.new()
-					var optionsList: Array = blockStructure[i][3].duplicate()
-					match blockStructure[i][1]:
-						2: optionsList.append_array(editor.signals)
-						3: optionsList.append_array(BlockStructures.keyOptions)
-					for j: String in optionsList:
-						options.add_item(j)
+					options.id = i
+					if !valuesToLoad.is_empty():
+						options.itemSelected = valuesToLoad[i][0]
+						options.selectedID = valuesToLoad[i][1]
+					else:
+						options.itemSelected = blockStructure[i][2]
+					setOptionsList(options)
 					options.block = self
 					options.mouse_filter = Control.MOUSE_FILTER_IGNORE
-					# It switches back to 0 if not deferred
-					if !valuesToLoad.is_empty():
-						options.select.call_deferred(valuesToLoad[i])
-					else:
-						options.select.call_deferred(blockStructure[i][2])
 					inputIds.append(options)
 					content.add_child(options)
 					if preview:
@@ -202,6 +200,46 @@ func addInputArea(blockInput: Control) -> void:
 	detection.add_child(detectionShape)
 	blockInput.detectionShape = detectionShape
 	blockInput.setDetectionRect.call_deferred()
+
+func setOptionsList(options: BlockOptions) -> void:
+	var optionsList: Array = blockStructure[options.id][3].duplicate()
+	options.clear()
+	options.itemIDs.clear()
+	# All non-addon options have an ID of -1
+	for _i in range(optionsList.size()): options.itemIDs.append(-1)
+	match blockStructure[options.id][1]:
+		1: # Sprites addon
+			var sortedSprites: Array[Sprite] = gameView.sprites.values()
+			sortedSprites.sort_custom(func(a: Sprite, b: Sprite):
+				return a.name.strip_edges().naturalnocasecmp_to(b.name.strip_edges()) < 0)
+			sortedSprites.erase(editor.selectedSprite)
+			var spriteNames: Array[StringName] = []
+			var spriteIDs: Array[int] = []
+			for i: Sprite in sortedSprites:
+				spriteNames.append(i.name)
+				spriteIDs.append(i.spriteID)
+			optionsList.append_array(spriteNames)
+			options.itemIDs.append_array(spriteIDs)
+		# Signals addon
+		2: optionsList.append_array(editor.signals)
+		# Keys addon
+		3: optionsList.append_array(BlockStructures.keyOptions)
+	for j: String in optionsList:
+		options.add_item(j)
+	# Select the proper addon item by looking at the ID
+	if options.selectedID != -1:
+		options.itemSelected = options.itemIDs.find(options.selectedID)
+	# It may switch back to 0 if not deferred
+	options.select.call_deferred(options.itemSelected)
+	fixMinimumSize.call_deferred()
+	if options.detectionShape:
+		await get_tree().process_frame
+		options.setDetectionRect()
+
+func updateBlockOptions() -> void:
+	for i: Control in content.get_children():
+		if i is BlockOptions:
+			setOptionsList(i)
 
 # Drag behavior
 func _process(_delta: float) -> void:

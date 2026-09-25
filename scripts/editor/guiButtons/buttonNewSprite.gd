@@ -22,10 +22,17 @@ func onPress() -> void:
 	sprite.spritePos = Vector2.ZERO
 	spriteEntry.sprite = sprite
 	
+	# Find a unique name and ID for the sprite
 	var names: Array[String] = []
-	for i: Sprite in editor.sprites:
+	var takenIDs: Array[int] = []
+	for i: Sprite in gameView.sprites.values():
 		names.append(i.name)
-	sprite.name = editor.findUniqueName("sprite1", names)
+		takenIDs.append(i.spriteID)
+	sprite.name = ParseData.findUniqueName("sprite1", names)
+	var i: int = 0
+	while takenIDs.has(i):
+		i += 1
+	sprite.spriteID = i
 	
-	editor.sprites.append(sprite)
+	gameView.sprites[i] = sprite
 	editor.selectedSprite = sprite

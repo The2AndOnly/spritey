@@ -17,18 +17,18 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	# Build inputs
 	var inputs: Array[Array] = []
 	for i: Control in block.content.get_children():
-		if i is LineEdit:
+		if i is BlockInputEdit:
 			# If not visible, then a value block is inserted
 			if i.visible:
-				inputs.append([0, [i.type, i.text]])
+				inputs.append([0, i.type, i.text])
 		if i is CodeBlock:
 			if i.parentInput is BlockInputEdit:
-				inputs.append([1, [i.parentInput.type, i.blockID]])
+				inputs.append([1, i.parentInput.type, i.blockID]) # Value block
 			else:
-				inputs.append([1, [5, i.blockID]])
+				inputs.append([1, 5, i.blockID]) # Boolean block
 			updateBlock(i, sprite)
-		if i is OptionButton:
-			inputs.append([2, i.selected])
+		if i is BlockOptions:
+			inputs.append([2, i.itemSelected, i.selectedID])
 		# Empty bool input
 		if i is BlockBoolPanel and i.visible:
 			inputs.append([3, false])

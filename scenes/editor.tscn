@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bhqp5qjohejt3" path="res://scripts/editor/gameView.gd" id="1_ba0ut"]
 [ext_resource type="Script" uid="uid://bwbrqjjnmmsge" path="res://scripts/editor/editor.gd" id="1_q68jb"]
 [ext_resource type="Script" uid="uid://jxs1kkb13lbb" path="res://scripts/editor/guiButtons/buttonNewSprite.gd" id="4_q68jb"]
-[ext_resource type="Script" uid="uid://b6lrotmsxgnnu" path="res://scripts/project/buttonStart.gd" id="4_xg7d5"]
+[ext_resource type="Script" uid="uid://b6lrotmsxgnnu" path="res://scripts/project/buttonProjectControls.gd" id="4_xg7d5"]
 [ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/guiButtons/buttonEditorView.gd" id="5_xg7d5"]
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
@@ -177,7 +177,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.020833334
 anchor_top = 0.028703704
-anchor_right = 0.15208334
+anchor_right = 0.10989583
 anchor_bottom = 0.11388883
 grow_horizontal = 2
 grow_vertical = 2
@@ -185,6 +185,23 @@ theme_override_font_sizes/font_size = 35
 text = "Start"
 script = ExtResource("4_xg7d5")
 gameView = NodePath("../SubViewportContainer/GameView")
+action = &"start"
+metadata/_edit_use_anchors_ = true
+
+[node name="stop" type="Button" parent="sprites" unique_id=1557543265 node_paths=PackedStringArray("gameView")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.125
+anchor_top = 0.028703704
+anchor_right = 0.2140625
+anchor_bottom = 0.11388883
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 35
+text = "Stop"
+script = ExtResource("4_xg7d5")
+gameView = NodePath("../SubViewportContainer/GameView")
+action = &"stop"
 metadata/_edit_use_anchors_ = true
 
 [node name="mousePosition" type="Label" parent="sprites" unique_id=1541269957]
@@ -200,7 +217,7 @@ theme_override_font_sizes/font_size = 35
 text = "0, 0"
 metadata/_edit_use_anchors_ = true
 
-[node name="spriteData" type="VBoxContainer" parent="sprites" unique_id=1974200215 node_paths=PackedStringArray("editor", "nameField", "xposField", "yposField", "directionField", "sizeField", "visibleTrue", "visibleFalse")]
+[node name="spriteData" type="VBoxContainer" parent="sprites" unique_id=1974200215 node_paths=PackedStringArray("editor", "gameView", "nameField", "xposField", "yposField", "directionField", "sizeField", "visibleTrue", "visibleFalse")]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.030208332
@@ -212,6 +229,7 @@ grow_vertical = 2
 theme_override_constants/separation = 15
 script = ExtResource("6_o435n")
 editor = NodePath("../..")
+gameView = NodePath("../SubViewportContainer/GameView")
 nameField = NodePath("topRow/name/LineEdit")
 xposField = NodePath("topRow/xPos/LineEdit")
 yposField = NodePath("topRow/yPos/LineEdit")
@@ -243,6 +261,12 @@ custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 placeholder_text = "Name"
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
 
 [node name="xPos" type="HBoxContainer" parent="sprites/spriteData/topRow" unique_id=1575746235]
 layout_mode = 2
@@ -260,6 +284,14 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
 
 [node name="yPos" type="HBoxContainer" parent="sprites/spriteData/topRow" unique_id=1326447784]
 layout_mode = 2
@@ -277,6 +309,14 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
 
 [node name="bottomRow" type="HBoxContainer" parent="sprites/spriteData" unique_id=933676941]
 layout_mode = 2
@@ -331,6 +371,14 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
 
 [node name="size" type="HBoxContainer" parent="sprites/spriteData/bottomRow" unique_id=2138771664]
 layout_mode = 2
@@ -348,6 +396,14 @@ vertical_alignment = 1
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false
@@ -444,10 +500,11 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("editor")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("editor", "gameView")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 0
 script = ExtResource("6_eqbpn")
 editor = NodePath("../../../..")
+gameView = NodePath("../../../../sprites/SubViewportContainer/GameView")
