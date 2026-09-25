@@ -55,5 +55,4 @@ func onSubmit(_newText: String) -> void:
 	mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
 	setDetectionRect()
 	release_focus()
-	block.getHighestInStack().updateSpriteScript()
 	if block.editor.uiFocused == self: block.editor.uiFocused = null

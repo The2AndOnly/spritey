@@ -78,6 +78,7 @@ func _ready() -> void:
 	grabArea.input_event.connect(inputEvent)
 	editor.changedFocus.connect(changedFocus)
 	editor.updateBlockOptions.connect(updateBlockOptions)
+	if !preview: editor.updateSpriteScript.connect(updateSpriteScript)
 	resized.connect(onResize)
 	
 	blockStructure = BlockStructures.structures[blockName]
@@ -103,6 +104,10 @@ func _ready() -> void:
 			valueDrop.queue_free()
 			valueDrop = null # Necessary for loading
 			nestDetection.queue_free()
+			# Fix nest end indent on load
+			if loading:
+				if parentNest and !shapeNode.drawBottomNotch:
+					parentNest.shapeNode.drawNestEndIndent = false
 	
 	# Read the structure to build the block's labels and inputs
 	for i: Variant in blockStructure[&"structure"]:
@@ -171,7 +176,7 @@ func _ready() -> void:
 		if nestDetection: loadNestEnd.call_deferred()
 		for i: CodeBlock in childValueBlocksToLoad:
 			i.detectedInput = inputIds[i.parentInputLoadID]
-			i.insertValueBlock.call_deferred()
+			i.insertValueBlock.call_deferred(false)
 		global_position = loadPosition
 		loading = false
 	else:
@@ -210,7 +215,7 @@ func setOptionsList(options: BlockOptions) -> void:
 	match blockStructure[options.id][1]:
 		1: # Sprites addon
 			var sortedSprites: Array[Sprite] = gameView.sprites.values()
-			sortedSprites.sort_custom(func(a: Sprite, b: Sprite):
+			sortedSprites.sort_custom(func(a: Sprite, b: Sprite) -> bool:
 				return a.name.strip_edges().naturalnocasecmp_to(b.name.strip_edges()) < 0)
 			sortedSprites.erase(editor.selectedSprite)
 			var spriteNames: Array[StringName] = []
@@ -285,7 +290,6 @@ func disconnectFromParent() -> void:
 		if parentInput:
 			disconnectValueBlock()
 		else:
-			var previousParent: CodeBlock = parentBlock
 			parentBlock.childBlock = null
 			parentBlock = null
 			# If this was part of a stack in a nest, then fix the nestEnd
@@ -295,20 +299,13 @@ func disconnectFromParent() -> void:
 				parentNest = null
 				setChildrenParentNests()
 			setToFront()
-			# After disconnecting, update the spriteScript for the two new stacks that were formed
-			previousParent.getHighestInStack().updateSpriteScript()
-			updateSpriteScript()
 	# If removed the first block in a nest
 	elif parentNest:
-		var previousParentNest: CodeBlock = parentNest
 		parentNest.setNestEnd(DefaultNestEnd, true)
 		parentNest.shapeNode.drawNestEndIndent = true
 		parentNest.childNest = null
 		parentNest = null
 		setChildrenParentNests()
-		# After disconnecting, update the spriteScript for the two new stacks that were formed
-		previousParentNest.getHighestInStack().updateSpriteScript()
-		updateSpriteScript()
 
 # topToBottom: If true, child blocks move when snapped
 # If false, parent blocks move when snapped
@@ -389,13 +386,6 @@ func released(topToBottom: bool) -> void:
 				parentNest.setNestEnd(calculateStackHeight(parentNest.childNest), true)
 				if !getLowestInStack().bottomDetection:
 					parentNest.shapeNode.drawNestEndIndent = false
-		# If any block was detected on release, update the sprite's script
-		if parentNest:
-			parentNest.getHighestInStack().updateSpriteScript()
-		else:
-			getHighestInStack().updateSpriteScript()
-	else: # No detected block, update this block's position in the sprite script
-		updateSpriteScript(true)
 	# Layering
 	getHighestInStack().setToFront()
 	# Fix any offset from preview if dropping in middle of stack
@@ -410,7 +400,7 @@ func released(topToBottom: bool) -> void:
 		if parentBlock: parentBlock.moveWithChild()
 
 # Called as a value block
-func insertValueBlock() -> void:
+func insertValueBlock(setFront: bool = true) -> void:
 	detectedBlock = null
 	if !detectedInput: return
 	detectedInput.visible = false
@@ -424,9 +414,7 @@ func insertValueBlock() -> void:
 	parentBlock.childValueBlocks.append(self)
 	detectedInput = null
 	parentBlock.fixMinimumSize()
-	# Layering and updating spriteScript
-	getHighestInStack().setToFront()
-	getHighestInStack().updateSpriteScript()
+	if setFront: getHighestInStack().setToFront()
 
 # Called as a value block
 func disconnectValueBlock() -> void:
@@ -442,7 +430,6 @@ func disconnectValueBlock() -> void:
 	z_index = 1
 	# Prevents multiple inputs being highlighted on disconnect
 	detectedInput = parentInput
-	getHighestInStack().updateSpriteScript()
 	parentBlock = null
 	parentInput = null
 
@@ -526,11 +513,10 @@ func setToFront() -> void:
 	move_to_front()
 	if childBlock: childBlock.setToFront()
 	if childNest: childNest.setToFront()
-func updateSpriteScript(thisBlockOnly: bool = false) -> void:
+func updateSpriteScript(fromEvent: bool) -> void:
+	if fromEvent and parentBlock: return
 	BuildSpriteScript.updateBlock(self, sprite)
-	if thisBlockOnly: return
-	if childBlock: childBlock.updateSpriteScript()
-	if childNest: childNest.updateSpriteScript()
+	if childBlock: childBlock.updateSpriteScript(false)
 
 # Snap preview
 func showPreview() -> void:

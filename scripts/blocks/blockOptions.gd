@@ -31,7 +31,6 @@ func onItemSelect(new: int) -> void:
 	selectedID = itemIDs[itemSelected]
 	block.fixMinimumSize()
 	block.size.x = 0.0
-	block.getHighestInStack().updateSpriteScript()
 	await get_tree().process_frame
 	setDetectionRect()
 

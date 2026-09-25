@@ -9,6 +9,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	if (block.parentBlock == null) and !block.parentNest:
 		spriteScriptBlock[&"top"] = true
 		spriteScriptBlock[&"pos"] = block.global_position
+		spriteScriptBlock[&"z"] = block.get_index()
 	else:
 		spriteScriptBlock[&"top"] = false
 	spriteScriptBlock[&"value"] = block.parentInput != null
@@ -37,4 +38,3 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	sprite.spriteScript[block.blockID] = spriteScriptBlock
 	# Require the sprite to re-compile once an event is received
 	sprite.scriptsCompiled = false
-	sprite.stopAllStacks()

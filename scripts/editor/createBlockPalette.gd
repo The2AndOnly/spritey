@@ -4,84 +4,92 @@ const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 
 @export var editor: Editor
 @export var gameView: GameView
+@export var blockGroup: StringName
+@export var container: ScrollContainer
 
-var blockOrder: Array[StringName] = [
-	&"event_start",
-	&"event_keyboard",
-	&"event_mouse",
-	&"event_receive",
-	&"event_signal",
-	
-	&"ctrl_wait",
-	&"ctrl_waitUntil",
-	&"ctrl_if",
-	&"ctrl_repeat",
-	&"ctrl_repeatSeconds",
-	&"ctrl_while",
-	&"ctrl_forever",
-	&"ctrl_break",
-	&"ctrl_continue",
-	&"ctrl_stopOther",
-	&"ctrl_stopStacks",
-	
-	&"inter_pointerX",
-	&"inter_pointerY",
-	&"inter_keyPressed",
-	
-	&"vis_show",
-	&"vis_hide",
-	&"vis_visible",
-	&"vis_setSize",
-	&"vis_changeSize",
-	&"vis_size",
-	&"vis_setStretch",
-	&"vis_changeStretch",
-	&"vis_stretch",
-	&"vis_setFlip",
-	&"vis_flip",
-	&"vis_setOpacity",
-	&"vis_changeOpacity",
-	&"vis_opacity",
-	
-	&"trans_setPosition",
-	&"trans_setPositionOption",
-	&"trans_setX",
-	&"trans_setY",
-	&"trans_changeX",
-	&"trans_changeY",
-	&"trans_glideToPosition",
-	&"trans_glideToOption",
-	&"trans_XPos",
-	&"trans_YPos",
-	&"trans_setDirection",
-	&"trans_turnDegrees",
-	&"trans_pointTowards",
-	&"trans_direction",
-	
-	&"exp_add",
-	&"exp_subtract",
-	&"exp_multiply",
-	&"exp_divide",
-	&"exp_random",
-	&"exp_join",
-	&"exp_ternary",
-	&"exp_equals",
-	&"exp_greater",
-	&"exp_less",
-	&"exp_and",
-	&"exp_or",
-	&"exp_not",
-	&"exp_charOf",
-	&"exp_substring",
-	&"exp_textLength",
-	&"exp_mod",
-	&"exp_exponent",
-	&"exp_abs",
-	&"exp_round",
-	&"exp_math",
-	
-	&"test_print"
-]
+var blockOrder: Dictionary[StringName, Array] = {
+	&"events": [
+		&"event_start",
+		&"event_keyboard",
+		&"event_mouse",
+		&"event_receive",
+		&"event_signal",
+		&"test_print"
+	],
+	&"control": [
+		&"ctrl_wait",
+		&"ctrl_waitUntil",
+		&"ctrl_if",
+		&"ctrl_repeat",
+		&"ctrl_repeatSeconds",
+		&"ctrl_while",
+		&"ctrl_forever",
+		&"ctrl_break",
+		&"ctrl_continue",
+		&"ctrl_stopOther",
+		&"ctrl_stopStacks",
+	],
+	&"interaction": [
+		&"inter_pointerX",
+		&"inter_pointerY",
+		&"inter_keyPressed",
+	],
+	&"visuals": [
+		&"vis_show",
+		&"vis_hide",
+		&"vis_visible",
+		&"vis_setSize",
+		&"vis_changeSize",
+		&"vis_size",
+		&"vis_setStretch",
+		&"vis_changeStretch",
+		&"vis_stretch",
+		&"vis_setFlip",
+		&"vis_flip",
+		&"vis_setOpacity",
+		&"vis_changeOpacity",
+		&"vis_opacity",
+	],
+	&"transform": [
+		&"trans_setPosition",
+		&"trans_setPositionOption",
+		&"trans_setX",
+		&"trans_setY",
+		&"trans_changeX",
+		&"trans_changeY",
+		&"trans_glideToPosition",
+		&"trans_glideToOption",
+		&"trans_XPos",
+		&"trans_YPos",
+		&"trans_setDirection",
+		&"trans_turnDegrees",
+		&"trans_pointTowards",
+		&"trans_direction",
+	],
+	&"expressions": [
+		&"exp_add",
+		&"exp_subtract",
+		&"exp_multiply",
+		&"exp_divide",
+		&"exp_random",
+		&"exp_join",
+		&"exp_ternary",
+		&"exp_equals",
+		&"exp_greater",
+		&"exp_less",
+		&"exp_and",
+		&"exp_or",
+		&"exp_not",
+		&"exp_charOf",
+		&"exp_substring",
+		&"exp_textLength",
+		&"exp_mod",
+		&"exp_exponent",
+		&"exp_abs",
+		&"exp_round",
+		&"exp_math",
+	]
+}
 
 # Negative: Spacing before
 # Position: Spacing after
@@ -92,7 +100,8 @@ func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 		_: return 0.0
 
 func _ready() -> void:
-	for i: StringName in blockOrder:
+	editor.switchBlockGroup.connect(switchBlockGroup)
+	for i: StringName in blockOrder[blockGroup]:
 		var extraSpacing: float = shapeExtraSpacing(BlockStructures.structures[i][&"shape"])
 		if extraSpacing < 0.0:
 			createSpacing(abs(extraSpacing))
@@ -130,3 +139,6 @@ func blockClicked(blockName: StringName) -> void:
 		i += 1
 	block.blockID = i
 	editor.scriptView.add_child(block)
+
+func switchBlockGroup(newGroup: StringName) -> void:
+	container.visible = newGroup == blockGroup

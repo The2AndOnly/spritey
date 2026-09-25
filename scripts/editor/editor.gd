@@ -14,12 +14,16 @@ var selectedSprite: Sprite:
 var currentView: StringName = &"sprites":
 	set(value):
 		currentView = value
-		if value == &"scripts":
-			if spriteBlocksLoaded != selectedSprite:
-				unloadSpriteBlocks()
-				loadSpriteBlocks()
-				spriteBlocksLoaded = selectedSprite
-			updateBlockOptions.emit()
+		match value:
+			&"scripts":
+				selectedSprite.stopAllStacks()
+				if spriteBlocksLoaded != selectedSprite:
+					unloadSpriteBlocks()
+					loadSpriteBlocks()
+					spriteBlocksLoaded = selectedSprite
+				updateBlockOptions.emit()
+			&"sprites":
+				updateSpriteScript.emit(true)
 		changedView.emit(value)
 var clampedMousePos: Vector2 = Vector2.ZERO
 # Having this set disables interaction with several things
@@ -35,6 +39,9 @@ signal changedView(view: StringName)
 signal changedFocus(newFocus: Control)
 signal changedSelectedSprite(newSprite: Sprite)
 signal updateBlockOptions()
+@warning_ignore("unused_signal")
+signal switchBlockGroup(newGroup: StringName)
+signal updateSpriteScript()
 
 func setMousePosition() -> void:
 	gameView.setMousePosition()
@@ -52,12 +59,18 @@ func unloadSpriteBlocks() -> void:
 func loadSpriteBlocks() -> void:
 	var spriteScript: Dictionary[int, Dictionary] = selectedSprite.spriteScript
 	var topBlocks: Array[CodeBlock] = []
+	# Inner arrays hold the block [0] and the order [1]
+	var indexes: Array[Array] = []
 	for i: int in spriteScript:
 		# Only load top level blocks with this loop
 		if !spriteScript[i][&"top"]: continue
-		topBlocks.append(loadBlock(spriteScript, i, null, null, -1))
+		topBlocks.append(loadBlock(spriteScript, i, null, null, -1, indexes))
+	# Load the layers of the stack
+	indexes.sort_custom(func(a, b) -> bool: return a[1] < b[1])
+	for i: Array in indexes:
+		i[0].setToFront()
 
-func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeBlock, parentNest: CodeBlock, parentInput: int) -> CodeBlock:
+func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeBlock, parentNest: CodeBlock, parentInput: int, indexes: Array[Array]) -> CodeBlock:
 	var blockData: Dictionary = spriteScript[id]
 	var block: CodeBlock = CODE_BLOCK.instantiate()
 	block.loading = true
@@ -70,6 +83,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 	block.parentInputLoadID = parentInput
 	block.parentNest = parentNest
 	if blockData.has(&"pos"): block.loadPosition = blockData[&"pos"]
+	if blockData.has(&"z"): indexes.append([block, blockData[&"z"]])
 	# Set up block's values (may involve creating value blocks)
 	if blockData.has(&"inputs"):
 		for i: int in range(blockData[&"inputs"].size()):
@@ -78,7 +92,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 				0: # raw value
 					block.valuesToLoad.append(inputData[2])
 				1: # value block
-					block.childValueBlocksToLoad.append(loadBlock(spriteScript, inputData[2], block, null, i))
+					block.childValueBlocksToLoad.append(loadBlock(spriteScript, inputData[2], block, null, i, indexes))
 					block.valuesToLoad.append("")
 				2: # options
 					block.valuesToLoad.append([inputData[1], inputData[2]])
@@ -86,9 +100,9 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 					block.valuesToLoad.append(false)
 	# Set up child blocks
 	if blockData.has(&"next"):
-		block.childBlock = loadBlock(spriteScript, blockData[&"next"], block, parentNest, -1)
+		block.childBlock = loadBlock(spriteScript, blockData[&"next"], block, parentNest, -1, indexes)
 	if blockData.has(&"nest"):
-		block.childNest = loadBlock(spriteScript, blockData[&"nest"], null, block, -1)
+		block.childNest = loadBlock(spriteScript, blockData[&"nest"], null, block, -1, indexes)
 	scriptView.add_child(block)
 	return block
 
