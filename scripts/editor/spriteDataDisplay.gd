@@ -25,9 +25,15 @@ func _ready() -> void:
 	sizeField.text_changed.connect(sizeTextChanged)
 	visibleTrue.pressed.connect(visibleChanged.bind(true))
 	visibleFalse.pressed.connect(visibleChanged.bind(false))
-	# Extra signals for fields that react after submitting
+	# For fields to react after submitting
+	yposField.text_submitted.connect(yposSubmitted)
+	yposField.focus_exited.connect(yposFocusExit)
+	xposField.text_submitted.connect(xposSubmitted)
+	xposField.focus_exited.connect(xposFocusExit)
 	directionField.text_submitted.connect(directionSubmitted)
 	directionField.focus_exited.connect(directionFocusExit)
+	sizeField.text_submitted.connect(sizeSubmitted)
+	sizeField.focus_exited.connect(sizeFocusExit)
 	nameField.text_submitted.connect(nameSubmitted)
 	nameField.focus_exited.connect(nameFocusExit)
 
@@ -38,7 +44,6 @@ func newSelectedSprite(sprite: Sprite) -> void:
 
 func _process(_delta: float) -> void:
 	if currentSprite: # TODO: remove in future, there should always be a current sprite (the background)
-		if currentSprite.activeStacks.is_empty(): return
 		setDisplays()
 
 func setDisplays() -> void:
@@ -58,9 +63,17 @@ func setDisplays() -> void:
 
 func xposTextChanged(newText: String) -> void:
 	currentSprite.spritePos.x = float(newText)
+func xposSubmitted(newText: String) -> void:
+	xposField.text = ParseData.stringNumber(float(newText))
+func xposFocusExit() -> void:
+	xposSubmitted(xposField.text)
 
 func yposTextChanged(newText: String) -> void:
 	currentSprite.spritePos.y = float(newText)
+func yposSubmitted(newText: String) -> void:
+	yposField.text = ParseData.stringNumber(float(newText))
+func yposFocusExit() -> void:
+	yposSubmitted(yposField.text)
 
 func directionTextChanged(newText: String) -> void:
 	currentSprite.direction = float(newText)
@@ -71,6 +84,10 @@ func directionFocusExit() -> void:
 
 func sizeTextChanged(newText: String) -> void:
 	currentSprite.size = float(newText)
+func sizeSubmitted(newText: String) -> void:
+	sizeField.text = ParseData.stringNumber(max(0.0, float(newText)))
+func sizeFocusExit() -> void:
+	sizeSubmitted(sizeField.text)
 
 func visibleChanged(visibility: bool) -> void:
 	currentSprite.visible = visibility

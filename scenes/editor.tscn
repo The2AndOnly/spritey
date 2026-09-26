@@ -9,7 +9,9 @@
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Script" uid="uid://lm7078vh18w6" path="res://scripts/editor/spriteDataDisplay.gd" id="6_o435n"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
+[ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
+[ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
@@ -486,8 +488,9 @@ anchor_top = 0.019000001
 anchor_right = 0.25100002
 anchor_bottom = 0.95000005
 offset_left = 0.7599983
-offset_top = -0.52000046
+offset_top = -3.5200005
 offset_right = -0.92004395
+offset_bottom = -3.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
@@ -689,6 +692,27 @@ gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"interaction"
 container = NodePath("../..")
 
+[node name="createEvent" type="Button" parent="scripts/blockSelector" unique_id=1786838654 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
+z_index = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.21004567
+anchor_top = 0.91053677
+anchor_right = 0.78995436
+anchor_bottom = 0.98210734
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "Create Event"
+script = ExtResource("10_3vi5u")
+dialogBox = NodePath("../../../dialogBox")
+gameView = NodePath("../../../sprites/SubViewportContainer/GameView")
+editor = NodePath("../../..")
+data = &"signal"
+blockGroup = &"events"
+metadata/_edit_use_anchors_ = true
+
 [node name="GridContainer" type="GridContainer" parent="scripts/blockSelector" unique_id=497806456]
 layout_mode = 1
 anchors_preset = -1
@@ -752,3 +776,7 @@ theme_override_font_sizes/font_size = 22
 script = ExtResource("10_o435n")
 blockGroup = &"expressions"
 editor = NodePath("../../../..")
+
+[node name="dialogBox" parent="." unique_id=1426297197 instance=ExtResource("12_78fwb")]
+visible = false
+layout_mode = 1

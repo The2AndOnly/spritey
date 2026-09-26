@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://dir76caema6d1"]
+
+[ext_resource type="Script" uid="uid://gopnxqog2u5p" path="res://scripts/editor/dialogBox.gd" id="1_jm5ip"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xls0"]
+bg_color = Color(0.16078432, 0.16078432, 0.16078432, 1)
+border_width_left = 8
+border_width_top = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.1, 0.1, 0.1, 1)
+border_blend = true
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+corner_detail = 4
+
+[node name="dialogBox" type="ColorRect" unique_id=1426297197 node_paths=PackedStringArray("cancel", "confirm", "title", "input")]
+z_index = 999
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.4862745)
+script = ExtResource("1_jm5ip")
+cancel = NodePath("Panel/HBoxContainer/cancel")
+confirm = NodePath("Panel/HBoxContainer/confirm")
+title = NodePath("Panel/Label")
+input = NodePath("Panel/LineEdit")
+metadata/_edit_use_anchors_ = true
+
+[node name="Panel" type="Panel" parent="." unique_id=383216297]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.29814816
+anchor_top = 0.29814816
+anchor_right = 0.70185184
+anchor_bottom = 0.70185184
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2xls0")
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="Panel" unique_id=1186088947]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.35321102
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 60
+text = "Create Data"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="LineEdit" type="LineEdit" parent="Panel" unique_id=61402357]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.13231076
+anchor_top = 0.3738532
+anchor_right = 0.86768925
+anchor_bottom = 0.58715594
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 36
+placeholder_text = "Enter name"
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=405755657]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.20713875
+anchor_top = 0.70183486
+anchor_right = 0.7928612
+anchor_bottom = 0.9082569
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 34
+metadata/_edit_use_anchors_ = true
+
+[node name="cancel" type="Button" parent="Panel/HBoxContainer" unique_id=43282102]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 35
+text = "Cancel"
+
+[node name="confirm" type="Button" parent="Panel/HBoxContainer" unique_id=659017295]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 35
+text = "Ok"

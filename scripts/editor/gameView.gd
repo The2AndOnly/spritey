@@ -13,6 +13,8 @@ const halfBaseSize: Vector2 = baseSize / 2.0
 @onready var sizeMinusOne: Vector2 = size - Vector2i(1, 1)
 
 var sprites: Dictionary[int, Sprite] = {}
+# Index is the ID of the signal
+var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
 # Stores key names to their index in BlockStructures.keyOptions
 var actionToIndex: Dictionary[StringName, int] = {}

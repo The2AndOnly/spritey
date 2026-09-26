@@ -33,8 +33,6 @@ var uiFocused: Control = null:
 		changedFocus.emit(value)
 var spriteBlocksLoaded: Sprite = null
 
-var signals: Array[String] = ["signal1"]
-
 signal changedView(view: StringName)
 signal changedFocus(newFocus: Control)
 signal changedSelectedSprite(newSprite: Sprite)

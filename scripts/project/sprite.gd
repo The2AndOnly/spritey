@@ -32,6 +32,7 @@ var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var scriptsCompiled := false
 # Return result from execute block
 var result: Variant
+var processingStacks := false
 
 func _ready() -> void:
 	gameView.event.connect(receivedEvent)
@@ -42,6 +43,8 @@ func receivedEvent(eventBlockName: StringName, eventData: Array[Variant]) -> voi
 	if !topLevelBlocks.has(eventBlockName): return
 	for i: CompiledBlock in topLevelBlocks[eventBlockName]:
 		runStackFromEvent(i, eventData)
+	# Immediately process stacks so it doesn't get delayed to the next frame
+	processStacks(get_process_delta_time())
 
 func stopAllStacks() -> void:
 	for i: ScriptStack in activeStacks:
@@ -93,6 +96,11 @@ func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> 
 	activeStacks.append(ScriptStack.new(startBlock.nextBlock, startBlock))
 
 func _process(delta: float) -> void:
+	processStacks(delta)
+
+func processStacks(delta: float) -> void:
+	if processingStacks: return
+	processingStacks = true
 	# Iterate backwards so stacks can be removed
 	for i: int in range(activeStacks.size() - 1, -1, -1):
 		currentStack = activeStacks[i]
@@ -152,6 +160,7 @@ func _process(delta: float) -> void:
 				continue
 			# If no more blocks to execute, then terminate this stack
 			activeStacks.remove_at(i)
+	processingStacks = false
 
 func finishWaitBlock() -> void:
 	currentStack.executeWait = false

@@ -33,6 +33,13 @@ func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
 func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
+func event_signal(inputs: Array) -> float:
+	gameView.event.emit(&"event_receive", inputs)
+	return -1.0
+
+func event_receive(inputs: Array, eventData: Array[Variant]) -> bool:
+	return inputs == eventData
+
 ## TRANSFORM
 
 func trans_setX(inputs: Array) -> float:

@@ -221,16 +221,31 @@ func setOptionsList(options: BlockOptions) -> void:
 			var spriteNames: Array[StringName] = []
 			var spriteIDs: Array[int] = []
 			for i: Sprite in sortedSprites:
-				spriteNames.append(i.name)
+				spriteNames.append(i.name.strip_edges())
 				spriteIDs.append(i.spriteID)
 			optionsList.append_array(spriteNames)
 			options.itemIDs.append_array(spriteIDs)
 		# Signals addon
-		2: optionsList.append_array(editor.signals)
+		2:
+			var sortedSignals: Array[String] = gameView.signals.duplicate()
+			var signalIDs: Dictionary[String, int]
+			for i: int in range(sortedSignals.size()):
+				signalIDs[sortedSignals[i]] = i
+			sortedSignals.sort_custom(func(a: String, b: String) -> bool:
+				return a.strip_edges().naturalnocasecmp_to(b.strip_edges()) < 0)
+			for i: String in sortedSignals:
+				optionsList.append(i)
+				options.itemIDs.append(signalIDs[i])
 		# Keys addon
-		3: optionsList.append_array(BlockStructures.keyOptions)
+		3:
+			optionsList.append_array(BlockStructures.keyOptions)
+			# item IDs don't matter for keys, but add -1 so it doesn't try to select one
+			options.itemIDs.append(-1)
 	for j: String in optionsList:
 		options.add_item(j)
+	# If there are only addons, select the ID of the first item
+	if (!preview) and (!options.itemIDs.has(-1)) and (options.selectedID == -1):
+		options.selectedID = options.itemIDs[0]
 	# Select the proper addon item by looking at the ID
 	if options.selectedID != -1:
 		options.itemSelected = options.itemIDs.find(options.selectedID)

@@ -28,7 +28,7 @@ func setDetectionRect() -> void:
 
 func onItemSelect(new: int) -> void:
 	itemSelected = new
-	selectedID = itemIDs[itemSelected]
+	if itemIDs.size() > itemSelected: selectedID = itemIDs[itemSelected]
 	block.fixMinimumSize()
 	block.size.x = 0.0
 	await get_tree().process_frame
