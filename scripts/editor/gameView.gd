@@ -12,6 +12,13 @@ const halfBaseSize: Vector2 = baseSize / 2.0
 @onready var scaledSize: Vector2 = Vector2(size.x / baseSize.x, size.y / baseSize.y)
 @onready var sizeMinusOne: Vector2 = size - Vector2i(1, 1)
 
+# This stores all of the actively running compiled stacks in the project
+var activeStacks: Array[ScriptStack] = []
+var currentStack: ScriptStack
+# Return result from execute block
+var result: Variant
+var stackIterator: int = 0
+
 var sprites: Dictionary[int, Sprite] = {}
 # Index is the ID of the signal
 var signals: Array[String] = ["signal1"]
@@ -19,16 +26,149 @@ var mousePosition: Vector2
 # Stores key names to their index in BlockStructures.keyOptions
 var actionToIndex: Dictionary[StringName, int] = {}
 
-@warning_ignore("unused_signal")
-signal event(blockName: StringName, eventData: Array[Variant])
-@warning_ignore("unused_signal")
-signal stopProject()
-
 func _ready() -> void:
 	if editor: editor.setMousePosition()
 	else: setMousePosition()
 	for i: int in range(BlockStructures.keyOptions.size()):
 		actionToIndex[BlockStructures.keyOptions[i]] = i
+
+func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
+	var rawBlock: Dictionary = sprite.spriteScript[blockID]
+	var compiledBlock: CompiledBlock = CompiledBlock.new()
+	compiledBlock.sprite = sprite
+	compiledBlock.definition = Callable(sprite, rawBlock[&"block"])
+	if rawBlock.has(&"inputs"): compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
+	# Compile next block in stack
+	if rawBlock.has(&"next"):
+		compiledBlock.nextBlock = compileStack(sprite, rawBlock[&"next"], null)
+	# Compile any nest
+	if rawBlock.has(&"nest"):
+		compiledBlock.firstInNest = compileStack(sprite, rawBlock[&"nest"], compiledBlock)
+	if parentNest: compiledBlock.parentNest = parentNest
+	return compiledBlock
+
+func parseInput(inputs: Array) -> Array:
+	var parsed: Array = []
+	for i: Array in inputs:
+		match i[0]:
+			# Raw input
+			0: parsed.append(ParseData.castType(i[1], i[2]))
+			# Value block
+			1: parsed.append([i[1], i[2]])
+			# Options
+			2:
+				var id: int = i[2]
+				parsed.append(i[1] if id == -1 else -id)
+			# Empty bool
+			3: parsed.append(false)
+	return parsed
+
+func _process(delta: float) -> void:
+	# Stacks can be removed and appended while processing
+	stackIterator = 0
+	while stackIterator < activeStacks.size():
+		currentStack = activeStacks[stackIterator]
+		stackIterator += 1
+		if currentStack.terminated:
+			stackIterator -= 1
+			activeStacks.remove_at(stackIterator)
+			continue
+		# Skip processing this stack if there is wait time
+		if currentStack.waitTime > 0.0:
+			currentStack.waitTime -= delta
+			# If time reached zero naturally, then continue with the stack
+			if currentStack.waitTime <= 0.0:
+				currentStack.waitTime = -1.0
+				# Execute the block one last time if it needs to finish up something
+				# Must go after setting waitTime to -1.0 and before calling finishExecuteWait
+				currentStack.sprite.executeBlock(currentStack.currentBlock)
+				finishWaitBlock()
+			else:
+				if currentStack.executeWait:
+					# Execute the waiting block every frame
+					currentStack.waitTime = currentStack.sprite.executeBlock(currentStack.currentBlock)
+					# If the block returns -1.0, it's done waiting
+					if currentStack.waitTime == -1.0:
+						finishWaitBlock()
+			continue
+		# Wait one frame for a wait time of 0.0
+		elif currentStack.waitTime == 0.0:
+			currentStack.waitTime = -1.0
+			currentStack.currentBlock = currentStack.currentBlock.nextBlock
+			continue
+		# Process stack
+		while currentStack.currentBlock:
+			result = currentStack.sprite.executeBlock(currentStack.currentBlock)
+			match result:
+				-1.0: # Go to next block
+					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+				# Enter nest/loop
+				-3.0:
+					currentStack.currentBlock = currentStack.currentBlock.firstInNest
+				# Do nothing / The block set which block is next
+				-5.0: pass
+				# Exit frame process
+				-6.0: break
+				# If a block returns >= 0.0, wait for that many seconds
+				# If the wait time is zero, then it will wait one frame
+				_:
+					currentStack.waitTime = result
+					break
+			# After finding next block to run
+			if currentStack.terminated:
+				break
+			elif !currentStack.currentBlock:
+				if !currentStack.exitNest.is_empty():
+					currentStack.currentBlock = currentStack.exitNest.back()
+					currentStack.exitNest.remove_at(-1)
+		# Reached end of stack after end of process
+		if !currentStack.currentBlock:
+			if !currentStack.loops.is_empty():
+				currentStack.currentBlock = currentStack.loops.back()
+				continue
+			# If no more blocks to execute, then terminate this stack
+			stackIterator -= 1
+			activeStacks.remove_at(stackIterator)
+
+func event(eventBlockName: StringName, eventData: Array[Variant]) -> void:
+	for sprite: Sprite in sprites.values():
+		if !sprite.scriptsCompiled: sprite.compileAll()
+		if !sprite.topLevelBlocks.has(eventBlockName): continue
+		for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
+			createStackFromEvent(i, eventData)
+
+func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
+	# The first block must be an event, so if it has inputs then pass the eventData
+	if !startBlock.inputs.is_empty():
+		# If the event block returns false, then don't continue
+		if !startBlock.definition.call(startBlock.inputs, eventData): return
+	var hadActiveStacks := false
+	for i: ScriptStack in activeStacks:
+		if i.startEvent == startBlock:
+			hadActiveStacks = true
+			if currentStack:
+				if currentStack.startEvent == startBlock: continue
+			i.terminate()
+	if hadActiveStacks:
+		activeStacks.push_front(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
+		stackIterator += 1
+		return
+	else:
+		activeStacks.append(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
+
+func stopAllStacks() -> void:
+	for sprite: Sprite in sprites.values():
+		for i: ScriptStack in activeStacks:
+			i.terminate()
+
+func stopStacksInSprite(sprite: Sprite) -> void:
+	for i: ScriptStack in activeStacks:
+		if i.sprite == sprite: i.terminate()
+
+func finishWaitBlock() -> void:
+	currentStack.executeWait = false
+	currentStack.blockData.clear()
+	currentStack.currentBlock = currentStack.currentBlock.nextBlock
 
 # Input is game coords, output is local coords
 func toLocalCoords(position: Vector2) -> Vector2:
@@ -56,10 +196,10 @@ func _input(inputEvent: InputEvent) -> void:
 	
 	if inputEvent is InputEventKey:
 		if inputEvent.is_echo(): return
-		event.emit(&"event_keyboard", [0, 0 if inputEvent.pressed else 1]) # Any key
+		event(&"event_keyboard", [0, 0 if inputEvent.pressed else 1]) # Any key
 		for i: StringName in actionToIndex:
 			if inputEvent.is_action(i) and (i != &"any"):
-				event.emit(&"event_keyboard", [
+				event(&"event_keyboard", [
 					actionToIndex[i],
 					0 if inputEvent.pressed else 1
 				])
@@ -68,7 +208,7 @@ func _input(inputEvent: InputEvent) -> void:
 	
 	if inputEvent is InputEventMouseButton:
 		if inputEvent.button_index > 2: return
-		event.emit(&"event_mouse", [inputEvent.button_index - 1, 0 if inputEvent.pressed else 1])
+		event(&"event_mouse", [inputEvent.button_index - 1, 0 if inputEvent.pressed else 1])
 		return
 	
 	# In the editor, mouse movement input is handled by editor.gd

@@ -1,6 +1,7 @@
 class_name ScriptStack
 extends RefCounted
 
+var sprite: Sprite
 var currentBlock: CompiledBlock
 var startEvent: CompiledBlock
 # Wait time of -1.0 means no wait
@@ -17,12 +18,12 @@ var loopData: Array[float] = []
 var blockData: Array[Variant] = []
 var terminated := false
 
-func _init(startBlock: CompiledBlock, eventBlock: CompiledBlock) -> void:
+func _init(stackSprite: Sprite, startBlock: CompiledBlock, eventBlock: CompiledBlock) -> void:
+	sprite = stackSprite
 	currentBlock = startBlock
 	startEvent = eventBlock
 
 func terminate() -> void:
 	terminated = true
-	currentBlock = null
 	loops.clear()
 	exitNest.clear()

@@ -1,6 +1,7 @@
 class_name CompiledBlock
 extends RefCounted
 
+var sprite: Sprite
 var definition: Callable
 var inputs: Array = []
 var nextBlock: CompiledBlock = null

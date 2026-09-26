@@ -6,7 +6,7 @@ extends SpriteData
 ## INPUTS ARRAY:
 # The items are in the order that the inputs are listed in blockStructures.gd
 # If a block has execute wait functions, it CAN NOT access these inputs again
-# Execute wait blocks should store needed inputs in currentStack.blockData
+# Execute wait blocks should store needed inputs in gameView.currentStack.blockData
 
 ## BLOCK RETURNS:
 # Value blocks can return any value necessary
@@ -18,8 +18,6 @@ extends SpriteData
 # -3.0 - Enter nest
 # -5.0 - Does nothing
 # -6.0 - Exit process this frame
-
-var currentStack: ScriptStack
 
 ## EVENTS
 
@@ -34,7 +32,7 @@ func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
 func event_signal(inputs: Array) -> float:
-	gameView.event.emit(&"event_receive", inputs)
+	gameView.event(&"event_receive", inputs)
 	return -1.0
 
 func event_receive(inputs: Array, eventData: Array[Variant]) -> bool:
@@ -87,25 +85,25 @@ func trans_glideToOption(inputs: Array) -> float:
 	else:
 		return H_glideToDestination(inputs, H_getPositionFromOption(inputs[1]))
 func H_glideToDestination(inputs: Array, destination: Vector2) -> float:
-	if currentStack.waitTime == -1.0:
-		if currentStack.executeWait:
+	if gameView.currentStack.waitTime == -1.0:
+		if gameView.currentStack.executeWait:
 			# Finished gliding
-			spritePos = currentStack.blockData[1]
+			spritePos = gameView.currentStack.blockData[1]
 			return 0.0
 		else:
 			# Initial execution
 			var time: float = inputs[0]
 			if time <= 0.0: return -1.0
-			currentStack.executeWait = true
-			currentStack.blockData.append_array([spritePos, destination, time])
+			gameView.currentStack.executeWait = true
+			gameView.currentStack.blockData.append_array([spritePos, destination, time])
 			return time
 	else:
 		# While gliding
-		spritePos = currentStack.blockData[0].lerp(
-			currentStack.blockData[1],
-			1.0 - (currentStack.waitTime / currentStack.blockData[2])
+		spritePos = gameView.currentStack.blockData[0].lerp(
+			gameView.currentStack.blockData[1],
+			1.0 - (gameView.currentStack.waitTime / gameView.currentStack.blockData[2])
 		)
-		return currentStack.waitTime
+		return gameView.currentStack.waitTime
 
 func trans_setDirection(inputs: Array) -> float:
 	direction = inputs[0]
@@ -129,21 +127,21 @@ func ctrl_wait(inputs: Array) -> float:
 	return inputs[0]
 
 func ctrl_waitUntil(inputs: Array) -> float:
-	if currentStack.executeWait:
+	if gameView.currentStack.executeWait:
 		return -1.0 if inputs[0] else 1.0
 	else:
 		if inputs[0]: return -1.0
-		currentStack.executeWait = true
+		gameView.currentStack.executeWait = true
 		return 1.0
 
 func ctrl_repeat(inputs: Array) -> float:
-	if currentStack.currentBlock in currentStack.loops:
+	if gameView.currentStack.currentBlock in gameView.currentStack.loops:
 		# While looping
-		currentStack.loopData[-1] -= 1.0
-		if currentStack.loopData[-1] <= 0.0:
+		gameView.currentStack.loopData[-1] -= 1.0
+		if gameView.currentStack.loopData[-1] <= 0.0:
 			# Loop finished
-			currentStack.loops.remove_at(-1)
-			currentStack.loopData.remove_at(-1)
+			gameView.currentStack.loops.remove_at(-1)
+			gameView.currentStack.loopData.remove_at(-1)
 			return -1.0
 		else:
 			# Continue loop
@@ -151,17 +149,17 @@ func ctrl_repeat(inputs: Array) -> float:
 	else:
 		# Initial call
 		if inputs[0] <= 0: return -1.0
-		currentStack.loops.append(currentStack.currentBlock)
-		currentStack.loopData.append(inputs[0])
+		gameView.currentStack.loops.append(gameView.currentStack.currentBlock)
+		gameView.currentStack.loopData.append(inputs[0])
 		return -3.0
 func ctrl_repeatSeconds(inputs: Array) -> float:
-	if currentStack.currentBlock in currentStack.loops:
+	if gameView.currentStack.currentBlock in gameView.currentStack.loops:
 		# While looping
-		currentStack.loopData[-1] -= get_process_delta_time()
-		if currentStack.loopData[-1] <= 0.0:
+		gameView.currentStack.loopData[-1] -= get_process_delta_time()
+		if gameView.currentStack.loopData[-1] <= 0.0:
 			# Loop finished
-			currentStack.loops.remove_at(-1)
-			currentStack.loopData.remove_at(-1)
+			gameView.currentStack.loops.remove_at(-1)
+			gameView.currentStack.loopData.remove_at(-1)
 			return -1.0
 		else:
 			# Continue loop
@@ -169,66 +167,67 @@ func ctrl_repeatSeconds(inputs: Array) -> float:
 	else:
 		# Initial call
 		if inputs[0] <= 0.0: return -1.0
-		currentStack.loops.append(currentStack.currentBlock)
-		currentStack.loopData.append(inputs[0])
+		gameView.currentStack.loops.append(gameView.currentStack.currentBlock)
+		gameView.currentStack.loopData.append(inputs[0])
 		return -3.0
 
 func ctrl_while(inputs: Array) -> float:
-	if currentStack.currentBlock in currentStack.loops:
+	if gameView.currentStack.currentBlock in gameView.currentStack.loops:
 		# While looping
 		if inputs[0]:
 			# Continue loop
 			return -3.0
 		else:
 			# Loop finished
-			currentStack.loops.remove_at(-1)
+			gameView.currentStack.loops.remove_at(-1)
 			return -1.0
 	else:
 		# Initial call
 		if inputs[0]:
-			currentStack.loops.append(currentStack.currentBlock)
+			gameView.currentStack.loops.append(gameView.currentStack.currentBlock)
 			return -3.0
 		else:
 			return -1.0
 
 func ctrl_forever() -> float:
-	if !(currentStack.currentBlock in currentStack.loops):
-		currentStack.loops.append(currentStack.currentBlock)
+	if !(gameView.currentStack.currentBlock in gameView.currentStack.loops):
+		gameView.currentStack.loops.append(gameView.currentStack.currentBlock)
 	return -3.0
 
 func ctrl_if(inputs: Array) -> float:
 	if inputs[0]:
-		currentStack.exitNest.append(currentStack.currentBlock.nextBlock)
+		gameView.currentStack.exitNest.append(gameView.currentStack.currentBlock.nextBlock)
 		return -3.0
 	else:
 		return -1.0
 
 func ctrl_break() -> float:
-	if !currentStack.loops.is_empty():
-		currentStack.currentBlock.exitNests(currentStack)
-		currentStack.currentBlock = currentStack.loops.back().nextBlock
-		currentStack.loops.remove_at(-1)
+	if !gameView.currentStack.loops.is_empty():
+		gameView.currentStack.currentBlock.exitNests(gameView.currentStack)
+		gameView.currentStack.currentBlock = gameView.currentStack.loops.back().nextBlock
+		gameView.currentStack.loops.remove_at(-1)
 		return -5.0
 	else:
 		return -1.0
 
 func ctrl_continue() -> float:
-	if !currentStack.loops.is_empty():
-		currentStack.currentBlock.exitNests(currentStack)
-		currentStack.currentBlock = currentStack.loops.back()
+	if !gameView.currentStack.loops.is_empty():
+		gameView.currentStack.currentBlock.exitNests(gameView.currentStack)
+		gameView.currentStack.currentBlock = gameView.currentStack.loops.back()
 		return -6.0
 	else:
 		return -1.0
 
 func ctrl_stopStacks(inputs: Array) -> float:
 	if inputs[0] == 1: # Stop project
-		gameView.stopProject.emit()
-	currentStack.terminate()
+		gameView.stopAllStacks()
+	gameView.currentStack.terminate()
 	return -5.0
 
 func ctrl_stopOther() -> float:
-	for i: ScriptStack in activeStacks:
-		if i == currentStack: continue
+	for i: ScriptStack in gameView.activeStacks:
+		if i.sprite != self: continue
+		if i == gameView.currentStack: continue
 		i.terminate()
 	return -1.0
 

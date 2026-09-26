@@ -24,42 +24,22 @@ extends BlockDefinitions
 ## Empty bool panel: [3, false]
 
 var spriteScript: Dictionary[int, Dictionary] = {}
+# Contains all value blocks (they are all a singular stack) | blockID: block
+var valueBlocks: Dictionary[int, CompiledBlock] = {}
 # This holds the compiled script, but only the top-level blocks are listed in their category
 # Ex: &"event_start": [CompiledBlock, CompiledBlock]
 var topLevelBlocks: Dictionary[StringName, Array] = {}
-# Contains all value blocks (they are all a singular stack) | blockID: block
-var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var scriptsCompiled := false
-# Return result from execute block
-var result: Variant
-var processingStacks := false
-
-func _ready() -> void:
-	gameView.event.connect(receivedEvent)
-	gameView.stopProject.connect(stopAllStacks)
-
-func receivedEvent(eventBlockName: StringName, eventData: Array[Variant]) -> void:
-	if !scriptsCompiled: compileAll()
-	if !topLevelBlocks.has(eventBlockName): return
-	for i: CompiledBlock in topLevelBlocks[eventBlockName]:
-		runStackFromEvent(i, eventData)
-	# Immediately process stacks so it doesn't get delayed to the next frame
-	processStacks(get_process_delta_time())
-
-func stopAllStacks() -> void:
-	for i: ScriptStack in activeStacks:
-		i.terminate()
 
 func compileAll() -> void:
 	# First, clear previous compilation
 	topLevelBlocks = {}
 	valueBlocks = {}
-	# Stop all execution
-	activeStacks.clear()
+	gameView.stopStacksInSprite(self)
 	for i: int in spriteScript:
 		# Value blocks are all a singular stack
 		if spriteScript[i][&"value"]:
-			valueBlocks[i] = compileStack(i, null)
+			valueBlocks[i] = gameView.compileStack(self, i, null)
 			continue
 		# Skips all blocks that aren't top-level
 		if !spriteScript[i][&"top"]: continue
@@ -68,104 +48,8 @@ func compileAll() -> void:
 		if !topLevelBlocks.has(blockName):
 			topLevelBlocks[blockName] = []
 		# Top-level block will be added to the category while it compiles the stack
-		topLevelBlocks[blockName].append(compileStack(i, null))
+		topLevelBlocks[blockName].append(gameView.compileStack(self, i, null))
 	scriptsCompiled = true
-
-func compileStack(blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
-	var rawBlock: Dictionary = spriteScript[blockID]
-	var compiledBlock: CompiledBlock = CompiledBlock.new()
-	compiledBlock.definition = Callable(self, rawBlock[&"block"])
-	if rawBlock.has(&"inputs"): compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
-	# Compile next block in stack
-	if rawBlock.has(&"next"):
-		compiledBlock.nextBlock = compileStack(rawBlock[&"next"], null)
-	# Compile any nest
-	if rawBlock.has(&"nest"):
-		compiledBlock.firstInNest = compileStack(rawBlock[&"nest"], compiledBlock)
-	if parentNest: compiledBlock.parentNest = parentNest
-	return compiledBlock
-
-func runStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
-	# The first block must be an event, so if it has inputs then pass the eventData
-	if !startBlock.inputs.is_empty():
-		# If the event block returns false, then don't continue
-		if !startBlock.definition.call(startBlock.inputs, eventData): return
-	# Clear any previous running stacks from this event
-	for i: ScriptStack in activeStacks:
-		if i.startEvent == startBlock: i.terminate()
-	activeStacks.append(ScriptStack.new(startBlock.nextBlock, startBlock))
-
-func _process(delta: float) -> void:
-	processStacks(delta)
-
-func processStacks(delta: float) -> void:
-	if processingStacks: return
-	processingStacks = true
-	# Iterate backwards so stacks can be removed
-	for i: int in range(activeStacks.size() - 1, -1, -1):
-		currentStack = activeStacks[i]
-		if currentStack.terminated:
-			activeStacks.remove_at(i)
-			continue
-		# Skip processing this stack if there is wait time
-		if currentStack.waitTime > 0.0:
-			currentStack.waitTime -= delta
-			# If time reached zero naturally, then continue with the stack
-			if currentStack.waitTime <= 0.0:
-				currentStack.waitTime = -1.0
-				# Execute the block one last time if it needs to finish up something
-				# Must go after setting waitTime to -1.0 and before calling finishExecuteWait
-				executeBlock(currentStack.currentBlock)
-				finishWaitBlock()
-			else:
-				if currentStack.executeWait:
-					# Execute the waiting block every frame
-					currentStack.waitTime = executeBlock(currentStack.currentBlock)
-					# If the block returns -1.0, it's done waiting
-					if currentStack.waitTime == -1.0:
-						finishWaitBlock()
-			continue
-		# Wait one frame for a wait time of 0.0
-		elif currentStack.waitTime == 0.0:
-			currentStack.waitTime = -1.0
-			currentStack.currentBlock = currentStack.currentBlock.nextBlock
-			continue
-		# Process stack
-		while currentStack.currentBlock:
-			result = executeBlock(currentStack.currentBlock)
-			match result:
-				-1.0: # Go to next block
-					currentStack.currentBlock = currentStack.currentBlock.nextBlock
-				# Enter nest/loop
-				-3.0:
-					currentStack.currentBlock = currentStack.currentBlock.firstInNest
-				# Do nothing / The block set which block is next
-				-5.0: pass
-				# Exit frame process
-				-6.0: break
-				# If a block returns >= 0.0, wait for that many seconds
-				# If the wait time is zero, then it will wait one frame
-				_:
-					currentStack.waitTime = result
-					break
-			# After finding next block to run
-			if !currentStack.currentBlock:
-				if !currentStack.exitNest.is_empty():
-					currentStack.currentBlock = currentStack.exitNest.back()
-					currentStack.exitNest.remove_at(-1)
-		# Reached end of stack after end of process
-		if !currentStack.currentBlock:
-			if !currentStack.loops.is_empty():
-				currentStack.currentBlock = currentStack.loops.back()
-				continue
-			# If no more blocks to execute, then terminate this stack
-			activeStacks.remove_at(i)
-	processingStacks = false
-
-func finishWaitBlock() -> void:
-	currentStack.executeWait = false
-	currentStack.blockData.clear()
-	currentStack.currentBlock = currentStack.currentBlock.nextBlock
 
 func executeBlock(block: CompiledBlock) -> Variant:
 	if block.definition.is_valid():
@@ -173,7 +57,7 @@ func executeBlock(block: CompiledBlock) -> Variant:
 			return block.definition.call()
 		else:
 			# If it's an execute wait, don't re-evaluate inputs unless there is no block data
-			if currentStack.executeWait and !currentStack.blockData.is_empty():
+			if gameView.currentStack.executeWait and !gameView.currentStack.blockData.is_empty():
 				return block.definition.call(block.inputs)
 			# Build the input data from any potential value blocks
 			var returnedValues: Array = []
@@ -186,19 +70,3 @@ func executeBlock(block: CompiledBlock) -> Variant:
 				returnedValues.append(i)
 			return block.definition.call(returnedValues)
 	return -1.0
-
-func parseInput(inputs: Array) -> Array:
-	var parsed: Array = []
-	for i: Array in inputs:
-		match i[0]:
-			# Raw input
-			0: parsed.append(ParseData.castType(i[1], i[2]))
-			# Value block
-			1: parsed.append([i[1], i[2]])
-			# Options
-			2:
-				var id: int = i[2]
-				parsed.append(i[1] if id == -1 else -id)
-			# Empty bool
-			3: parsed.append(false)
-	return parsed

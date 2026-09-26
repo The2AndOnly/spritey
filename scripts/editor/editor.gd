@@ -16,7 +16,7 @@ var currentView: StringName = &"sprites":
 		currentView = value
 		match value:
 			&"scripts":
-				selectedSprite.stopAllStacks()
+				gameView.stopStacksInSprite(selectedSprite)
 				if spriteBlocksLoaded != selectedSprite:
 					unloadSpriteBlocks()
 					loadSpriteBlocks()

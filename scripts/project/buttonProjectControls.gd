@@ -9,7 +9,7 @@ func _ready() -> void:
 func onPress() -> void:
 	match action:
 		&"start":
-			gameView.event.emit(&"event_start", [])
+			gameView.event(&"event_start", [])
 		&"stop":
-			gameView.stopProject.emit()
+			gameView.stopAllStacks()
 	release_focus()

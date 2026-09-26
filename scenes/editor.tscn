@@ -692,7 +692,7 @@ gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"interaction"
 container = NodePath("../..")
 
-[node name="createEvent" type="Button" parent="scripts/blockSelector" unique_id=1786838654 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
+[node name="createSignal" type="Button" parent="scripts/blockSelector" unique_id=1786838654 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
 z_index = 1
 layout_mode = 1
 anchors_preset = -1
@@ -704,7 +704,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 30
-text = "Create Event"
+text = "Create Signal"
 script = ExtResource("10_3vi5u")
 dialogBox = NodePath("../../../dialogBox")
 gameView = NodePath("../../../sprites/SubViewportContainer/GameView")
