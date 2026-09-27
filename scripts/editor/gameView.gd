@@ -19,7 +19,7 @@ var currentStack: ScriptStack
 var result: Variant
 var stackIterator: int = 0
 
-var sprites: Dictionary[int, Sprite] = {}
+var sprites: Dictionary[Sprite, String] = {}
 # Index is the ID of the signal
 var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
@@ -56,9 +56,7 @@ func parseInput(inputs: Array) -> Array:
 			# Value block
 			1: parsed.append([i[1], i[2]])
 			# Options
-			2:
-				var id: int = i[2]
-				parsed.append(i[1] if id == -1 else -id)
+			2: parsed.append(i[1])
 			# Empty bool
 			3: parsed.append(false)
 	return parsed
@@ -131,7 +129,7 @@ func _process(delta: float) -> void:
 			activeStacks.remove_at(stackIterator)
 
 func event(eventBlockName: StringName, eventData: Array[Variant]) -> void:
-	for sprite: Sprite in sprites.values():
+	for sprite: Sprite in sprites.keys():
 		if !sprite.scriptsCompiled: sprite.compileAll()
 		if !sprite.topLevelBlocks.has(eventBlockName): continue
 		for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
@@ -142,13 +140,16 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 	if !startBlock.inputs.is_empty():
 		# If the event block returns false, then don't continue
 		if !startBlock.definition.call(startBlock.inputs, eventData): return
+	# Terminate all stacks that are currently running this event
 	var hadActiveStacks := false
 	for i: ScriptStack in activeStacks:
 		if i.startEvent == startBlock:
 			hadActiveStacks = true
-			if currentStack:
-				if currentStack.startEvent == startBlock: continue
 			i.terminate()
+	# If a stack was interrupted, then the new stack will be processed on the next frame
+	# Otherwise, it gets processed at the end of this frame
+	# The reason is to allow for recursive events, but also be able to
+	# start events in the same process
 	if hadActiveStacks:
 		activeStacks.push_front(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
 		stackIterator += 1
@@ -157,7 +158,7 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 		activeStacks.append(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
 
 func stopAllStacks() -> void:
-	for sprite: Sprite in sprites.values():
+	for sprite: Sprite in sprites.keys():
 		for i: ScriptStack in activeStacks:
 			i.terminate()
 

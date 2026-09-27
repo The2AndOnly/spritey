@@ -29,12 +29,12 @@ static func stringNumber(value: float) -> String:
 		return "%.1f" % value
 
 static func findUniqueName(desired: String, existing: Array[String]) -> String:
-	if !existing.has(desired): return desired
+	if !existing.has(desired.strip_edges()): return desired.strip_edges()
 	var regex: RegEx = RegEx.new()
 	# Splits name into text (with whitespaces) and the number at the end
 	regex.compile("^(.*?)(\\d+)?$")
 	var result: RegExMatch = regex.search(desired)
-	var baseName: String = result.get_string(1)
+	var baseName: String = result.get_string(1).strip_edges(true, false)
 	var countStart: int = 2
 	
 	var count: int = countStart
@@ -42,4 +42,4 @@ static func findUniqueName(desired: String, existing: Array[String]) -> String:
 	while existing.has(possibleName):
 		count += 1
 		possibleName = "%s%d" % [baseName, count]
-	return possibleName
+	return possibleName.strip_edges()

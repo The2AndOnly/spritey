@@ -93,7 +93,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 					block.childValueBlocksToLoad.append(loadBlock(spriteScript, inputData[2], block, null, i, indexes))
 					block.valuesToLoad.append("")
 				2: # options
-					block.valuesToLoad.append([inputData[1], inputData[2]])
+					block.valuesToLoad.append(inputData[1])
 				3: # Empty bool
 					block.valuesToLoad.append(false)
 	# Set up child blocks

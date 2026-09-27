@@ -29,7 +29,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 				inputs.append([1, 5, i.blockID]) # Boolean block
 			updateBlock(i, sprite)
 		if i is BlockOptions:
-			inputs.append([2, i.itemSelected, i.selectedID])
+			inputs.append([2, i.itemSelected])
 		# Empty bool input
 		if i is BlockBoolPanel and i.visible:
 			inputs.append([3, false])

@@ -62,9 +62,9 @@ func trans_setPosition(inputs: Array) -> float:
 	spritePos = Vector2(inputs[0], inputs[1])
 	return -1.0
 func trans_setPositionOption(inputs: Array) -> float:
-	var option: int = inputs[0]
-	if option < 0:
-		spritePos = gameView.sprites[-option].spritePos
+	var option: Variant = inputs[0]
+	if option is Sprite:
+		spritePos = option.spritePos
 	else:
 		spritePos = H_getPositionFromOption(option)
 	return -1.0
@@ -79,9 +79,9 @@ func H_getPositionFromOption(option: int) -> Vector2:
 func trans_glideToPosition(inputs: Array) -> float:
 	return H_glideToDestination(inputs, Vector2(inputs[1], inputs[2]))
 func trans_glideToOption(inputs: Array) -> float:
-	var option: int = inputs[1]
-	if option < 0:
-		return H_glideToDestination(inputs, gameView.sprites[-option].spritePos)
+	var option: Variant = inputs[1]
+	if option is Sprite:
+		return H_glideToDestination(inputs, option.spritePos)
 	else:
 		return H_glideToDestination(inputs, H_getPositionFromOption(inputs[1]))
 func H_glideToDestination(inputs: Array, destination: Vector2) -> float:

@@ -12,6 +12,7 @@ signal popup(titleText: String)
 func _ready() -> void:
 	cancel.pressed.connect(cancelPressed)
 	confirm.pressed.connect(confirmPressed)
+	input.text_submitted.connect(submitted)
 	popup.connect(onPopup)
 
 func onPopup(titleText: String) -> void:
@@ -26,4 +27,7 @@ func cancelPressed() -> void:
 
 func confirmPressed() -> void:
 	visible = false
-	popupClosed.emit(input.text.strip_edges() != "", input.text)
+	popupClosed.emit(input.text.strip_edges() != "", input.text.strip_edges())
+
+func submitted(_new: String) -> void:
+	confirmPressed()

@@ -4,12 +4,9 @@ extends OptionButton
 var block: CodeBlock
 var detectionShape: CollisionShape2D
 var id: int
-# Custom item to select since the options may get cleared and updated
-var itemSelected: int = 0
-# IDs are for addon options that reference things eg. sprites
-# Created alongside the option button's items, if -1 then no ID
-var itemIDs: Array[int] = []
-var selectedID: int = -1
+# For non-addon items, the item is an int of the item index
+var items: Array[Variant] = []
+var itemSelected: Variant = 0
 
 func _ready() -> void:
 	mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED
@@ -27,8 +24,7 @@ func setDetectionRect() -> void:
 	detectionShape.position = size / Vector2(2.0, 2.0)
 
 func onItemSelect(new: int) -> void:
-	itemSelected = new
-	if itemIDs.size() > itemSelected: selectedID = itemIDs[itemSelected]
+	itemSelected = items[new]
 	block.fixMinimumSize()
 	block.size.x = 0.0
 	await get_tree().process_frame

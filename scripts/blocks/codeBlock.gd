@@ -137,8 +137,7 @@ func _ready() -> void:
 					var options: BlockOptions = BlockOptions.new()
 					options.id = i
 					if !valuesToLoad.is_empty():
-						options.itemSelected = valuesToLoad[i][0]
-						options.selectedID = valuesToLoad[i][1]
+						options.itemSelected = valuesToLoad[i]
 					else:
 						options.itemSelected = blockStructure[i][2]
 					setOptionsList(options)
@@ -209,48 +208,38 @@ func addInputArea(blockInput: Control) -> void:
 func setOptionsList(options: BlockOptions) -> void:
 	var optionsList: Array = blockStructure[options.id][3].duplicate()
 	options.clear()
-	options.itemIDs.clear()
-	# All non-addon options have an ID of -1
-	for _i in range(optionsList.size()): options.itemIDs.append(-1)
+	options.items.clear()
+	for i in range(optionsList.size()): options.items.append(i)
 	match blockStructure[options.id][1]:
 		1: # Sprites addon
-			var sortedSprites: Array[Sprite] = gameView.sprites.values()
+			var sortedSprites: Array[Sprite] = gameView.sprites.keys()
 			sortedSprites.sort_custom(func(a: Sprite, b: Sprite) -> bool:
-				return a.name.strip_edges().naturalnocasecmp_to(b.name.strip_edges()) < 0)
+				return a.name.naturalnocasecmp_to(b.name) < 0)
 			sortedSprites.erase(editor.selectedSprite)
 			var spriteNames: Array[StringName] = []
-			var spriteIDs: Array[int] = []
 			for i: Sprite in sortedSprites:
-				spriteNames.append(i.name.strip_edges())
-				spriteIDs.append(i.spriteID)
+				spriteNames.append(i.name)
 			optionsList.append_array(spriteNames)
-			options.itemIDs.append_array(spriteIDs)
-		# Signals addon
-		2:
+			options.items.append_array(sortedSprites)
+		2: # Signals addon
 			var sortedSignals: Array[String] = gameView.signals.duplicate()
-			var signalIDs: Dictionary[String, int]
-			for i: int in range(sortedSignals.size()):
-				signalIDs[sortedSignals[i]] = i
 			sortedSignals.sort_custom(func(a: String, b: String) -> bool:
-				return a.strip_edges().naturalnocasecmp_to(b.strip_edges()) < 0)
+				return a.naturalnocasecmp_to(b) < 0)
 			for i: String in sortedSignals:
 				optionsList.append(i)
-				options.itemIDs.append(signalIDs[i])
-		# Keys addon
-		3:
+				options.items.append(i)
+		3: # Keys addon
 			optionsList.append_array(BlockStructures.keyOptions)
-			# item IDs don't matter for keys, but add -1 so it doesn't try to select one
-			options.itemIDs.append(-1)
+			for i in range(options.items.size(), optionsList.size()): options.items.append(i)
 	for j: String in optionsList:
 		options.add_item(j)
-	# If there are only addons, select the ID of the first item
-	if (!preview) and (!options.itemIDs.has(-1)) and (options.selectedID == -1):
-		options.selectedID = options.itemIDs[0]
-	# Select the proper addon item by looking at the ID
-	if options.selectedID != -1:
-		options.itemSelected = options.itemIDs.find(options.selectedID)
-	# It may switch back to 0 if not deferred
-	options.select.call_deferred(options.itemSelected)
+	if preview:
+		options.select.call_deferred(options.itemSelected)
+	else:
+		# The item selected should be synced with the internal items array
+		var sharedIndex: int = max(0, options.items.find(options.itemSelected))
+		options.itemSelected = options.items[sharedIndex]
+		options.select.call_deferred(sharedIndex)
 	fixMinimumSize.call_deferred()
 	if options.detectionShape:
 		await get_tree().process_frame

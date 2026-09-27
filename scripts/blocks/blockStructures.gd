@@ -25,7 +25,7 @@ static var categoryColors: Dictionary[StringName, Color] = {
 	&"expressions": Color("a6981eff"),
 	&"control": Color("9e501cff"),
 	&"interaction": Color("1c734dff"),
-	&"visuals": Color("7a1d4dff"),
+	&"visuals": Color("872056ff"),
 	&"unknown": Color("636363ff")
 }
 

@@ -16,11 +16,9 @@ extends BlockDefinitions
 ## Read type 1 (value block): [read type, input type, block ID]
 # - input type is same as read type 0 (raw input)
 # - block ID is int
-## Read type 2 (options): [read type, option, ID]
-# - option is int (selected option)
-# - ID is int, and if it's not -1 then it gets passed as the input for the block
-#        - It gets passed as negative so the block knows it's an ID
-# - also used by empty bool inputs, so option can be false
+## Read type 2 (options): [read type, option]
+# - option is variant
+# - used by empty bool inputs, where option is false
 ## Empty bool panel: [3, false]
 
 var spriteScript: Dictionary[int, Dictionary] = {}
