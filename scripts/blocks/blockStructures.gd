@@ -338,6 +338,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
+	&"inter_mousePressed": {
+		&"structure": [0, "mouse pressed"],
+		0: [&"options", 0, 0, ["left", "right"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
 	
 	## CONTROL
 	
@@ -502,6 +508,18 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["change", 0, "by", 1],
 		0: [&"options", 4, 0, []],
 		1: [&"input", 1, "1"],
+		&"color": &"variables",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"var_showVar": {
+		&"structure": ["show", 0],
+		0: [&"options", 4, 0, []],
+		&"color": &"variables",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"var_hideVar": {
+		&"structure": ["hide", 0],
+		0: [&"options", 4, 0, []],
 		&"color": &"variables",
 		&"shape": BlockShape.blockShapes.STACK
 	},

@@ -224,11 +224,11 @@ func setOptionsList(options: BlockOptions) -> void:
 		1: # Sprites
 			var sortedSprites: Array[Sprite] = gameView.sprites.duplicate()
 			sortedSprites.sort_custom(func(a: Sprite, b: Sprite) -> bool:
-				return a.name.naturalnocasecmp_to(b.name) < 0)
+				return a.spriteName.naturalnocasecmp_to(b.spriteName) < 0)
 			sortedSprites.erase(editor.selectedSprite)
 			var spriteNames: Array[StringName] = []
 			for i: Sprite in sortedSprites:
-				spriteNames.append(i.name)
+				spriteNames.append(i.spriteName)
 			optionsList.append_array(spriteNames)
 			options.items.append_array(sortedSprites)
 		2: # Signals

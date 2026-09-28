@@ -5,6 +5,8 @@ extends Control
 @export var valueLabel: Label
 @export var dragArea: PanelContainer
 var variable: Variable
+#var sprite: Sprite
+#var spriteProperty: StringName
 var mouseTouching := false
 var dragging := false
 var disableDrag := false
@@ -14,6 +16,10 @@ var gameView: GameView
 func _ready() -> void:
 	dragArea.mouse_entered.connect(mouseEntered)
 	dragArea.mouse_exited.connect(mouseExited)
+	if variable: variable.changeValue.connect(setFromString)
+	#if sprite:
+		#match spriteProperty:
+			#pass
 
 func _process(_delta: float) -> void:
 	if !visible: return
@@ -42,3 +48,9 @@ func mouseEntered() -> void:
 
 func mouseExited() -> void:
 	mouseTouching = false
+
+func setFromString(newValue: String) -> void:
+	if newValue.is_valid_float():
+		valueLabel.text = ParseData.stringNumber(float(newValue))
+	else:
+		valueLabel.text = newValue

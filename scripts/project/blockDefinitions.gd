@@ -397,6 +397,11 @@ func inter_keyPressed(inputs: Array) -> bool:
 	if index == 0:
 		return Input.is_action_pressed(&"any") or Input.is_action_pressed(&"any2") or Input.is_action_pressed(&"any3")
 	return Input.is_action_pressed(BlockStructures.keyOptions[index])
+func inter_mousePressed(inputs: Array) -> bool:
+	if inputs[0] == 0:
+		return Input.is_action_pressed(&"leftMouse")
+	else:
+		return Input.is_action_pressed(&"rightMouse")
 
 ## VARIABLES
 
@@ -408,6 +413,12 @@ func var_setTo(inputs: Array) -> float:
 func var_changeBy(inputs: Array) -> float:
 	var variable: Variable = inputs[0]
 	variable.value = str(float(variable.value) + inputs[1])
+	return -1.0
+func var_showVar(inputs: Array) -> float:
+	inputs[0].visible = true
+	return -1.0
+func var_hideVar(inputs: Array) -> float:
+	inputs[0].visible = false
 	return -1.0
 
 ## TEST

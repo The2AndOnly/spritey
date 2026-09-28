@@ -27,12 +27,13 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"ctrl_break",
 		&"ctrl_continue",
 		&"ctrl_stopOther",
-		&"ctrl_stopStacks",
+		&"ctrl_stopStacks"
 	],
 	&"interaction": [
 		&"inter_pointerX",
 		&"inter_pointerY",
 		&"inter_keyPressed",
+		&"inter_mousePressed"
 	],
 	&"visuals": [
 		&"vis_show",
@@ -48,7 +49,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_flip",
 		&"vis_setOpacity",
 		&"vis_changeOpacity",
-		&"vis_opacity",
+		&"vis_opacity"
 	],
 	&"transform": [
 		&"trans_setPosition",
@@ -64,7 +65,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"trans_setDirection",
 		&"trans_turnDegrees",
 		&"trans_pointTowards",
-		&"trans_direction",
+		&"trans_direction"
 	],
 	&"expressions": [
 		&"exp_add",
@@ -87,11 +88,13 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"exp_exponent",
 		&"exp_abs",
 		&"exp_round",
-		&"exp_math",
+		&"exp_math"
 	],
 	&"variables": [
 		&"var_setTo",
-		&"var_changeBy"
+		&"var_changeBy",
+		&"var_showVar",
+		&"var_hideVar"
 	]
 }
 

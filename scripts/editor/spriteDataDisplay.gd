@@ -39,7 +39,7 @@ func _ready() -> void:
 
 func newSelectedSprite(sprite: Sprite) -> void:
 	currentSprite = sprite
-	nameField.text = sprite.name
+	nameField.text = sprite.spriteName
 	setDisplays()
 
 func _process(_delta: float) -> void:
@@ -94,12 +94,13 @@ func visibleChanged(visibility: bool) -> void:
 
 func nameSubmitted(newText: String) -> void:
 	if newText.strip_edges() == "":
-		nameField.text = currentSprite.name
+		nameField.text = currentSprite.spriteName
 		return
 	var names: Array[String] = []
 	for i: Sprite in gameView.sprites:
-		if i != currentSprite: names.append(i.name)
-	currentSprite.name = ParseData.findUniqueName(newText, names)
-	nameField.text = currentSprite.name
+		if i != currentSprite: names.append(i.spriteName)
+	currentSprite.spriteName = ParseData.findUniqueName(newText, names)
+	currentSprite.updateDataGraphicNames()
+	nameField.text = currentSprite.spriteName
 func nameFocusExit() -> void:
 	nameSubmitted(nameField.text)
