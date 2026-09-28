@@ -18,14 +18,19 @@ extends Node
 ## 1 - sprites
 ## 2 - events
 ## 3 - keyboard keys
+## 4 - global and local variables
+# special value (not shown on block but passed through block definition):
+# [&"special", Variant]
 
 static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
 	&"events": Color("b52a2aff"),
 	&"expressions": Color("a6981eff"),
 	&"control": Color("9e501cff"),
-	&"interaction": Color("1c734dff"),
+	&"interaction": Color("4d9413ff"),
 	&"visuals": Color("872056ff"),
+	&"variables": Color("139094ff"),
+	&"lists": Color("0f7355ff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -482,6 +487,23 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["opacity"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
+	},
+	
+	## VARIABLES
+	
+	&"var_setTo": {
+		&"structure": ["set", 0, "to", 1],
+		0: [&"options", 4, 0, []],
+		1: [&"input", 2, "0"],
+		&"color": &"variables",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"var_changeBy": {
+		&"structure": ["change", 0, "by", 1],
+		0: [&"options", 4, 0, []],
+		1: [&"input", 1, "1"],
+		&"color": &"variables",
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	
 	## TESTS

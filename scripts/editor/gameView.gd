@@ -19,7 +19,8 @@ var currentStack: ScriptStack
 var result: Variant
 var stackIterator: int = 0
 
-var sprites: Dictionary[Sprite, String] = {}
+var sprites: Array[Sprite] = []
+var variables: Array[Variable] = []
 # Index is the ID of the signal
 var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
@@ -31,12 +32,13 @@ func _ready() -> void:
 	else: setMousePosition()
 	for i: int in range(BlockStructures.keyOptions.size()):
 		actionToIndex[BlockStructures.keyOptions[i]] = i
+	variables.append(Variable.new("variable"))
 
 func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = sprite.spriteScript[blockID]
 	var compiledBlock: CompiledBlock = CompiledBlock.new()
 	compiledBlock.sprite = sprite
-	compiledBlock.definition = Callable(sprite, rawBlock[&"block"])
+	compiledBlock.definition = Callable(sprite, str(rawBlock[&"block"]).split(":")[0])
 	if rawBlock.has(&"inputs"): compiledBlock.inputs = parseInput(rawBlock[&"inputs"])
 	# Compile next block in stack
 	if rawBlock.has(&"next"):
@@ -55,10 +57,8 @@ func parseInput(inputs: Array) -> Array:
 			0: parsed.append(ParseData.castType(i[1], i[2]))
 			# Value block
 			1: parsed.append([i[1], i[2]])
-			# Options
+			# Options / empty bool / special
 			2: parsed.append(i[1])
-			# Empty bool
-			3: parsed.append(false)
 	return parsed
 
 func _process(delta: float) -> void:
@@ -129,7 +129,7 @@ func _process(delta: float) -> void:
 			activeStacks.remove_at(stackIterator)
 
 func event(eventBlockName: StringName, eventData: Array[Variant]) -> void:
-	for sprite: Sprite in sprites.keys():
+	for sprite: Sprite in sprites:
 		if !sprite.scriptsCompiled: sprite.compileAll()
 		if !sprite.topLevelBlocks.has(eventBlockName): continue
 		for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
@@ -158,7 +158,7 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 		activeStacks.append(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
 
 func stopAllStacks() -> void:
-	for sprite: Sprite in sprites.keys():
+	for sprite: Sprite in sprites:
 		for i: ScriptStack in activeStacks:
 			i.terminate()
 

@@ -88,6 +88,10 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"exp_abs",
 		&"exp_round",
 		&"exp_math",
+	],
+	&"variables": [
+		&"var_setTo",
+		&"var_changeBy"
 	]
 }
 
@@ -101,23 +105,33 @@ func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 
 func _ready() -> void:
 	editor.switchBlockGroup.connect(switchBlockGroup)
+	editor.updateBlockOptions.connect(updateList)
 	for i: StringName in blockOrder[blockGroup]:
-		var extraSpacing: float = shapeExtraSpacing(BlockStructures.structures[i][&"shape"])
-		if extraSpacing < 0.0:
-			createSpacing(abs(extraSpacing))
-		var block: CodeBlock = CODE_BLOCK.instantiate()
-		block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		block.offset_transform_scale = Vector2(0.7, 0.7)
-		block.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
-		block.offset_transform_visual_only = false
-		block.blockName = i
-		block.preview = true
-		block.editor = editor
-		block.gameView = gameView
-		block.clicked.connect(blockClicked.bind(i))
-		add_child(block)
-		if extraSpacing > 0.0:
-			createSpacing(extraSpacing)
+		createBlock(i)
+
+func createBlock(blockName: StringName, atFront: bool = false, spacing: float = -999.0) -> void:
+	var extraSpacing: float
+	if spacing == -999.0:
+		extraSpacing = shapeExtraSpacing(BlockStructures.structures[blockName][&"shape"])
+	else:
+		extraSpacing = spacing
+	if extraSpacing < 0.0:
+		createSpacing(abs(extraSpacing))
+	var block: CodeBlock = CODE_BLOCK.instantiate()
+	block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	block.offset_transform_scale = Vector2(0.7, 0.7)
+	block.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
+	block.offset_transform_visual_only = false
+	block.blockName = blockName
+	block.preview = true
+	block.editor = editor
+	block.gameView = gameView
+	block.clicked.connect(blockClicked.bind(block.blockName))
+	add_child(block)
+	if atFront:
+		move_child(block, 0)
+	if extraSpacing > 0.0:
+		createSpacing(extraSpacing)
 
 func createSpacing(amount: float) -> void:
 	var spacing: Control = Control.new()
@@ -125,10 +139,10 @@ func createSpacing(amount: float) -> void:
 	spacing.custom_minimum_size.y = amount
 	add_child(spacing)
 
-func blockClicked(blockName: StringName) -> void:
+func blockClicked(clicked: StringName) -> void:
 	# Create a new block in the script area
 	var block: CodeBlock = CODE_BLOCK.instantiate()
-	block.blockName = blockName
+	block.blockName = clicked
 	block.editor = editor
 	block.gameView = gameView
 	block.sprite = editor.selectedSprite
@@ -142,3 +156,28 @@ func blockClicked(blockName: StringName) -> void:
 
 func switchBlockGroup(newGroup: StringName) -> void:
 	container.visible = newGroup == blockGroup
+
+func updateList() -> void:
+	match blockGroup:
+		&"variables":
+			# Clear previous
+			for i: CodeBlock in get_children():
+				if i.blockName.contains(&"var_value:"):
+					i.queue_free()
+			# Sort global and local variables
+			var sortedVars: Array[Variable] = gameView.variables.duplicate()
+			# TODO: remove check since there should always be selected sprite in the future
+			if editor.selectedSprite: sortedVars.append_array(editor.selectedSprite.variables)
+			sortedVars.sort_custom(func(a: Variable, b: Variable) -> bool:
+				return a.name.naturalnocasecmp_to(b.name) > 0)
+			# Create var_value blocks
+			var structureName: StringName
+			for i: Variable in sortedVars:
+				structureName = &"var_value:" + i.name
+				BlockStructures.structures[structureName] = {
+					&"structure": [0, i.name],
+					0: [&"special", i],
+					&"color": &"variables",
+					&"shape": BlockShape.blockShapes.VALUE
+				}
+				createBlock(structureName, true, 0.0)

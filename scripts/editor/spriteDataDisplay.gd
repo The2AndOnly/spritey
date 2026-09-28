@@ -97,7 +97,7 @@ func nameSubmitted(newText: String) -> void:
 		nameField.text = currentSprite.name
 		return
 	var names: Array[String] = []
-	for i: Sprite in gameView.sprites.keys():
+	for i: Sprite in gameView.sprites:
 		if i != currentSprite: names.append(i.name)
 	currentSprite.name = ParseData.findUniqueName(newText, names)
 	nameField.text = currentSprite.name

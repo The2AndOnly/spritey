@@ -692,6 +692,39 @@ gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"interaction"
 container = NodePath("../..")
 
+[node name="variables" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1588330394]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.16003977
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+horizontal_scroll_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="scripts/blockSelector/variables" unique_id=1141178498]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/variables/MarginContainer" unique_id=758168936 node_paths=PackedStringArray("editor", "gameView", "container")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+script = ExtResource("6_eqbpn")
+editor = NodePath("../../../../..")
+gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
+blockGroup = &"variables"
+container = NodePath("../..")
+
 [node name="createSignal" type="Button" parent="scripts/blockSelector" unique_id=1786838654 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
 z_index = 1
 layout_mode = 1
@@ -711,6 +744,29 @@ gameView = NodePath("../../../sprites/SubViewportContainer/GameView")
 editor = NodePath("../../..")
 data = &"signal"
 blockGroup = &"events"
+metadata/_edit_use_anchors_ = true
+
+[node name="createVariable" type="Button" parent="scripts/blockSelector" unique_id=687914396 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
+visible = false
+z_index = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.21004567
+anchor_top = 0.91053677
+anchor_right = 0.78995436
+anchor_bottom = 0.98210734
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 30
+text = "Create Variable"
+script = ExtResource("10_3vi5u")
+dialogBox = NodePath("../../../dialogBox")
+gameView = NodePath("../../../sprites/SubViewportContainer/GameView")
+editor = NodePath("../../..")
+data = &"variable"
+blockGroup = &"variables"
+showModifiers = true
 metadata/_edit_use_anchors_ = true
 
 [node name="GridContainer" type="GridContainer" parent="scripts/blockSelector" unique_id=497806456]
@@ -775,6 +831,15 @@ size_flags_vertical = 3
 theme_override_font_sizes/font_size = 22
 script = ExtResource("10_o435n")
 blockGroup = &"expressions"
+editor = NodePath("../../../..")
+
+[node name="blockGroup7" type="Button" parent="scripts/blockSelector/GridContainer" unique_id=1908024272 node_paths=PackedStringArray("editor")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+script = ExtResource("10_o435n")
+blockGroup = &"variables"
 editor = NodePath("../../../..")
 
 [node name="dialogBox" parent="." unique_id=1426297197 instance=ExtResource("12_78fwb")]

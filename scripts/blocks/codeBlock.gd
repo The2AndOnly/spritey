@@ -31,8 +31,9 @@ var initialMousePos: Vector2 = Vector2.ZERO
 var dragDistance: float = 0.0
 ## Prevents dragging if the inital mouse click was outside the block
 var dragDisabled := false
-## Structure of the block
 var blockStructure: Dictionary = {}
+## Ignore the pre-defined structure from blockStructures.gd
+var customStructure := false
 ## Which side of another block it can be connected to while dragging
 # -1 = bottom | 0 = none | 1 = top | -2 = first in nest | 2 = nesting full stack
 var detectedSnapPos: int = 0
@@ -81,7 +82,8 @@ func _ready() -> void:
 	if !preview: editor.updateSpriteScript.connect(updateSpriteScript)
 	resized.connect(onResize)
 	
-	blockStructure = BlockStructures.structures[blockName]
+	if !customStructure:
+		blockStructure = BlockStructures.structures[blockName]
 	
 	# Special properties for certain blocks
 	match blockStructure[&"shape"]:
@@ -156,6 +158,10 @@ func _ready() -> void:
 					inputIds.append(boolean)
 					content.add_child(boolean)
 					if !preview: addInputArea(boolean)
+				&"special":
+					var special: BlockSpecialValue = BlockSpecialValue.new()
+					special.value = blockStructure[i][1]
+					content.add_child(special)
 	shapeNode.blockColor = BlockStructures.categoryColors[blockStructure[&"color"]]
 	shapeNode.blockShape = blockStructure[&"shape"]
 	custom_minimum_size.x = shapeNode.minimumSizes[blockStructure[&"shape"]]
@@ -211,8 +217,8 @@ func setOptionsList(options: BlockOptions) -> void:
 	options.items.clear()
 	for i in range(optionsList.size()): options.items.append(i)
 	match blockStructure[options.id][1]:
-		1: # Sprites addon
-			var sortedSprites: Array[Sprite] = gameView.sprites.keys()
+		1: # Sprites
+			var sortedSprites: Array[Sprite] = gameView.sprites.duplicate()
 			sortedSprites.sort_custom(func(a: Sprite, b: Sprite) -> bool:
 				return a.name.naturalnocasecmp_to(b.name) < 0)
 			sortedSprites.erase(editor.selectedSprite)
@@ -221,32 +227,44 @@ func setOptionsList(options: BlockOptions) -> void:
 				spriteNames.append(i.name)
 			optionsList.append_array(spriteNames)
 			options.items.append_array(sortedSprites)
-		2: # Signals addon
+		2: # Signals
 			var sortedSignals: Array[String] = gameView.signals.duplicate()
 			sortedSignals.sort_custom(func(a: String, b: String) -> bool:
 				return a.naturalnocasecmp_to(b) < 0)
 			for i: String in sortedSignals:
 				optionsList.append(i)
 				options.items.append(i)
-		3: # Keys addon
+		3: # Keys
 			optionsList.append_array(BlockStructures.keyOptions)
 			for i in range(options.items.size(), optionsList.size()): options.items.append(i)
+		4: # Variables
+			var sortedVars: Array[Variable] = gameView.variables.duplicate()
+			# TODO: remove check since there should always be selected sprite in the future
+			if editor.selectedSprite: sortedVars.append_array(editor.selectedSprite.variables)
+			sortedVars.sort_custom(func(a: Variable, b: Variable) -> bool:
+				return a.name.naturalnocasecmp_to(b.name) < 0)
+			var varNames: Array[StringName] = []
+			for i: Variable in sortedVars:
+				varNames.append(i.name)
+			optionsList.append_array(varNames)
+			options.items.append_array(sortedVars)
 	for j: String in optionsList:
 		options.add_item(j)
-	if preview:
-		options.select.call_deferred(options.itemSelected)
-	else:
-		# The item selected should be synced with the internal items array
-		var sharedIndex: int = max(0, options.items.find(options.itemSelected))
-		options.itemSelected = options.items[sharedIndex]
-		options.select.call_deferred(sharedIndex)
+	if options.items.size() > 0:
+		if preview:
+			options.select.call_deferred(options.itemSelected)
+		else:
+			# The item selected should be synced with the internal items array
+			var sharedIndex: int = max(0, options.items.find(options.itemSelected))
+			options.itemSelected = options.items[sharedIndex]
+			options.select.call_deferred(sharedIndex)
 	fixMinimumSize.call_deferred()
 	if options.detectionShape:
 		await get_tree().process_frame
 		options.setDetectionRect()
 
 func updateBlockOptions() -> void:
-	for i: Control in content.get_children():
+	for i: Node in content.get_children():
 		if i is BlockOptions:
 			setOptionsList(i)
 
@@ -752,7 +770,9 @@ func onResize() -> void:
 	height = size.y + nestEnd
 	height += 2.0 # For outline
 	if bottomDetection: bottomDetection.position.y = height
-	if valueDrop: valueDrop.position.y = size.y / 2.0
+	if valueDrop:
+		valueDrop.position.y = size.y / 2.0
+		fixMinimumSize.call_deferred()
 	if nestDetection:
 		nestDetection.position.y = size.y
 		if childNest: childNest.moveWithParent()

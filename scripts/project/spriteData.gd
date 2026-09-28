@@ -3,6 +3,8 @@ extends Sprite2D
 
 var gameView: GameView
 
+var variables: Array[Variable] = []
+
 var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
 		spritePos = value

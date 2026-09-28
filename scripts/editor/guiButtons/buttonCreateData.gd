@@ -5,9 +5,12 @@ extends Button
 @export var editor: Editor
 @export var data: StringName
 @export var blockGroup: StringName
+@export var showModifiers: bool
+var createdPopup := false
 
 var titles: Dictionary[StringName, String] = {
-	&"signal": "Create Signal"
+	&"signal": "Create Signal",
+	&"variable": "Create Variable"
 }
 
 func _ready() -> void:
@@ -16,14 +19,25 @@ func _ready() -> void:
 	editor.switchBlockGroup.connect(switchBlockGroup)
 
 func onPress() -> void:
-	dialogBox.popup.emit(titles[data])
+	createdPopup = true
+	dialogBox.popup(titles[data], showModifiers)
 
-func popupClosed(confirmed: bool, input: String) -> void:
+func popupClosed(confirmed: bool, input: String, modifier: int) -> void:
+	if !createdPopup: return
 	if !confirmed: return
+	createdPopup = false
 	match data:
 		&"signal":
 			if gameView.signals.has(input): return
 			gameView.signals.append(input)
+			editor.updateBlockOptions.emit()
+		&"variable":
+			if modifier == 0: # global variable
+				for i: Variable in gameView.variables: if i.name == input: return
+				gameView.variables.append(Variable.new(input))
+			else: # modifier is 1, local variable
+				for i: Variable in editor.selectedSprite.variables: if i.name == input: return
+				editor.selectedSprite.variables.append(Variable.new(input))
 			editor.updateBlockOptions.emit()
 
 func switchBlockGroup(newGroup: StringName) -> void:

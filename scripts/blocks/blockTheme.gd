@@ -39,7 +39,7 @@ func configureProperties() -> void:
 	
 	theme = newTheme
 	
-	for i: Control in get_children():
+	for i: Node in get_children():
 		if i is BlockInputEdit:
 			setLineEditProperties(i)
 		if i is BlockOptions:

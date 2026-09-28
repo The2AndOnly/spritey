@@ -398,6 +398,18 @@ func inter_keyPressed(inputs: Array) -> bool:
 		return Input.is_action_pressed(&"any") or Input.is_action_pressed(&"any2") or Input.is_action_pressed(&"any3")
 	return Input.is_action_pressed(BlockStructures.keyOptions[index])
 
+## VARIABLES
+
+func var_value(inputs: Array) -> Variant:
+	return inputs[0].value
+func var_setTo(inputs: Array) -> float:
+	inputs[0].value = inputs[1]
+	return -1.0
+func var_changeBy(inputs: Array) -> float:
+	var variable: Variable = inputs[0]
+	variable.value = float(variable.value) + inputs[1]
+	return -1.0
+
 ## TEST
 
 func test_print(inputs: Array) -> float:

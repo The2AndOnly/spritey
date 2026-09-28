@@ -17,7 +17,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	if block.childNest: spriteScriptBlock[&"nest"] = block.childNest.blockID
 	# Build inputs
 	var inputs: Array[Array] = []
-	for i: Control in block.content.get_children():
+	for i: Node in block.content.get_children():
 		if i is BlockInputEdit:
 			# If not visible, then a value block is inserted
 			if i.visible:
@@ -32,7 +32,9 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 			inputs.append([2, i.itemSelected])
 		# Empty bool input
 		if i is BlockBoolPanel and i.visible:
-			inputs.append([3, false])
+			inputs.append([2, false])
+		if i is BlockSpecialValue:
+			inputs.append([2, i.value])
 	if inputs.size() > 0: spriteScriptBlock[&"inputs"] = inputs
 	# Add this to the sprite
 	sprite.spriteScript[block.blockID] = spriteScriptBlock

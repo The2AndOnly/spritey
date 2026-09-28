@@ -19,6 +19,7 @@ extends BlockDefinitions
 ## Read type 2 (options): [read type, option]
 # - option is variant
 # - used by empty bool inputs, where option is false
+# - used by special values (see blockStructures.gd)
 ## Empty bool panel: [3, false]
 
 var spriteScript: Dictionary[int, Dictionary] = {}

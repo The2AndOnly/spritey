@@ -16,7 +16,9 @@ corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
 corner_detail = 4
 
-[node name="dialogBox" type="ColorRect" unique_id=1426297197 node_paths=PackedStringArray("cancel", "confirm", "title", "input")]
+[sub_resource type="ButtonGroup" id="ButtonGroup_jm5ip"]
+
+[node name="dialogBox" type="ColorRect" unique_id=1426297197 node_paths=PackedStringArray("cancel", "confirm", "title", "input", "modifiers", "modifierButtons")]
 z_index = 999
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,6 +31,8 @@ cancel = NodePath("Panel/HBoxContainer/cancel")
 confirm = NodePath("Panel/HBoxContainer/confirm")
 title = NodePath("Panel/Label")
 input = NodePath("Panel/LineEdit")
+modifiers = NodePath("Panel/modifiers")
+modifierButtons = [NodePath("Panel/modifiers/global"), NodePath("Panel/modifiers/local")]
 metadata/_edit_use_anchors_ = true
 
 [node name="Panel" type="Panel" parent="." unique_id=383216297]
@@ -60,9 +64,9 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.13231076
-anchor_top = 0.3738532
+anchor_top = 0.33944955
 anchor_right = 0.86768925
-anchor_bottom = 0.58715594
+anchor_bottom = 0.5527522
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 36
@@ -74,6 +78,38 @@ drag_and_drop_selection_enabled = false
 virtual_keyboard_enabled = false
 caret_blink = true
 metadata/_edit_use_anchors_ = true
+
+[node name="modifiers" type="HBoxContainer" parent="Panel" unique_id=583582317]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.16843462
+anchor_top = 0.58715594
+anchor_right = 0.8315654
+anchor_bottom = 0.67431194
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true
+
+[node name="global" type="Button" parent="Panel/modifiers" unique_id=1516462034]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_jm5ip")
+text = "global"
+alignment = 0
+
+[node name="local" type="Button" parent="Panel/modifiers" unique_id=684353923]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+toggle_mode = true
+button_group = SubResource("ButtonGroup_jm5ip")
+text = "for this sprite"
+alignment = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=405755657]
 layout_mode = 1

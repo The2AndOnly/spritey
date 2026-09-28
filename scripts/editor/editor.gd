@@ -13,6 +13,7 @@ var selectedSprite: Sprite:
 		changedSelectedSprite.emit(value)
 var currentView: StringName = &"sprites":
 	set(value):
+		if currentView == value: return
 		currentView = value
 		match value:
 			&"scripts":
