@@ -407,7 +407,7 @@ func var_setTo(inputs: Array) -> float:
 	return -1.0
 func var_changeBy(inputs: Array) -> float:
 	var variable: Variable = inputs[0]
-	variable.value = float(variable.value) + inputs[1]
+	variable.value = str(float(variable.value) + inputs[1])
 	return -1.0
 
 ## TEST

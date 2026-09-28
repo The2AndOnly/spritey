@@ -49,6 +49,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.16078432, 0.16078432, 0.16078432, 1)
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="viewSprites" type="Button" parent="." unique_id=1725437823 node_paths=PackedStringArray("enabledWithView", "editor")]
 layout_mode = 1
@@ -93,6 +94,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="sprites" unique_id=1956139392]
 z_index = 1
@@ -106,23 +108,18 @@ grow_horizontal = 2
 grow_vertical = 2
 stretch = true
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
-[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor")]
+[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI")]
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
 render_target_update_mode = 4
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
+projectUI = NodePath("UI")
 
-[node name="clear" type="ColorRect" parent="sprites/SubViewportContainer/GameView" unique_id=826513618]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 1)
+[node name="UI" type="CanvasLayer" parent="sprites/SubViewportContainer/GameView" unique_id=1355168075]
 
 [node name="SpritePanel" type="Panel" parent="sprites" unique_id=1850654370]
 layout_mode = 1

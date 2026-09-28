@@ -89,23 +89,27 @@ func _ready() -> void:
 	match blockStructure[&"shape"]:
 		BlockShape.blockShapes.VALUE:
 			nestDetection.queue_free()
-			custom_minimum_size.y = 75.0
+			nestDetection = null
+			custom_minimum_size.y = 65.0
 			set_deferred(&"size:y", 0.0)
 		BlockShape.blockShapes.BOOLEAN:
 			nestDetection.queue_free()
+			nestDetection = null
 			valueDrop.set_collision_mask_value(4, true)
-			custom_minimum_size.y = 75.0
+			custom_minimum_size.y = 65.0
 			boolBlock = true
 			set_deferred(&"size:y", 0.0)
 		BlockShape.blockShapes.NEST:
 			valueDrop.queue_free()
+			valueDrop = null
 			fallbackNestEnd = shapeNode.nestEnd
 			setNestEnd.call_deferred(fallbackNestEnd, false)
 		_:
 			shapeNode.drawBottomNotch = blockStructure[&"shape"] != BlockShape.blockShapes.STOP
 			valueDrop.queue_free()
-			valueDrop = null # Necessary for loading
+			valueDrop = null
 			nestDetection.queue_free()
+			nestDetection = null
 			# Fix nest end indent on load
 			if loading:
 				if parentNest and !shapeNode.drawBottomNotch:
@@ -458,7 +462,7 @@ func disconnectValueBlock() -> void:
 func fixMinimumSize() -> void:
 	custom_minimum_size = Vector2(
 		shapeNode.minimumSizes[blockStructure[&"shape"]],
-		75.0 if valueDrop else 85.0
+		65.0 if valueDrop else 85.0
 	)
 	# It's obsessed with giving me warnings unless I set deferred
 	set_deferred(&"size", Vector2(0.0, 0.0))
@@ -672,7 +676,7 @@ func detectBlockSnap() -> void:
 				detectedInput = i.get_parent()
 				detectedBlock = detectedInput.block
 				detectedInput.highlight.visible = true
-				detectedBlock.getHighestInStack().setToFront()
+				detectedBlock.getRootBlock().setToFront()
 				setToFront()
 				return
 	# For nest blocks to nest an entire stack from the top

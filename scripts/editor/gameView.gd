@@ -5,6 +5,7 @@ extends SubViewport
 # event_keyboard: [key pressed, pressed/released]
 
 @export var editor: Editor
+@export var projectUI: CanvasLayer
 const baseSize: Vector2 = Vector2(1280.0, 720.0)
 # These are to optimize calculating coordinates
 const halfBaseSize: Vector2 = baseSize / 2.0
@@ -32,7 +33,7 @@ func _ready() -> void:
 	else: setMousePosition()
 	for i: int in range(BlockStructures.keyOptions.size()):
 		actionToIndex[BlockStructures.keyOptions[i]] = i
-	variables.append(Variable.new("variable"))
+	variables.append(Variable.new("variable", self, "0.0"))
 
 func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = sprite.spriteScript[blockID]

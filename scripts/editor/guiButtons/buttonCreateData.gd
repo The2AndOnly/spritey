@@ -34,10 +34,10 @@ func popupClosed(confirmed: bool, input: String, modifier: int) -> void:
 		&"variable":
 			if modifier == 0: # global variable
 				for i: Variable in gameView.variables: if i.name == input: return
-				gameView.variables.append(Variable.new(input))
+				gameView.variables.append(Variable.new(input, gameView, "0.0"))
 			else: # modifier is 1, local variable
 				for i: Variable in editor.selectedSprite.variables: if i.name == input: return
-				editor.selectedSprite.variables.append(Variable.new(input))
+				editor.selectedSprite.variables.append(Variable.new(input, gameView, "0.0", editor.selectedSprite))
 			editor.updateBlockOptions.emit()
 
 func switchBlockGroup(newGroup: StringName) -> void:

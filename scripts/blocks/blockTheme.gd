@@ -61,6 +61,7 @@ func setLineEditProperties(lineEdit: LineEdit) -> void:
 		lineEdit.expand_to_text_length = true
 		lineEdit.custom_minimum_size = Vector2(60.0, 55.0)
 		lineEdit.custom_maximum_size = Vector2(-1.0, 55.0)
+		lineEdit.alignment = HORIZONTAL_ALIGNMENT_CENTER
 		# Create a highlight for if a value block is dragged over it
 		var highlight: Panel = Panel.new()
 		highlight.set_anchors_preset(Control.PRESET_FULL_RECT)

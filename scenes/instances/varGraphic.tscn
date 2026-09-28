@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://bawekqtjf8tpg"]
+
+[ext_resource type="Script" uid="uid://gpkwe2rdncsw" path="res://scripts/project/varGraphic.gd" id="1_25p0y"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_78fwb"]
+bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16078432, 0.16078432, 0.16078432, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xls0"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.07450981, 0.5647059, 0.5803922, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.050699998, 0.37869, 0.39, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 3
+
+[node name="varGraphic" type="Control" unique_id=1375513703 node_paths=PackedStringArray("nameLabel", "valueLabel", "dragArea")]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_25p0y")
+nameLabel = NodePath("default/MarginContainer/HBoxContainer/name")
+valueLabel = NodePath("default/MarginContainer/HBoxContainer/value")
+dragArea = NodePath("default")
+
+[node name="default" type="PanelContainer" parent="." unique_id=2012144525]
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 1
+anchors_preset = -1
+offset_right = 87.0
+offset_bottom = 55.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_78fwb")
+
+[node name="MarginContainer" type="MarginContainer" parent="default" unique_id=1407311093]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="default/MarginContainer" unique_id=1934271810]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="name" type="Label" parent="default/MarginContainer/HBoxContainer" unique_id=1329947484]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 1
+
+[node name="value" type="Label" parent="default/MarginContainer/HBoxContainer" unique_id=1368686946]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_2xls0")
+horizontal_alignment = 1
+vertical_alignment = 1

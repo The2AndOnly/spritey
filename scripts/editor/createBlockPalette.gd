@@ -109,7 +109,7 @@ func _ready() -> void:
 	for i: StringName in blockOrder[blockGroup]:
 		createBlock(i)
 
-func createBlock(blockName: StringName, atFront: bool = false, spacing: float = -999.0) -> void:
+func createBlock(blockName: StringName, checkBox: VarGraphicCheckbox = null, atFront: bool = false, spacing: float = -999.0) -> void:
 	var extraSpacing: float
 	if spacing == -999.0:
 		extraSpacing = shapeExtraSpacing(BlockStructures.structures[blockName][&"shape"])
@@ -118,18 +118,33 @@ func createBlock(blockName: StringName, atFront: bool = false, spacing: float = 
 	if extraSpacing < 0.0:
 		createSpacing(abs(extraSpacing))
 	var block: CodeBlock = CODE_BLOCK.instantiate()
-	block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	block.offset_transform_scale = Vector2(0.7, 0.7)
-	block.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
-	block.offset_transform_visual_only = false
 	block.blockName = blockName
 	block.preview = true
+	block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	block.editor = editor
 	block.gameView = gameView
 	block.clicked.connect(blockClicked.bind(block.blockName))
-	add_child(block)
-	if atFront:
-		move_child(block, 0)
+	if checkBox:
+		var hbox: HBoxContainer = HBoxContainer.new()
+		hbox.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		hbox.offset_transform_enabled = true
+		hbox.offset_transform_scale = Vector2(0.7, 0.7)
+		hbox.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
+		hbox.offset_transform_visual_only = false
+		hbox.add_theme_constant_override(&"separation", 15)
+		checkBox.custom_minimum_size.x = 100.0
+		hbox.add_child(checkBox)
+		hbox.add_child(block)
+		add_child(hbox)
+		if atFront:
+			move_child(hbox, 0)
+	else:
+		block.offset_transform_scale = Vector2(0.7, 0.7)
+		block.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
+		block.offset_transform_visual_only = false
+		add_child(block)
+		if atFront:
+			move_child(block, 0)
 	if extraSpacing > 0.0:
 		createSpacing(extraSpacing)
 
@@ -161,7 +176,7 @@ func updateList() -> void:
 	match blockGroup:
 		&"variables":
 			# Clear previous
-			for i: CodeBlock in get_children():
+			for i: Node in find_children("*", "CodeBlock", true, false):
 				if i.blockName.contains(&"var_value:"):
 					i.queue_free()
 			# Sort global and local variables
@@ -180,4 +195,6 @@ func updateList() -> void:
 					&"color": &"variables",
 					&"shape": BlockShape.blockShapes.VALUE
 				}
-				createBlock(structureName, true, 0.0)
+				var checkbox: VarGraphicCheckbox = VarGraphicCheckbox.new()
+				checkbox.variable = i
+				createBlock(structureName, checkbox, true, 0.0)
