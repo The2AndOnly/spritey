@@ -1,5 +1,5 @@
 class_name SpriteData
-extends Sprite2D
+extends AnimatedSprite2D
 
 #const VAR_GRAPHIC: PackedScene = preload("uid://bawekqtjf8tpg")
 var gameView: GameView

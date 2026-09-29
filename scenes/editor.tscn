@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Script" uid="uid://lm7078vh18w6" path="res://scripts/editor/spriteDataDisplay.gd" id="6_o435n"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
+[ext_resource type="Script" uid="uid://b1nalp7pifqeb" path="res://scripts/editor/frameEditor/bitmapFrame.gd" id="7_74j0u"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
@@ -18,13 +19,16 @@ bg_color = Color(0.22, 0.22, 0.22, 1)
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_j8y2p"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xls0"]
+bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5tm2q"]
 size = Vector2(7000, 4500)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
-[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel")]
+[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "frameEntryContainer", "bitmapEdit")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -36,6 +40,8 @@ script = ExtResource("1_q68jb")
 gameView = NodePath("sprites/SubViewportContainer/GameView")
 scriptView = NodePath("scripts/SubViewportContainer/ScriptView")
 mousePosLabel = NodePath("sprites/mousePosition")
+frameEntryContainer = NodePath("frames/previews/ScrollContainer/MarginContainer/VBoxContainer")
+bitmapEdit = NodePath("frames/SubViewportContainer/FrameView/bitmapFrame")
 metadata/_edit_lock_ = true
 
 [node name="clear" type="ColorRect" parent="." unique_id=1126558441]
@@ -51,41 +57,53 @@ color = Color(0.16078432, 0.16078432, 0.16078432, 1)
 metadata/_edit_use_anchors_ = true
 metadata/_edit_lock_ = true
 
-[node name="viewSprites" type="Button" parent="." unique_id=1725437823 node_paths=PackedStringArray("enabledWithView", "editor")]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1434305994]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.32083333
+anchor_left = 0.31041667
 anchor_top = 0.028703704
-anchor_right = 0.45208332
-anchor_bottom = 0.11388883
+anchor_right = 0.63177085
+anchor_bottom = 0.11388889
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="viewSprites" type="Button" parent="HBoxContainer" unique_id=1725437823 node_paths=PackedStringArray("enabledWithView", "editor")]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 35
 text = "Sprites"
 script = ExtResource("5_xg7d5")
-enabledWithView = NodePath("../sprites")
+enabledWithView = NodePath("../../sprites")
 viewName = &"sprites"
-editor = NodePath("..")
+editor = NodePath("../..")
 metadata/_edit_use_anchors_ = true
 
-[node name="viewScripts" type="Button" parent="." unique_id=1971486897 node_paths=PackedStringArray("enabledWithView", "editor")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.46666667
-anchor_top = 0.028703704
-anchor_right = 0.59791666
-anchor_bottom = 0.11388883
-grow_horizontal = 2
-grow_vertical = 2
+[node name="viewScripts" type="Button" parent="HBoxContainer" unique_id=1971486897 node_paths=PackedStringArray("enabledWithView", "editor")]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 35
 text = "Code"
 script = ExtResource("5_xg7d5")
-enabledWithView = NodePath("../scripts")
+enabledWithView = NodePath("../../scripts")
 viewName = &"scripts"
-editor = NodePath("..")
+editor = NodePath("../..")
+metadata/_edit_use_anchors_ = true
+
+[node name="viewFrames" type="Button" parent="HBoxContainer" unique_id=1531614095 node_paths=PackedStringArray("enabledWithView", "editor")]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 35
+text = "Frames"
+script = ExtResource("5_xg7d5")
+enabledWithView = NodePath("../../frames")
+viewName = &"frames"
+editor = NodePath("../..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -114,7 +132,7 @@ metadata/_edit_lock_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 projectUI = NodePath("UI")
@@ -405,6 +423,102 @@ drag_and_drop_selection_enabled = false
 virtual_keyboard_enabled = false
 caret_blink = true
 
+[node name="frames" type="Control" parent="." unique_id=1330480262]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
+
+[node name="previews" type="Panel" parent="frames" unique_id=1256415847]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.01875
+anchor_top = 0.13518518
+anchor_right = 0.1671875
+anchor_bottom = 0.97407407
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2xls0")
+metadata/_edit_use_anchors_ = true
+
+[node name="ScrollContainer" type="ScrollContainer" parent="frames/previews" unique_id=1276757271]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="frames/previews/ScrollContainer" unique_id=248763902]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="frames/previews/ScrollContainer/MarginContainer" unique_id=2085314475]
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_edit_use_anchors_ = true
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="frames" unique_id=1559469628]
+z_index = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.26770833
+anchor_top = 0.15648147
+anchor_right = 0.97291666
+anchor_bottom = 0.95185184
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+mouse_target = true
+metadata/_edit_use_anchors_ = true
+
+[node name="FrameView" type="SubViewport" parent="frames/SubViewportContainer" unique_id=898406173]
+disable_3d = true
+handle_input_locally = false
+physics_object_picking = true
+physics_object_picking_sort = true
+physics_object_picking_first_only = true
+size = Vector2i(1354, 859)
+render_target_update_mode = 4
+
+[node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.499
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = 0.35897827
+offset_right = 0.00012207031
+offset_bottom = -0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_74j0u")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="frames/SubViewportContainer/FrameView/CanvasLayer" unique_id=606471634]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.21960784, 0.21960784, 0.21960784, 1)
+metadata/_edit_lock_ = true
+
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false
 layout_mode = 1
@@ -415,6 +529,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="scripts" unique_id=1417721329]
 z_index = 1

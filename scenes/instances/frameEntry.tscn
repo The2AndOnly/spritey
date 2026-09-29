@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://cak3veot0rt61"]
+
+[ext_resource type="Script" uid="uid://ccrp7xrgapb5a" path="res://scripts/editor/guiButtons/UIFrameEntry.gd" id="1_5dg8d"]
+
+[node name="frameEntry" type="Button" unique_id=683191188 node_paths=PackedStringArray("entryTexture")]
+custom_minimum_size = Vector2(-1, 150)
+anchors_preset = -1
+anchor_right = 0.133
+anchor_bottom = 0.13900001
+offset_right = -0.3600006
+offset_bottom = -0.120010376
+script = ExtResource("1_5dg8d")
+entryTexture = NodePath("MarginContainer/TextureRect")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=300481455]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=977048307]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5

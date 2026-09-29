@@ -4,8 +4,12 @@ extends Control
 @export var gameView: GameView
 @export var scriptView: SubViewport
 @export var mousePosLabel: Label
+@export var frameEntryContainer: VBoxContainer
+@export var bitmapEdit: BitmapFrame
 const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
+const FRAME_ENTRY: PackedScene = preload("uid://cak3veot0rt61")
+const FRAME_SELECTOR_GROUP: ButtonGroup = preload("uid://ysu73lx0nf7n")
 
 var selectedSprite: Sprite:
 	set(value):
@@ -25,6 +29,10 @@ var currentView: StringName = &"sprites":
 				updateBlockOptions.emit()
 			&"sprites":
 				updateSpriteScript.emit(true)
+			&"frames":
+				if spriteFramesLoaded != selectedSprite:
+					loadSpriteFrames()
+					spriteFramesLoaded = selectedSprite
 		changedView.emit(value)
 var clampedMousePos: Vector2 = Vector2.ZERO
 # Having this set disables interaction with several things
@@ -33,6 +41,7 @@ var uiFocused: Control = null:
 		uiFocused = value
 		changedFocus.emit(value)
 var spriteBlocksLoaded: Sprite = null
+var spriteFramesLoaded: Sprite = null
 
 signal changedView(view: StringName)
 signal changedFocus(newFocus: Control)
@@ -47,6 +56,10 @@ func setMousePosition() -> void:
 	clampedMousePos = gameView.mousePosition.clamp(-halfBaseSize, halfBaseSize)
 	gameView.mousePosition = clampedMousePos
 	mousePosLabel.text = "%s, %d" % [roundi(clampedMousePos.x), roundi(clampedMousePos.y)]
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		setMousePosition()
 
 func unloadSpriteBlocks() -> void:
 	for i: Node in scriptView.get_children():
@@ -105,6 +118,17 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 	scriptView.add_child(block)
 	return block
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
-		setMousePosition()
+func loadSpriteFrames() -> void:
+	# Clear previous frame entries
+	for i: FrameEntry in frameEntryContainer.get_children():
+		i.queue_free()
+	# Create frame entries
+	var spriteFrames: SpriteFrames = selectedSprite.sprite_frames
+	for i: int in range(spriteFrames.get_frame_count(&"default")):
+		var texture: Texture2D = spriteFrames.get_frame_texture(&"default", i)
+		var entry: FrameEntry = FRAME_ENTRY.instantiate()
+		entry.previewTexture = texture
+		frameEntryContainer.add_child(entry)
+		entry.bitmapEdit = bitmapEdit
+		entry.button_group = FRAME_SELECTOR_GROUP
+		entry.button_pressed = true

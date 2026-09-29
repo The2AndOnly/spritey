@@ -1,22 +1,31 @@
 extends Button
 
+const SPRITE_ENTRY: PackedScene = preload("uid://b4g1hm5dt1b7m")
+const SPRITE_SELECTOR_GROUP: ButtonGroup = preload("uid://g30w58c26scg")
+
 @export var spriteEntryContainer: GridContainer
 @export var gameView: GameView
 @export var editor: Editor
 
-const ICON: Texture2D = preload("uid://tixr4qmml0y4")
+const DEFAULT_FRAME: Texture2D = preload("uid://tixr4qmml0y4")
+const DEFAULT_FRAME_2: Texture2D = preload("uid://pry5ny7fwqfe")
 
 func _ready() -> void:
 	pressed.connect(onPress)
 
 func onPress() -> void:
-	var spriteEntry: UISpriteEntry = UISpriteEntry.new()
-	spriteEntry.previewTexture = ICON
+	var spriteEntry: SpriteEntry = SPRITE_ENTRY.instantiate()
+	spriteEntry.previewTexture = DEFAULT_FRAME
 	spriteEntry.editor = editor
 	spriteEntryContainer.add_child(spriteEntry)
+	spriteEntry.button_group = SPRITE_SELECTOR_GROUP
+	spriteEntry.button_pressed = true
 	
 	var sprite: Sprite = Sprite.new()
-	sprite.texture = ICON
+	var spriteFrames: SpriteFrames = SpriteFrames.new()
+	spriteFrames.add_frame(&"default", DEFAULT_FRAME)
+	spriteFrames.add_frame(&"default", DEFAULT_FRAME_2)
+	sprite.sprite_frames = spriteFrames
 	sprite.gameView = gameView
 	# Find a unique name and ID for the sprite
 	var names: Array[String] = []
