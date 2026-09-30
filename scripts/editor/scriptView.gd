@@ -1,7 +1,6 @@
 extends SubViewport
 
 @export var camera: Camera2D
-@export var grid: Sprite2D
 @export var dragDetector: Area2D
 const MinZoom: Vector2 = Vector2(0.2, 0.2)
 const MaxZoom: Vector2 = Vector2(1.8, 1.8)

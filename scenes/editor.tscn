@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Script" uid="uid://lm7078vh18w6" path="res://scripts/editor/spriteDataDisplay.gd" id="6_o435n"]
+[ext_resource type="Script" uid="uid://1dp7em7056hh" path="res://scripts/editor/frameView.gd" id="7_2w0at"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
 [ext_resource type="Script" uid="uid://b1nalp7pifqeb" path="res://scripts/editor/frameEditor/bitmapFrame.gd" id="7_74j0u"]
 [ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
@@ -487,7 +488,7 @@ stretch = true
 mouse_target = true
 metadata/_edit_use_anchors_ = true
 
-[node name="FrameView" type="SubViewport" parent="frames/SubViewportContainer" unique_id=898406173]
+[node name="FrameView" type="SubViewport" parent="frames/SubViewportContainer" unique_id=898406173 node_paths=PackedStringArray("camera")]
 disable_3d = true
 handle_input_locally = false
 physics_object_picking = true
@@ -495,8 +496,11 @@ physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1280, 720)
 render_target_update_mode = 4
+script = ExtResource("7_2w0at")
+camera = NodePath("Camera2D")
 
 [node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356]
+texture_filter = 1
 anchors_preset = -1
 anchor_left = -0.5
 anchor_top = -0.5
@@ -559,7 +563,7 @@ stretch = true
 mouse_target = true
 metadata/_edit_use_anchors_ = true
 
-[node name="ScriptView" type="SubViewport" parent="scripts/SubViewportContainer" unique_id=1227163633 node_paths=PackedStringArray("camera", "grid", "dragDetector")]
+[node name="ScriptView" type="SubViewport" parent="scripts/SubViewportContainer" unique_id=1227163633 node_paths=PackedStringArray("camera", "dragDetector")]
 disable_3d = true
 handle_input_locally = false
 physics_object_picking = true
@@ -569,7 +573,6 @@ size = Vector2i(1354, 859)
 render_target_update_mode = 0
 script = ExtResource("6_j8y2p")
 camera = NodePath("Camera2D")
-grid = NodePath("Sprite2D")
 dragDetector = NodePath("Camera2D/drag")
 
 [node name="Camera2D" type="Camera2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1134382404]
