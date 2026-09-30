@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://lm7078vh18w6" path="res://scripts/editor/spriteDataDisplay.gd" id="6_o435n"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
 [ext_resource type="Script" uid="uid://b1nalp7pifqeb" path="res://scripts/editor/frameEditor/bitmapFrame.gd" id="7_74j0u"]
+[ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
@@ -474,10 +475,12 @@ metadata/_edit_use_anchors_ = true
 z_index = 1
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.26770833
-anchor_top = 0.15648147
-anchor_right = 0.97291666
-anchor_bottom = 0.95185184
+anchor_left = 0.2953907
+anchor_top = 0.26759258
+anchor_right = 0.96216667
+anchor_bottom = 0.934
+offset_right = -0.20983887
+offset_bottom = 0.27996826
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
@@ -490,21 +493,29 @@ handle_input_locally = false
 physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
-size = Vector2i(1354, 859)
+size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
 [node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356]
 anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.499
+anchor_left = -0.5
+anchor_top = -0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_top = 0.35897827
-offset_right = 0.00012207031
-offset_bottom = -0.5
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("7_74j0u")
+
+[node name="transparency" type="TextureRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=1506137497]
+z_index = -9
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_sdh1e")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
 layer = -1
@@ -518,6 +529,9 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 metadata/_edit_lock_ = true
+
+[node name="Camera2D" type="Camera2D" parent="frames/SubViewportContainer/FrameView" unique_id=1966488675]
+zoom = Vector2(0.9, 0.9)
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false
@@ -578,7 +592,7 @@ position = Vector2(679.5, 433)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("7_5tm2q")
 region_enabled = true
-region_rect = Rect2(0, 0, 20000, 20000)
+region_rect = Rect2(0, 0, 999999, 999999)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="scripts/SubViewportContainer/ScriptView" unique_id=896693586]
 layer = -1

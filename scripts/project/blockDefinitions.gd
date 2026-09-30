@@ -30,6 +30,10 @@ func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
 
 func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
+func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
+	print(inputs)
+	print(eventData)
+	return inputs == eventData
 
 func event_signal(inputs: Array) -> float:
 	gameView.event(&"event_receive", inputs)
@@ -63,10 +67,10 @@ func trans_setPosition(inputs: Array) -> float:
 	return -1.0
 func trans_setPositionOption(inputs: Array) -> float:
 	var option: Variant = inputs[0]
-	if option is Sprite:
-		spritePos = option.spritePos
-	else:
+	if option is int:
 		spritePos = H_getPositionFromOption(option)
+	else:
+		spritePos = option.spritePos
 	return -1.0
 func H_getPositionFromOption(option: int) -> Vector2:
 	match option:
@@ -392,16 +396,42 @@ func inter_pointerX() -> float:
 	return round(gameView.mousePosition.x)
 func inter_pointerY() -> float:
 	return round(gameView.mousePosition.y)
+
 func inter_keyPressed(inputs: Array) -> bool:
 	var index: int = inputs[0]
 	if index == 0:
 		return Input.is_action_pressed(&"any") or Input.is_action_pressed(&"any2") or Input.is_action_pressed(&"any3")
 	return Input.is_action_pressed(BlockStructures.keyOptions[index])
+
 func inter_mousePressed(inputs: Array) -> bool:
 	if inputs[0] == 0:
 		return Input.is_action_pressed(&"leftMouse")
 	else:
 		return Input.is_action_pressed(&"rightMouse")
+
+func inter_distanceTo(inputs: Array) -> float:
+	var option: Variant = inputs[0]
+	if option is int:
+		return spritePos.round().distance_to(gameView.mousePosition.round())
+	else:
+		return spritePos.round().distance_to(option.spritePos.round())
+
+func inter_localTime(inputs: Array) -> int:
+	var date: Dictionary = Time.get_datetime_dict_from_system(false)
+	match inputs[0]:
+		0: return date["year"]
+		1: return date["month"]
+		2: return date["day"]
+		3: return date["weekday"] + 1
+		4: return date["hour"]
+		5: return date["minute"]
+		6: return date["second"]
+		_: return 0
+func inter_timeSince1970() -> float:
+	return Time.get_unix_time_from_system()
+
+func inter_deltaTime() -> float:
+	return get_process_delta_time()
 
 ## VARIABLES
 

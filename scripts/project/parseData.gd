@@ -9,10 +9,7 @@ static func castType(type: int, value: Variant) -> Variant:
 			return float(value)
 		2: # string
 			if value is float:
-				if is_equal_approx(value, floorf(value)):
-					return str(int(value))
-				else:
-					return str(snappedf(float(value), 0.01))
+				return stringNumber(value)
 			return str(value)
 		3: # positive integer
 			return max(0, int(value))
@@ -23,10 +20,7 @@ static func castType(type: int, value: Variant) -> Variant:
 	return null
 
 static func stringNumber(value: float) -> String:
-	if is_equal_approx(value, floorf(value)):
-		return str(int(value))
-	else:
-		return "%.1f" % value
+	return ("%.3f" % value).rstrip("0").trim_suffix(".")
 
 static func findUniqueName(desired: String, existing: Array[String]) -> String:
 	if !existing.has(desired.strip_edges()): return desired.strip_edges()

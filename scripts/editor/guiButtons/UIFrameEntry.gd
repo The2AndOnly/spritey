@@ -11,5 +11,4 @@ func _ready() -> void:
 	pressed.connect(onPress)
 
 func onPress() -> void:
-	bitmapEdit.texture = previewTexture
-	bitmapEdit.showFrame()
+	bitmapEdit.showFrame(previewTexture)

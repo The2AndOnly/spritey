@@ -100,7 +100,6 @@ func nameSubmitted(newText: String) -> void:
 	for i: Sprite in gameView.sprites:
 		if i != currentSprite: names.append(i.spriteName)
 	currentSprite.spriteName = ParseData.findUniqueName(newText, names)
-	currentSprite.updateDataGraphicNames()
 	nameField.text = currentSprite.spriteName
 func nameFocusExit() -> void:
 	nameSubmitted(nameField.text)

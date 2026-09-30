@@ -12,6 +12,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"event_start",
 		&"event_keyboard",
 		&"event_mouse",
+		&"event_scrolled",
 		&"event_receive",
 		&"event_signal",
 		&"test_print"
@@ -33,7 +34,11 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"inter_pointerX",
 		&"inter_pointerY",
 		&"inter_keyPressed",
-		&"inter_mousePressed"
+		&"inter_mousePressed",
+		&"inter_distanceTo",
+		&"inter_deltaTime",
+		&"inter_localTime",
+		&"inter_timeSince1970"
 	],
 	&"visuals": [
 		&"vis_show",

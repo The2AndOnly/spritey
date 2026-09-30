@@ -194,7 +194,11 @@ func setMousePosition() -> void:
 
 # Send input events
 func _input(inputEvent: InputEvent) -> void:
-	if editor: if editor.currentView != &"sprites": return
+	if editor:
+		if editor.currentView != &"sprites": return
+		if inputEvent is InputEventMouseMotion:
+			setMousePosition()
+			return
 	
 	if inputEvent is InputEventKey:
 		if inputEvent.is_echo(): return
@@ -206,14 +210,10 @@ func _input(inputEvent: InputEvent) -> void:
 					0 if inputEvent.pressed else 1
 				])
 				break
-		return
-	
-	if inputEvent is InputEventMouseButton:
+	elif inputEvent.is_action_released(&"mouseWheelUp"):
+		event(&"event_scrolled", [0])
+	elif inputEvent.is_action_released(&"mouseWheelDown"):
+		event(&"event_scrolled", [1])
+	elif inputEvent is InputEventMouseButton:
 		if inputEvent.button_index > 2: return
 		event(&"event_mouse", [inputEvent.button_index - 1, 0 if inputEvent.pressed else 1])
-		return
-	
-	# In the editor, mouse movement input is handled by editor.gd
-	if editor: return
-	if inputEvent is InputEventMouseMotion:
-		setMousePosition()

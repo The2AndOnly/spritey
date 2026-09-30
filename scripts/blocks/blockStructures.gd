@@ -44,7 +44,11 @@ static var keyOptions: Array[StringName] = [
 	&"enter",
 	&"A",&"B",&"C",&"D",&"E",&"F",&"G",&"H",&"I",&"J",&"K",&"L",&"M",
 	&"N",&"O",&"P",&"Q",&"R",&"S",&"T",&"U",&"V",&"W",&"X",&"Y",&"Z",
-	&"0",&"1",&"2",&"3",&"4",&"5",&"6",&"7",&"8",&"9"
+	&"0",&"1",&"2",&"3",&"4",&"5",&"6",&"7",&"8",&"9",
+	&"ctrl",
+	&"shift",
+	&"alt",
+	&"backspace"
 ]
 
 static var structures: Dictionary[StringName, Dictionary] = {
@@ -81,6 +85,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		0: [&"options", 2, 0, []],
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"event_scrolled": {
+		&"structure": ["when scrolled", 0],
+		0: [&"options", 0, 0, ["up", "down"]],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
 	},
 	
 	## TRANSFORM
@@ -343,6 +353,28 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		0: [&"options", 0, 0, ["left", "right"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"inter_distanceTo": {
+		&"structure": ["distance to", 0],
+		0: [&"options", 1, 0, ["pointer"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"inter_localTime": {
+		&"structure": ["current", 0],
+		0: [&"options", 0, 0, ["year", "month", "date", "day of week", "hour", "minute", "second"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"inter_timeSince1970": {
+		&"structure": ["time since 1970"],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"inter_deltaTime": {
+		&"structure": ["delta time"],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
 	},
 	
 	## CONTROL
