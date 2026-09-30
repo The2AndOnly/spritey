@@ -2,7 +2,7 @@ extends SubViewport
 
 @export var camera: Camera2D
 const MinZoom: Vector2 = Vector2(0.3, 0.3)
-const MaxZoom: Vector2 = Vector2(3.0, 3.0)
+const MaxZoom: Vector2 = Vector2(5.0, 5.0)
 
 var cameraPanning := false
 var initialMouse: Vector2 = Vector2.ZERO

@@ -1,7 +1,7 @@
 extends Node
 
 func _ready() -> void:
-	RenderingServer.set_default_clear_color(Color("000000ff"))
+	RenderingServer.set_default_clear_color(Color("ffffffff"))
 
 func _input(event: InputEvent) -> void:
 	# Debug toggle fullscreen

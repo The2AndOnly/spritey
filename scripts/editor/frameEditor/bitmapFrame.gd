@@ -2,66 +2,48 @@ class_name BitmapFrame
 extends TextureRect
 
 const CANVAS_SIZE := Vector2i(1280, 720)
-const MIN_POINT_DISTANCE: float = 1.0
 
-@export var brushRadius: int = 4
-@export var brushColor: Color = Color("ff0000ff")
+# Adjustable by the tool settings
+var brushRadius: int = 5:
+	set(value):
+		brushRadius = value
+		setBrushStamp()
+var color: Color = Color("000000ff"):
+	set(value):
+		color = value
+		alpha = color.a
+		color.a = 1.0
+		setBrushStamp()
+var alpha: float = 1.0
 
 var editableImage: Image
 var brushStamp: Image
+# The queued image modified while drawing, but it's hidden for performance
+# It gets baked onto the actual image once the mouse is released
+var queuedImage: Image
+# Texture version of the brush stamp so the preview can draw it
 var brushTexture: ImageTexture
-var previewImage: Image
+# List of coordinates that the brush stamp gets placed in the stroke
+# Used to calculate the stroke bounds
+var strokePoints: Array[Vector2i] = []
+var drawing := false
+var currentPosition: Vector2i = Vector2i(-1, -1)
+var lastPosition: Vector2i = Vector2i(-1, -1)
+# Only the last element is accessed as the point to interpolate to
+var queuedPoints: Array[Vector2i] = []
+var newPoints := false
+
 var previewTexture: ImageTexture
-var stroke_points: Array[Vector2i] = []
-var drawing: bool = false
-var last_mouse_pos := Vector2i(-1, -1)
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	init_preview_image()
-
-func _process(_delta: float) -> void:
-	if drawing and is_dirty:
-		process_pending_points()
-		queue_redraw()
-		is_dirty = false
-
-func process_pending_points() -> void:
-	if pending_motion_points.is_empty():
-		return
-
-	var target_pos = pending_motion_points[-1]
-	pending_motion_points.clear()
-
-	if target_pos != last_mouse_pos:
-		# HERE: Calculates spacing interval based on exact brushRadius
-		var step_dist := maxf(1.0, float(brushRadius) * 0.15)
-		
-		var dist := Vector2(last_mouse_pos).distance_to(Vector2(target_pos))
-		var steps := int(dist / step_dist)
-		
-		if steps > 0:
-			for i in range(1, steps + 1):
-				var t := float(i) / float(steps)
-				var interpolated_pt := Vector2(last_mouse_pos).lerp(Vector2(target_pos), t).round()
-				var pt := Vector2i(interpolated_pt)
-				
-				stroke_points.append(pt)
-				stamp_to_preview(pt)
-		else:
-			stroke_points.append(target_pos)
-			stamp_to_preview(target_pos)
-			
-		last_mouse_pos = target_pos
-
-func init_preview_image() -> void:
-	previewImage = Image.create(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
-	previewImage.fill(Color(0, 0, 0, 0))
-	previewTexture = ImageTexture.create_from_image(previewImage)
+	queuedImage = Image.create_empty(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
+	queuedImage.fill(Color("00000000"))
+	previewTexture = ImageTexture.create_from_image(queuedImage)
+	setBrushStamp()
 
 # Load the frame onto a 1280x720 canvas
 func showFrame(showTexture: Texture2D) -> void:
-	editableImage = Image.create(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
+	editableImage = Image.create_empty(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
 	editableImage.fill(Color("00000000"))
 	var sourceImage: Image = showTexture.get_image()
 	if sourceImage.is_compressed():
@@ -74,126 +56,158 @@ func showFrame(showTexture: Texture2D) -> void:
 	editableImage.blit_rect(sourceImage, Rect2i(Vector2i.ZERO, sourceSize), Vector2i(sourceX, sourceY))
 	texture = ImageTexture.create_from_image(editableImage)
 
-func stamp_to_preview(center_pos: Vector2i) -> void:
-	if not brushStamp or brushStamp.get_width() != brushRadius:
-		updateBrushStamp()
+# Create points and redraw if there are any new points to process
+func _process(_delta: float) -> void:
+	if drawing and newPoints:
+		interpolatePoints()
+		queue_redraw()
+		newPoints = false
 
-	if brushRadius <= 1:
-		if is_valid_canvas_pos(center_pos):
-			previewImage.set_pixel(center_pos.x, center_pos.y, brushColor)
-	else:
-		var src_rect := Rect2i(0, 0, brushRadius, brushRadius)
-		# HERE: Centering offset for stamping onto CPU Image
-		var offset := Vector2i(brushRadius / 2, brushRadius / 2)
-		var dest_pos := center_pos - offset
-		previewImage.blend_rect(brushStamp, src_rect, dest_pos)
-
-
-func bake_preview_to_main_canvas() -> void:
-	var full_rect := Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y)
+# This creates several points between the current and last position for the brush stamp
+# Take the latest input in case mouse inputs get detected multiple times per frame
+func interpolatePoints() -> void:
+	if queuedPoints.is_empty(): return
+	var targetPosition = queuedPoints[-1]
+	queuedPoints.clear()
 	
-	# 1. Single C++ memory blend on mouse up
-	editableImage.blend_rect(previewImage, full_rect, Vector2i.ZERO)
-	
-	# 2. Update VRAM texture ONCE at the end of the stroke
-	texture = ImageTexture.create_from_image(editableImage)
-	
-	# 3. Reset preview image in CPU memory
-	previewImage.fill(Color(0, 0, 0, 0))
-
-var frame_points: Array[Vector2i] = []
-
-var pending_motion_points: Array[Vector2i] = []
-var is_dirty: bool = false
+	if targetPosition != lastPosition:
+		var distance: float = Vector2(lastPosition).distance_to(Vector2(targetPosition))
+		var steps: int = int(distance / maxf(1.0, float(brushRadius) * 0.05))
+		if steps == 0:
+			strokePoints.append(targetPosition)
+			stampOnPreview(targetPosition)
+		else:
+			for i: int in range(1, steps + 1):
+				var weight: float = i / float(steps)
+				var interpolated: Vector2 = Vector2(lastPosition).lerp(Vector2(targetPosition), weight).round()
+				strokePoints.append(Vector2i(interpolated))
+				stampOnPreview(Vector2i(interpolated))
+		lastPosition = targetPosition
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"leftMouse"):
-		var pos = Vector2i(get_local_mouse_position())
-		if is_valid_canvas_pos(pos):
-			drawing = true
-			last_mouse_pos = pos
-			
-			stroke_points.clear()
-			stroke_points.append(pos)
-			stamp_to_preview(pos)
-			is_dirty = true
-
+		currentPosition = Vector2i(get_local_mouse_position())
+		if !withinCanvas(currentPosition): return
+		drawing = true
+		lastPosition = currentPosition
+		strokePoints.clear()
+		strokePoints.append(currentPosition)
+		stampOnPreview(currentPosition)
+		newPoints = true
 	elif (event is InputEventMouseMotion) and drawing:
-		var pos = Vector2i(get_local_mouse_position())
-		if is_valid_canvas_pos(pos) and pos != last_mouse_pos:
-			# Append to a pending buffer to throttle execution
-			pending_motion_points.append(pos)
-			is_dirty = true
-
+		currentPosition = Vector2i(get_local_mouse_position())
+		if !withinCanvas(currentPosition): return
+		if currentPosition != lastPosition:
+			queuedPoints.append(currentPosition)
+			newPoints = true
+	# Bake the preview onto the actual image when released
 	elif event.is_action_released(&"leftMouse") and drawing:
 		drawing = false
-		process_pending_points() # Process remaining points before baking
-		bake_preview_to_main_canvas()
-		last_mouse_pos = Vector2i(-1, -1)
-		stroke_points.clear()
+		lastPosition = Vector2i(-1, -1)
+		bakePreview()
+		strokePoints.clear()
 		queue_redraw()
 
-
 func _draw() -> void:
-	if not drawing or stroke_points.is_empty() or not brushTexture:
+	if not drawing or strokePoints.is_empty():
 		return
 
-	# HERE: Centering offset for GPU preview drawing
-	var offset := Vector2(brushRadius / 2, brushRadius / 2)
-	
-	for pt in stroke_points:
-		var draw_pos := Vector2(pt) - offset
-		draw_texture(brushTexture, draw_pos)
-
-
-func is_valid_canvas_pos(pos: Vector2i) -> bool:
-	return pos.x >= 0 and pos.x < CANVAS_SIZE.x and pos.y >= 0 and pos.y < CANVAS_SIZE.y
-
-func updateBrushStamp() -> void:
-	# brushRadius represents exact pixel diameter (1, 2, 3, 4, etc.)
-	if brushRadius <= 1:
-		brushStamp = Image.create(1, 1, false, Image.FORMAT_RGBA8)
-		brushStamp.set_pixel(0, 0, brushColor)
-		brushTexture = ImageTexture.create_from_image(brushStamp)
+	# Calculate dirty bounding rect of current stroke
+	var bounds := get_stroke_bounds()
+	if bounds.size.x <= 0 or bounds.size.y <= 0:
 		return
 
-	var diameter := brushRadius
-	var center := (diameter - 1) / 2.0  # Floating point center allows even dimensions
-	var radius_sq := (diameter / 2.0) * (diameter / 2.0)
+	# Update previewTexture with queuedImage contents
+	previewTexture.update(queuedImage)
 
-	brushStamp = Image.create(diameter, diameter, false, Image.FORMAT_RGBA8)
-	brushStamp.fill(Color(0, 0, 0, 0))
+	# Modulate entire stroke uniformly with chosen alpha
+	var preview_modulate := Color(1.0, 1.0, 1.0, alpha)
 
-	for x in range(diameter):
-		for y in range(diameter):
-			# Measure distance from true center (handles even and odd diameters)
-			var dx := (x - center)
-			var dy := (y - center)
-			if (dx * dx) + (dy * dy) <= radius_sq:
-				brushStamp.set_pixel(x, y, brushColor)
+	# Draw only modified rect to keep GPU work minimal
+	draw_texture_rect_region(
+		previewTexture,
+		Rect2(bounds.position, bounds.size),
+		Rect2(bounds.position, bounds.size),
+		preview_modulate
+	)
 
+## Shows a preview of the stroke while drawing before it gets baked
+#func _draw() -> void:
+	#if (!drawing) or (strokePoints.is_empty()) or !brushTexture:
+		#return
+	#for i: Vector2i in strokePoints:
+		#draw_texture(brushTexture, Vector2(i) - Vector2(brushRadius / 2, brushRadius / 2))
+
+func withinCanvas(coord: Vector2i) -> bool:
+	return (coord.x >= 0) and (coord.x < CANVAS_SIZE.x) and (coord.y >= 0) and (coord.y < CANVAS_SIZE.y)
+
+# Create an image and texture for the brush stamp
+func setBrushStamp() -> void:
+	brushStamp = Image.create_empty(brushRadius, brushRadius, false, Image.FORMAT_RGBA8)
+	brushStamp.fill(Color("00000000"))
+	# The brush stamp is a pixelated circle
+	var center: float = (brushRadius - 1) / 2.0
+	for x: int in range(brushRadius):
+		for y: int in range(brushRadius):
+			if ((x - center) ** 2) + ((y - center) ** 2) <= (brushRadius / 2.0) ** 2:
+				brushStamp.set_pixel(x, y, color)
 	brushTexture = ImageTexture.create_from_image(brushStamp)
 
-# Bresenham's algorithm for gapless pixel lines
-func get_bresenham_line(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
-	var points: Array[Vector2i] = []
-	var dx = abs(to.x - from.x)
-	var dy = -abs(to.y - from.y)
-	var sx = 1 if from.x < to.x else -1
-	var sy = 1 if from.y < to.y else -1
-	var err = dx + dy
-	var curr = from
+# Stamp the brush onto the preview
+func stampOnPreview(center: Vector2i) -> void:
+	var trueCenter: Vector2i = center - Vector2i(brushRadius / 2, brushRadius / 2)
+	queuedImage.blend_rect(brushStamp, Rect2i(0, 0, brushRadius, brushRadius), trueCenter)
 
-	while true:
-		points.append(curr)
-		if curr == to:
-			break
-		var e2 = 2 * err
-		if e2 >= dy:
-			err += dy
-			curr.x += sx
-		if e2 <= dx:
-			err += dx
-			curr.y += sy
+func bakePreview() -> void:
+	if strokePoints.is_empty():
+		return
+	# If the stroke is fully opaque (alpha == 1.0), use fast native blend_rect
+	if alpha == 1.0:
+		editableImage.blend_rect(queuedImage, Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y), Vector2i.ZERO)
+	else:
+		# Calculate the dirty bounding rect of the stroke to avoid scanning all 1280x720 pixels
+		var dirty_rect := get_stroke_bounds()
+		
+		# Apply alpha modulation to the modified region only
+		for x in range(dirty_rect.position.x, dirty_rect.end.x):
+			for y in range(dirty_rect.position.y, dirty_rect.end.y):
+				var src_color := queuedImage.get_pixel(x, y)
+				if src_color.a > 0.0:
+					# Apply stroke alpha to source pixel
+					src_color.a *= alpha
+					
+					# Blend manually onto editableImage
+					var dst_color := editableImage.get_pixel(x, y)
+					var blended := dst_color.blend(src_color)
+					editableImage.set_pixel(x, y, blended)
 
-	return points
+	# Update main GPU texture once
+	texture = ImageTexture.create_from_image(editableImage)
+	
+	# Reset preview
+	queuedImage.fill(Color(0, 0, 0, 0))
+	strokePoints.clear()
+
+# Helper to find the affected area of the stroke for fast baking
+func get_stroke_bounds() -> Rect2i:
+	var min_pos := strokePoints[0]
+	var max_pos := strokePoints[0]
+
+	for pt in strokePoints:
+		min_pos.x = mini(min_pos.x, pt.x)
+		min_pos.y = mini(min_pos.y, pt.y)
+		max_pos.x = maxi(max_pos.x, pt.x)
+		max_pos.y = maxi(max_pos.y, pt.y)
+
+	var offset := Vector2i(brushRadius / 2, brushRadius / 2)
+	min_pos = (min_pos - offset).clamp(Vector2i.ZERO, CANVAS_SIZE)
+	max_pos = (max_pos + Vector2i(brushRadius, brushRadius) - offset).clamp(Vector2i.ZERO, CANVAS_SIZE)
+
+	return Rect2i(min_pos, max_pos - min_pos)
+
+## Add the preview to the actual texture
+#func bakePreview() -> void:
+	#editableImage.blend_rect(queuedImage, Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y), Vector2i.ZERO)
+	#texture = ImageTexture.create_from_image(editableImage)
+	## Reset preview
+	#queuedImage.fill(Color("00000000"))

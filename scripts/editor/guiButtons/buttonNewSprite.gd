@@ -7,8 +7,8 @@ const SPRITE_SELECTOR_GROUP: ButtonGroup = preload("uid://g30w58c26scg")
 @export var gameView: GameView
 @export var editor: Editor
 
-const DEFAULT_FRAME: Texture2D = preload("uid://tixr4qmml0y4")
-const DEFAULT_FRAME_2: Texture2D = preload("uid://pry5ny7fwqfe")
+const DEFAULT_FRAME: Texture2D = preload("uid://xfrwldn7tb1p")
+const DEFAULT_FRAME_2: Texture2D = preload("uid://bio3f3s4d5x6")
 
 func _ready() -> void:
 	pressed.connect(onPress)

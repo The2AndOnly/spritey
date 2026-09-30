@@ -9,8 +9,10 @@
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
 [ext_resource type="Script" uid="uid://lm7078vh18w6" path="res://scripts/editor/spriteDataDisplay.gd" id="6_o435n"]
 [ext_resource type="Script" uid="uid://1dp7em7056hh" path="res://scripts/editor/frameView.gd" id="7_2w0at"]
+[ext_resource type="Script" uid="uid://chle2akbs4lw7" path="res://scripts/editor/frameEditor/frameToolSettingField.gd" id="7_5tdu1"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
 [ext_resource type="Script" uid="uid://b1nalp7pifqeb" path="res://scripts/editor/frameEditor/bitmapFrame.gd" id="7_74j0u"]
+[ext_resource type="Script" uid="uid://hh8jhs3mcgte" path="res://scripts/editor/frameEditor/frameToolSettingColor.gd" id="8_q8l03"]
 [ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
@@ -471,6 +473,70 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 2
 theme_override_constants/separation = 10
 metadata/_edit_use_anchors_ = true
+
+[node name="toolSettings" type="Control" parent="frames" unique_id=1135755254]
+layout_mode = 1
+anchor_left = 0.3125
+anchor_top = 0.16018519
+anchor_right = 0.909375
+anchor_bottom = 0.24444444
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="brush" type="HBoxContainer" parent="frames/toolSettings" unique_id=977624693]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.08791209
+anchor_right = 1.0
+anchor_bottom = 0.9120879
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+metadata/_edit_use_anchors_ = true
+
+[node name="size" type="HBoxContainer" parent="frames/toolSettings/brush" unique_id=834563850]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="frames/toolSettings/brush/size" unique_id=1682862726]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Size:"
+
+[node name="LineEdit2" type="LineEdit" parent="frames/toolSettings/brush/size" unique_id=1254956202 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "5"
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
+script = ExtResource("7_5tdu1")
+bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
+setting = &"brushSize"
+
+[node name="color" type="HBoxContainer" parent="frames/toolSettings/brush" unique_id=613395225]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="frames/toolSettings/brush/color" unique_id=363892508]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Color:"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="frames/toolSettings/brush/color" unique_id=1394899095 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+script = ExtResource("8_q8l03")
+bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
+setting = &"brushColor"
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="frames" unique_id=1559469628]
 z_index = 1
