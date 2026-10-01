@@ -33,8 +33,6 @@ var brushStamp: Image
 var queuedImage: Image
 # Texture version of the queued image so a preview can be shown in the _draw() function
 var previewTexture: ImageTexture
-# List of coordinates that the brush stamp gets placed in the stroke
-var strokePoints: Array[Vector2i] = []
 var drawing := false
 var currentPosition: Vector2i = Vector2i(-1, -1)
 var lastPosition: Vector2i = Vector2i(-1, -1)
@@ -91,13 +89,11 @@ func interpolatePoints() -> void:
 		var distance: float = Vector2(lastPosition).distance_to(Vector2(targetPosition))
 		var steps: int = int(distance / maxf(1.0, float(brushRadius) * 0.05))
 		if steps == 0:
-			strokePoints.append(targetPosition)
 			stampOnPreview(targetPosition)
 		else:
 			for i: int in range(1, steps + 1):
 				var weight: float = i / float(steps)
 				var interpolated: Vector2 = Vector2(lastPosition).lerp(Vector2(targetPosition), weight).round()
-				strokePoints.append(Vector2i(interpolated))
 				stampOnPreview(Vector2i(interpolated))
 		lastPosition = targetPosition
 
@@ -106,8 +102,6 @@ func _input(event: InputEvent) -> void:
 		currentPosition = Vector2i(get_local_mouse_position())
 		drawing = true
 		lastPosition = currentPosition
-		strokePoints.clear()
-		strokePoints.append(currentPosition)
 		texture = null
 		queuedImage.blit_rect(editableImage, Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y), Vector2i.ZERO)
 		stampOnPreview(currentPosition)
@@ -121,12 +115,11 @@ func _input(event: InputEvent) -> void:
 		drawing = false
 		lastPosition = Vector2i(-1, -1)
 		bakePreview()
-		strokePoints.clear()
 		queue_redraw()
 
 # Show the preview before it gets baked
 func _draw() -> void:
-	if (!drawing) or strokePoints.is_empty(): return
+	if !drawing: return
 	# The draw function needs a texture version of the queued image
 	previewTexture.update(queuedImage)
 	draw_texture(previewTexture, Vector2.ZERO)
@@ -174,11 +167,9 @@ func stampOnPreview(center: Vector2i) -> void:
 
 # Update the image by setting the actual texture to the preview
 func bakePreview() -> void:
-	if strokePoints.is_empty(): return
 	editableImage.blit_rect(queuedImage, Rect2i(Vector2i.ZERO, CANVAS_SIZE), Vector2i.ZERO)
 	texture = ImageTexture.create_from_image(editableImage)
 	queuedImage.fill(Color(0.0, 0.0, 0.0, 0.0))
-	strokePoints.clear()
 	updateFrame()
 
 # Emit frameUpdated with the new texture and a cropped texture
@@ -191,20 +182,6 @@ func updateFrame() -> void:
 			return
 	var cropped: Image = editableImage.get_region(usedRect)
 	frameUpdated.emit(texture, ImageTexture.create_from_image(cropped))
-
-## Get the bounding box of the stroke
-#func getStrokeBounds() -> Rect2i:
-	#var minPos: Vector2i = strokePoints[0]
-	#var maxPos: Vector2i = strokePoints[0]
-	#for i: Vector2i in strokePoints:
-		#minPos.x = mini(minPos.x, i.x)
-		#minPos.y = mini(minPos.y, i.y)
-		#maxPos.x = maxi(maxPos.x, i.x)
-		#maxPos.y = maxi(maxPos.y, i.y)
-	#var offset: Vector2i = Vector2i(brushRadius / 2, brushRadius / 2)
-	#minPos = (minPos - offset).clamp(Vector2i.ZERO, CANVAS_SIZE)
-	#maxPos = (maxPos + Vector2i(brushRadius, brushRadius) - offset).clamp(Vector2i.ZERO, CANVAS_SIZE)
-	#return Rect2i(minPos, maxPos - minPos)
 
 #func withinCanvas(coord: Vector2i) -> bool:
 	#return (coord.x >= 0) and (coord.x < CANVAS_SIZE.x) and (coord.y >= 0) and (coord.y < CANVAS_SIZE.y)
