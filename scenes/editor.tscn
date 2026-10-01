@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://chle2akbs4lw7" path="res://scripts/editor/frameEditor/frameToolSettingField.gd" id="7_5tdu1"]
 [ext_resource type="Texture2D" uid="uid://b3pautysdg03k" path="res://textures/UI/scriptAreaBG.png" id="7_5tm2q"]
 [ext_resource type="Script" uid="uid://b1nalp7pifqeb" path="res://scripts/editor/frameEditor/bitmapFrame.gd" id="7_74j0u"]
+[ext_resource type="Script" uid="uid://lskcnug2l5x6" path="res://scripts/editor/frameEditor/buttonSelectTool.gd" id="8_0u1f5"]
 [ext_resource type="Script" uid="uid://hh8jhs3mcgte" path="res://scripts/editor/frameEditor/frameToolSettingColor.gd" id="8_q8l03"]
 [ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
@@ -503,7 +504,7 @@ theme_override_constants/separation = 15
 [node name="Label" type="Label" parent="frames/toolSettings/brush/size" unique_id=1682862726]
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
-text = "Size:"
+text = "Size"
 
 [node name="LineEdit2" type="LineEdit" parent="frames/toolSettings/brush/size" unique_id=1254956202 node_paths=PackedStringArray("bitmapFrame")]
 custom_minimum_size = Vector2(120, 0)
@@ -522,22 +523,34 @@ script = ExtResource("7_5tdu1")
 bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
 setting = &"brushSize"
 
-[node name="color" type="HBoxContainer" parent="frames/toolSettings/brush" unique_id=613395225]
-layout_mode = 2
+[node name="tools" type="VBoxContainer" parent="frames" unique_id=2015994550]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18541667
+anchor_top = 0.26759258
+anchor_right = 0.2765625
+anchor_bottom = 0.92685187
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 15
+metadata/_edit_use_anchors_ = true
 
-[node name="Label" type="Label" parent="frames/toolSettings/brush/color" unique_id=363892508]
+[node name="brush" type="Button" parent="frames/tools" unique_id=1517976653 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Color:"
+theme_override_font_sizes/font_size = 36
+text = "Brush"
+script = ExtResource("8_0u1f5")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="frames/toolSettings/brush/color" unique_id=1394899095 node_paths=PackedStringArray("bitmapFrame")]
-custom_minimum_size = Vector2(75, 0)
+[node name="eraser" type="Button" parent="frames/tools" unique_id=1115921652 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
-color = Color(1, 0.55, 0, 1)
-script = ExtResource("8_q8l03")
-bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
-setting = &"brushColor"
+theme_override_font_sizes/font_size = 36
+text = "Eraser"
+script = ExtResource("8_0u1f5")
+tool = 1
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="frames" unique_id=1559469628]
 z_index = 1
@@ -567,7 +580,7 @@ script = ExtResource("7_2w0at")
 camera = NodePath("Camera2D")
 
 [node name="brushStampPreview" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=364172529]
-z_index = 1
+z_index = 2
 texture_filter = 1
 
 [node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356 node_paths=PackedStringArray("brushStampPreview")]
@@ -609,6 +622,32 @@ metadata/_edit_lock_ = true
 [node name="Camera2D" type="Camera2D" parent="frames/SubViewportContainer/FrameView" unique_id=1966488675]
 zoom = Vector2(0.9, 0.9)
 limit_enabled = false
+
+[node name="color" type="HBoxContainer" parent="frames" unique_id=613395225]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18400002
+anchor_top = 0.16800001
+anchor_right = 0.27600002
+anchor_bottom = 0.23700002
+offset_left = 0.7199707
+offset_top = -0.4400177
+offset_right = -0.92004395
+offset_bottom = 0.039978027
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="frames/color" unique_id=363892508]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Color"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="frames/color" unique_id=1394899095 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+color = Color(1, 0.55, 0, 1)
+script = ExtResource("8_q8l03")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+setting = &"brushColor"
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false
