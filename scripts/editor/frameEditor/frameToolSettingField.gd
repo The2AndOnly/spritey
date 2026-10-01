@@ -6,6 +6,7 @@ extends LineEdit
 func _ready() -> void:
 	focus_exited.connect(focusExit)
 	text_submitted.connect(submitted)
+	text_changed.connect(changed)
 
 func submitted(newText: String) -> void:
 	match setting:
@@ -15,3 +16,6 @@ func submitted(newText: String) -> void:
 			bitmapFrame.brushRadius = newSize
 func focusExit() -> void:
 	submitted(text)
+
+func changed(newText: String) -> void:
+	bitmapFrame.brushRadius = clampi(int(newText), 1, 200)

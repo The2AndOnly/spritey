@@ -127,8 +127,9 @@ func loadSpriteFrames() -> void:
 	for i: int in range(spriteFrames.get_frame_count(&"default")):
 		var texture: Texture2D = spriteFrames.get_frame_texture(&"default", i)
 		var entry: FrameEntry = FRAME_ENTRY.instantiate()
-		entry.previewTexture = texture
-		frameEntryContainer.add_child(entry)
+		entry.textureData = texture
 		entry.bitmapEdit = bitmapEdit
+		entry.frameID = i
+		frameEntryContainer.add_child(entry)
 		entry.button_group = FRAME_SELECTOR_GROUP
 		entry.button_pressed = true
