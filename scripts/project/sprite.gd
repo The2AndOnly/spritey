@@ -30,6 +30,9 @@ var valueBlocks: Dictionary[int, CompiledBlock] = {}
 var topLevelBlocks: Dictionary[StringName, Array] = {}
 var scriptsCompiled := false
 
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 func compileAll() -> void:
 	# First, clear previous compilation
 	topLevelBlocks = {}

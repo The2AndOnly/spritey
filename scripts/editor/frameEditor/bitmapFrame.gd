@@ -9,7 +9,7 @@ enum Tools {
 }
 
 # Adjustable by the tool settings
-var brushRadius: int = 5:
+var brushRadius: int = 10:
 	set(value):
 		brushRadius = value
 		setBrushStamp()

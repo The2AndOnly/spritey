@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bio3f3s4d5x6"
-path="res://.godot/imported/costume2.png-f4da0a3c9da31ba3bf1913014857abc5.ctex"
+uid="uid://dhmontm0rmbj8"
+path="res://.godot/imported/orangeMoe.png-a91459b46cdddbb9f0ee5ad7ac264ec6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/sprite library/costume2.png"
-dest_files=["res://.godot/imported/costume2.png-f4da0a3c9da31ba3bf1913014857abc5.ctex"]
+source_file="res://textures/sprite library/orangeMoe.png"
+dest_files=["res://.godot/imported/orangeMoe.png-a91459b46cdddbb9f0ee5ad7ac264ec6.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ccrp7xrgapb5a" path="res://scripts/editor/guiButtons/UIFrameEntry.gd" id="1_5dg8d"]
 
-[node name="frameEntry" type="Button" unique_id=683191188 node_paths=PackedStringArray("entryTexture")]
-custom_minimum_size = Vector2(-1, 150)
+[node name="frameEntry" type="Button" unique_id=683191188 node_paths=PackedStringArray("entryTexture", "nameLabel", "sizeLabel")]
+custom_minimum_size = Vector2(0, 150)
 anchors_preset = -1
 anchor_right = 0.133
 anchor_bottom = 0.13900001
@@ -11,6 +11,8 @@ offset_right = -0.3600006
 offset_bottom = -0.120010376
 script = ExtResource("1_5dg8d")
 entryTexture = NodePath("MarginContainer/TextureRect")
+nameLabel = NodePath("info/VBoxContainer/name")
+sizeLabel = NodePath("info/VBoxContainer/size")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=300481455]
 layout_mode = 1
@@ -19,8 +21,47 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=977048307]
+texture_filter = 1
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
+
+[node name="info" type="Panel" parent="." unique_id=974592489]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.64
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="info" unique_id=1129594873]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = -4
+metadata/_edit_use_anchors_ = true
+
+[node name="name" type="Label" parent="info/VBoxContainer" unique_id=878463235]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 21
+text = "Name"
+horizontal_alignment = 1
+
+[node name="size" type="Label" parent="info/VBoxContainer" unique_id=2057787794]
+layout_mode = 2
+size_flags_vertical = 3
+text = "1 x 1"
+horizontal_alignment = 1

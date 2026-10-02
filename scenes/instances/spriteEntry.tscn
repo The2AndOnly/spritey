@@ -27,6 +27,7 @@ theme_override_constants/margin_right = 15
 theme_override_constants/margin_bottom = 15
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=1481622570]
+texture_filter = 1
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
