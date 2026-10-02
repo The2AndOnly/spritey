@@ -6,6 +6,7 @@ extends Control
 @export var mousePosLabel: Label
 @export var frameEntryContainer: VBoxContainer
 @export var bitmapEdit: BitmapFrame
+@export var frameNameField: LineEdit
 const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 const FRAME_ENTRY: PackedScene = preload("uid://cak3veot0rt61")
@@ -129,7 +130,13 @@ func loadSpriteFrames() -> void:
 		var entry: FrameEntry = FRAME_ENTRY.instantiate()
 		entry.textureData = texture
 		entry.bitmapEdit = bitmapEdit
+		entry.sprite = selectedSprite
 		entry.frameID = i
+		entry.nameField = frameNameField
 		frameEntryContainer.add_child(entry)
 		entry.button_group = FRAME_SELECTOR_GROUP
-		entry.button_pressed = true
+		if selectedSprite.frame == i: entry.button_pressed = true
+	# Automatically select the frame the sprite was on
+	var currentID: int = selectedSprite.frame
+	bitmapEdit.showFrame(selectedSprite.sprite_frames.get_frame_texture(&"default", currentID), currentID)
+	frameNameField.text = selectedSprite.frameNames[currentID]

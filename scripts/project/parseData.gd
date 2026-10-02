@@ -1,5 +1,5 @@
 class_name ParseData
-extends Node
+extends Object
 
 static func castType(type: int, value: Variant) -> Variant:
 	match type:
@@ -37,3 +37,33 @@ static func findUniqueName(desired: String, existing: Array[String]) -> String:
 		count += 1
 		possibleName = "%s%d" % [baseName, count]
 	return possibleName.strip_edges()
+
+static func forceTextureSize(source: Texture2D, size: Vector2i = Vector2i(1280, 720)) -> Texture2D:
+	var sourceImage: Image = source.get_image()
+	var sourceSize: Vector2i = sourceImage.get_size()
+	# Shrink images larger than the target size to fit
+	if (sourceSize.x > size.x) or sourceSize.y > size.y:
+		var scale: float = minf(float(size.x) / float(sourceSize.x), float(size.y) / float(sourceSize.y))
+		var newSize: Vector2i = Vector2i(int(sourceSize.x * scale), int(sourceSize.y * scale))
+		sourceImage.resize(newSize.x, newSize.y, Image.INTERPOLATE_NEAREST)
+		sourceSize = sourceImage.get_size()
+	# Make a transparent image with the specified size and center the source onto it
+	var newImage: Image = Image.create_empty(size.x, size.y, false, Image.FORMAT_RGBA8)
+	newImage.fill(Color(0.0, 0.0, 0.0, 0.0))
+	if sourceImage.is_compressed():
+		sourceImage.decompress()
+	sourceImage.convert(Image.FORMAT_RGBA8)
+	# Center source image on the canvas
+	var sourceX: int = (size.x - sourceSize.x) / 2
+	var sourceY: int = (size.y - sourceSize.y) / 2
+	newImage.blit_rect(sourceImage, Rect2i(Vector2i.ZERO, sourceSize), Vector2i(sourceX, sourceY))
+	return ImageTexture.create_from_image(newImage)
+
+static func cropTexture(source: Texture2D) -> Texture2D:
+	var sourceImage: Image = source.get_image()
+	var usedRect: Rect2i = sourceImage.get_used_rect()
+	# An empty image becomes a 1x1 transparent texture
+	if (usedRect.size.x <= 0) or usedRect.size.y <= 0:
+			var empty: ImageTexture = ImageTexture.create_from_image(Image.create_empty(1, 1, false, Image.FORMAT_RGBA8))
+			return empty
+	return ImageTexture.create_from_image(sourceImage.get_region(usedRect))

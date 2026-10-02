@@ -2,17 +2,20 @@
 
 [ext_resource type="Script" uid="uid://ccrp7xrgapb5a" path="res://scripts/editor/guiButtons/UIFrameEntry.gd" id="1_5dg8d"]
 
-[node name="frameEntry" type="Button" unique_id=683191188 node_paths=PackedStringArray("entryTexture", "nameLabel", "sizeLabel")]
+[node name="frameEntry" type="Button" unique_id=683191188 node_paths=PackedStringArray("entryTexture", "nameLabel", "sizeLabel", "idLabel")]
 custom_minimum_size = Vector2(0, 150)
 anchors_preset = -1
-anchor_right = 0.133
-anchor_bottom = 0.13900001
-offset_right = -0.3600006
-offset_bottom = -0.120010376
+anchor_right = 0.080729164
+anchor_bottom = 0.1388889
+grow_horizontal = 2
+grow_vertical = 2
+toggle_mode = true
 script = ExtResource("1_5dg8d")
 entryTexture = NodePath("MarginContainer/TextureRect")
 nameLabel = NodePath("info/VBoxContainer/name")
 sizeLabel = NodePath("info/VBoxContainer/size")
+idLabel = NodePath("id")
+metadata/_edit_use_anchors_ = true
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=300481455]
 layout_mode = 1
@@ -22,9 +25,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 15
-theme_override_constants/margin_top = 15
+theme_override_constants/margin_top = 25
 theme_override_constants/margin_right = 15
-theme_override_constants/margin_bottom = 15
+theme_override_constants/margin_bottom = 25
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer" unique_id=977048307]
 texture_filter = 1
@@ -59,9 +62,23 @@ size_flags_vertical = 3
 theme_override_font_sizes/font_size = 21
 text = "Name"
 horizontal_alignment = 1
+text_overrun_behavior = 5
 
 [node name="size" type="Label" parent="info/VBoxContainer" unique_id=2057787794]
 layout_mode = 2
 size_flags_vertical = 3
-text = "1 x 1"
+text = "1280 x 720"
 horizontal_alignment = 1
+
+[node name="id" type="Label" parent="." unique_id=69873002]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.033333268
+anchor_right = 0.96666676
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 20
+text = "1"
+metadata/_edit_use_anchors_ = true

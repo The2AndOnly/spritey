@@ -6,6 +6,7 @@ extends SubViewport
 
 @export var editor: Editor
 @export var projectUI: CanvasLayer
+@export var camera: Camera2D
 const baseSize: Vector2 = Vector2(1280.0, 720.0)
 # These are to optimize calculating coordinates
 const halfBaseSize: Vector2 = baseSize / 2.0
@@ -34,6 +35,11 @@ func _ready() -> void:
 	for i: int in range(BlockStructures.keyOptions.size()):
 		actionToIndex[BlockStructures.keyOptions[i]] = i
 	variables.append(Variable.new("variable", self, "0.0"))
+	# Set the inital zoom and position of the camera
+	camera.position = Vector2(size) / Vector2(2.0, 2.0)
+	var scaleFactor: Vector2 = Vector2(size) / baseSize
+	var minScale: float = minf(scaleFactor.x, scaleFactor.y)
+	camera.zoom = Vector2(minScale, minScale)
 
 func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = sprite.spriteScript[blockID]

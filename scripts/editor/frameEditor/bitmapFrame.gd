@@ -49,21 +49,10 @@ func _ready() -> void:
 	previewTexture = ImageTexture.create_from_image(queuedImage)
 	setBrushStamp()
 
-# Load the frame onto a 1280x720 canvas
 func showFrame(showTexture: Texture2D, id: int) -> void:
 	frameID = id
-	editableImage = Image.create_empty(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
-	editableImage.fill(Color(0.0, 0.0, 0.0, 0.0))
-	var sourceImage: Image = showTexture.get_image()
-	if sourceImage.is_compressed():
-		sourceImage.decompress()
-	sourceImage.convert(Image.FORMAT_RGBA8)
-	# Center source image on the canvas
-	var sourceSize: Vector2i = sourceImage.get_size()
-	var sourceX: int = (CANVAS_SIZE.x - sourceSize.x) / 2
-	var sourceY: int = (CANVAS_SIZE.y - sourceSize.y) / 2
-	editableImage.blit_rect(sourceImage, Rect2i(Vector2i.ZERO, sourceSize), Vector2i(sourceX, sourceY))
-	texture = ImageTexture.create_from_image(editableImage)
+	editableImage = showTexture.get_image()
+	texture = showTexture
 
 # Create points and redraw if there are any new points to process
 func _process(_delta: float) -> void:
@@ -138,9 +127,9 @@ func setBrushStamp() -> void:
 				if toolSelected == Tools.ERASER:
 					var outline: float = maxf(0.0, (brushRadius / 2.0) - 1.0) ** 2
 					if distance < outline:
-						brushStamp.set_pixel(x, y, Color(0.16, 0.16, 0.16, 1.0))
+						brushStamp.set_pixel(x, y, Color(1.0, 1.0, 1.0, 0.471))
 					else:
-						brushStamp.set_pixel(x, y, Color(0.32, 0.637, 1.0, 1.0))
+						brushStamp.set_pixel(x, y, Color(1.0, 1.0, 1.0, 0.784))
 				else:
 					brushStamp.set_pixel(x, y, color)
 	# Set stamp preview
@@ -170,18 +159,7 @@ func bakePreview() -> void:
 	editableImage.blit_rect(queuedImage, Rect2i(Vector2i.ZERO, CANVAS_SIZE), Vector2i.ZERO)
 	texture = ImageTexture.create_from_image(editableImage)
 	queuedImage.fill(Color(0.0, 0.0, 0.0, 0.0))
-	updateFrame()
-
-# Emit frameUpdated with the new texture and a cropped texture
-func updateFrame() -> void:
-	# An empty image becomes a 1x1 transparent texture
-	var usedRect: Rect2i = editableImage.get_used_rect()
-	if (usedRect.size.x <= 0) or usedRect.size.y <= 0:
-			var empty: ImageTexture = ImageTexture.create_from_image(Image.create_empty(1, 1, false, Image.FORMAT_RGBA8))
-			frameUpdated.emit(empty, empty)
-			return
-	var cropped: Image = editableImage.get_region(usedRect)
-	frameUpdated.emit(texture, ImageTexture.create_from_image(cropped))
+	frameUpdated.emit(texture)
 
 #func withinCanvas(coord: Vector2i) -> bool:
 	#return (coord.x >= 0) and (coord.x < CANVAS_SIZE.x) and (coord.y >= 0) and (coord.y < CANVAS_SIZE.y)

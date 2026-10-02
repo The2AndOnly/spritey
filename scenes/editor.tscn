@@ -18,6 +18,7 @@
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
+[ext_resource type="Script" uid="uid://c2yywh5aeypjo" path="res://scripts/editor/frameEditor/buttonNewFrame.gd" id="13_8g6du"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
@@ -33,7 +34,7 @@ size = Vector2(7000, 4500)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
-[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "frameEntryContainer", "bitmapEdit")]
+[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "frameEntryContainer", "bitmapEdit", "frameNameField")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,6 +48,7 @@ scriptView = NodePath("scripts/SubViewportContainer/ScriptView")
 mousePosLabel = NodePath("sprites/mousePosition")
 frameEntryContainer = NodePath("frames/previews/ScrollContainer/MarginContainer/VBoxContainer")
 bitmapEdit = NodePath("frames/SubViewportContainer/FrameView/bitmapFrame")
+frameNameField = NodePath("frames/frameName/LineEdit2")
 metadata/_edit_lock_ = true
 
 [node name="clear" type="ColorRect" parent="." unique_id=1126558441]
@@ -108,7 +110,6 @@ editor = NodePath("../..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -131,18 +132,21 @@ grow_horizontal = 2
 grow_vertical = 2
 stretch = true
 metadata/_edit_use_anchors_ = true
-metadata/_edit_lock_ = true
 
-[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI")]
+[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI", "camera")]
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 0
+render_target_update_mode = 4
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 projectUI = NodePath("UI")
+camera = NodePath("Camera2D")
 
 [node name="UI" type="CanvasLayer" parent="sprites/SubViewportContainer/GameView" unique_id=1355168075]
+
+[node name="Camera2D" type="Camera2D" parent="sprites/SubViewportContainer/GameView" unique_id=937611384]
+limit_enabled = false
 
 [node name="SpritePanel" type="Panel" parent="sprites" unique_id=1850654370]
 layout_mode = 1
@@ -270,12 +274,12 @@ theme_override_constants/separation = 53
 [node name="name" type="HBoxContainer" parent="sprites/spriteData/topRow" unique_id=540193201]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/topRow/name" unique_id=122987131]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Name:"
+text = "Name"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -294,12 +298,12 @@ caret_blink = true
 [node name="xPos" type="HBoxContainer" parent="sprites/spriteData/topRow" unique_id=1575746235]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/topRow/xPos" unique_id=1194812130]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "X:"
+text = "X"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -319,12 +323,12 @@ caret_blink = true
 [node name="yPos" type="HBoxContainer" parent="sprites/spriteData/topRow" unique_id=1326447784]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/topRow/yPos" unique_id=643226182]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Y:"
+text = "Y"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -349,12 +353,12 @@ theme_override_constants/separation = 53
 [node name="visible" type="HBoxContainer" parent="sprites/spriteData/bottomRow" unique_id=1921340487]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/bottomRow/visible" unique_id=1810433242]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Visible:"
+text = "Visible"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -381,12 +385,12 @@ text = "Yes"
 [node name="direction" type="HBoxContainer" parent="sprites/spriteData/bottomRow" unique_id=1321632804]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/bottomRow/direction" unique_id=430273507]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Direction:"
+text = "Direction"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -406,12 +410,12 @@ caret_blink = true
 [node name="size" type="HBoxContainer" parent="sprites/spriteData/bottomRow" unique_id=2138771664]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 32
+theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="sprites/spriteData/bottomRow/size" unique_id=271072603]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Size:"
+text = "Size"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -429,6 +433,7 @@ virtual_keyboard_enabled = false
 caret_blink = true
 
 [node name="frames" type="Control" parent="." unique_id=1330480262]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -575,7 +580,7 @@ physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1280, 720)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("7_2w0at")
 camera = NodePath("Camera2D")
 
@@ -648,6 +653,87 @@ color = Color(1, 0.55, 0, 1)
 script = ExtResource("8_q8l03")
 bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
 setting = &"brushColor"
+
+[node name="frameName" type="HBoxContainer" parent="frames" unique_id=1551576237]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.192375
+anchor_top = 0.062962964
+anchor_right = 0.37600002
+anchor_bottom = 0.133
+offset_left = -0.36001587
+offset_right = -0.92004395
+offset_bottom = 0.3600006
+grow_vertical = 2
+theme_override_constants/separation = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="frames/frameName" unique_id=1091542709]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Name"
+
+[node name="LineEdit2" type="LineEdit" parent="frames/frameName" unique_id=1483465988 node_paths=PackedStringArray("bitmapFrame", "editor")]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+placeholder_text = "Name"
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
+script = ExtResource("7_5tdu1")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+editor = NodePath("../../..")
+setting = &"frameName"
+
+[node name="newFrame" type="HBoxContainer" parent="frames" unique_id=200012496]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.022000002
+anchor_top = 0.048
+anchor_right = 0.16900001
+anchor_bottom = 0.11000001
+offset_left = -0.24000168
+offset_top = 0.15999985
+offset_right = -0.4800415
+offset_bottom = 0.19998932
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="empty" type="Button" parent="frames/newFrame" unique_id=1422607045 node_paths=PackedStringArray("editor", "bitmapEdit", "frameNameField", "frameEntryContainer")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "empty"
+script = ExtResource("13_8g6du")
+action = &"empty"
+editor = NodePath("../../..")
+bitmapEdit = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+frameNameField = NodePath("../../frameName/LineEdit2")
+frameEntryContainer = NodePath("../../previews/ScrollContainer/MarginContainer/VBoxContainer")
+
+[node name="upload" type="Button" parent="frames/newFrame" unique_id=271634577 node_paths=PackedStringArray("editor", "bitmapEdit", "frameNameField", "frameEntryContainer", "fileDialog")]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "upload"
+script = ExtResource("13_8g6du")
+action = &"upload"
+editor = NodePath("../../..")
+bitmapEdit = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+frameNameField = NodePath("../../frameName/LineEdit2")
+frameEntryContainer = NodePath("../../previews/ScrollContainer/MarginContainer/VBoxContainer")
+fileDialog = NodePath("FileDialog")
+
+[node name="FileDialog" type="FileDialog" parent="frames/newFrame/upload" unique_id=1930096738]
+oversampling_override = 1.0
+title = "Open File(s)"
+file_mode = 1
+access = 2
+filters = PackedStringArray("*.png, *.jpg, *.jpeg, *.webp, *.apng, *.jfif, *.pjpeg, *.pjp ; Supported Images")
+use_native_dialog = true
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false

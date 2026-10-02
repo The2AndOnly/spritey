@@ -11,6 +11,8 @@ var gameView: GameView
 #@onready var opacityGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 
 var variables: Array[Variable] = []
+# Index is the frame number
+var frameNames: Array[String] = []
 
 var spriteName: String = "?"
 var spritePos: Vector2 = Vector2.ZERO:
@@ -45,6 +47,10 @@ func updateSize() -> void:
 		baseScale * ((stretch.x / 100.0) + 1.0),
 		baseScale * ((stretch.y / 100.0) + 1.0)
 	)
+
+func addFrame(newFrame: Texture2D, frameName: String) -> void:
+	sprite_frames.add_frame(&"default", ParseData.forceTextureSize(newFrame))
+	frameNames.append(ParseData.findUniqueName(frameName, frameNames))
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)
