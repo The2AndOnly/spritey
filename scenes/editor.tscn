@@ -19,6 +19,7 @@
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
 [ext_resource type="Script" uid="uid://c2yywh5aeypjo" path="res://scripts/editor/frameEditor/buttonNewFrame.gd" id="13_8g6du"]
+[ext_resource type="Script" uid="uid://b3tdjcx85l7es" path="res://scripts/project/spriteCollision.gd" id="20_aa8l6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
 bg_color = Color(0.22, 0.22, 0.22, 1)
@@ -1174,3 +1175,6 @@ editor = NodePath("../../../..")
 [node name="dialogBox" parent="." unique_id=1426297197 instance=ExtResource("12_78fwb")]
 visible = false
 layout_mode = 1
+
+[node name="Node" type="Node" parent="." unique_id=313119718]
+script = ExtResource("20_aa8l6")

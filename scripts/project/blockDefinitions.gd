@@ -75,7 +75,7 @@ func H_getPositionFromOption(option: int) -> Vector2:
 		0:
 			return gameView.mousePosition
 		1:
-			return gameView.getRandomCoord()
+			return Vector2(randi_range(-640, 640), randi_range(-360, 360))
 	return spritePos
 
 func trans_moveSteps(inputs: Array) -> float:
@@ -468,7 +468,7 @@ func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
 func inter_touching(inputs: Array) -> bool:
-	return false
+	return SpriteCollision.check_gpu_collision(self, inputs[0])
 
 ## VARIABLES
 

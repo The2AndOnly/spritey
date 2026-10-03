@@ -8,10 +8,15 @@ extends SubViewport
 @export var projectUI: CanvasLayer
 @export var camera: Camera2D
 const baseSize: Vector2 = Vector2(1280.0, 720.0)
+
+# Set the inital zoom of the camera so it fits the base size perfectly
+@onready var scaleFactor: Vector2 = Vector2(size) / baseSize
+@onready var originalZoom: float = minf(scaleFactor.x, scaleFactor.y)
+@onready var originalZoomVector: Vector2 = Vector2(originalZoom, originalZoom)
 # These are to optimize calculating coordinates
-const halfBaseSize: Vector2 = baseSize / 2.0
+@onready var halfBaseSize: Vector2 = baseSize / 2.0
 @onready var halfSize: Vector2 = Vector2(size.x / 2.0, size.y / 2.0)
-@onready var scaledSize: Vector2 = Vector2(size.x / baseSize.x, size.y / baseSize.y)
+@onready var scaledSize: Vector2 = Vector2(size.x / baseSize.x, size.y / baseSize.y) / originalZoomVector
 @onready var sizeMinusOne: Vector2 = size - Vector2i(1, 1)
 
 # This stores all of the actively running compiled stacks in the project
@@ -30,16 +35,16 @@ var mousePosition: Vector2
 var actionToIndex: Dictionary[StringName, int] = {}
 
 func _ready() -> void:
-	if editor: editor.setMousePosition()
-	else: setMousePosition()
+	if editor:
+		editor.setMousePosition()
+	else:
+		setMousePosition()
 	for i: int in range(BlockStructures.keyOptions.size()):
 		actionToIndex[BlockStructures.keyOptions[i]] = i
 	variables.append(Variable.new("variable", self, "0.0"))
 	# Set the inital zoom and position of the camera
 	camera.position = Vector2(size) / Vector2(2.0, 2.0)
-	var scaleFactor: Vector2 = Vector2(size) / baseSize
-	var minScale: float = minf(scaleFactor.x, scaleFactor.y)
-	camera.zoom = Vector2(minScale, minScale)
+	camera.zoom = originalZoomVector
 
 func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = sprite.spriteScript[blockID]
@@ -181,19 +186,14 @@ func finishWaitBlock() -> void:
 # Input is game coords, output is local coords
 func toLocalCoords(position: Vector2) -> Vector2:
 	return Vector2(
-		(position.x * (scaledSize.x)) + (halfSize.x),
-		(halfSize.y) - (position.y * (scaledSize.y))
+		(position.x * scaledSize.x) + halfSize.x,
+		halfSize.y - (position.y * scaledSize.y)
 	)
 # Input is local coords, output is game coords
 func toGameCoords(position: Vector2) -> Vector2:
 	return Vector2(
-		(position.x - halfSize.x) / scaledSize.x,
-		(halfSize.y - position.y) / scaledSize.y
-	)
-func getRandomCoord() -> Vector2:
-	return Vector2(
-		randf_range(-halfBaseSize.x, halfBaseSize.x),
-		randf_range(-halfBaseSize.y, halfBaseSize.y)
+		(position.x - halfSize.x) / originalZoom,
+		(halfSize.y - position.y) / originalZoom
 	)
 func setMousePosition() -> void:
 	mousePosition = toGameCoords(get_mouse_position())
@@ -203,7 +203,7 @@ func _input(inputEvent: InputEvent) -> void:
 	if editor:
 		if editor.currentView != &"sprites": return
 		if inputEvent is InputEventMouseMotion:
-			setMousePosition()
+			if !editor: setMousePosition()
 			return
 	
 	if inputEvent is InputEventKey:
