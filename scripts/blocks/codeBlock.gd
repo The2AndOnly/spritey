@@ -215,6 +215,7 @@ func addInputArea(blockInput: Control) -> void:
 	blockInput.detectionShape = detectionShape
 	blockInput.setDetectionRect.call_deferred()
 
+# Add the addons to the dropdown menus
 func setOptionsList(options: BlockOptions) -> void:
 	var optionsList: Array = blockStructure[options.id][3].duplicate()
 	options.clear()
@@ -238,7 +239,7 @@ func setOptionsList(options: BlockOptions) -> void:
 			for i: String in sortedSignals:
 				optionsList.append(i)
 				options.items.append(i)
-		3: # Keys
+		3: # Keyboard keys
 			optionsList.append_array(BlockStructures.keyOptions)
 			for i in range(options.items.size(), optionsList.size()): options.items.append(i)
 		4: # Variables
@@ -252,6 +253,11 @@ func setOptionsList(options: BlockOptions) -> void:
 				varNames.append(i.name)
 			optionsList.append_array(varNames)
 			options.items.append_array(sortedVars)
+		5: # Frames
+			# TODO: remove check since there should always be selected sprite in the future
+			if !editor.selectedSprite: return
+			optionsList.append_array(editor.selectedSprite.frameNames)
+			for i: int in range(optionsList.size()): options.items.append(i)
 	for j: String in optionsList:
 		options.add_item(j)
 	if options.items.size() > 0:

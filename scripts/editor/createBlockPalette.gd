@@ -47,6 +47,8 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_setSize",
 		&"vis_changeSize",
 		&"vis_size",
+		&"vis_changeFrame",
+		&"vis_setFrame",
 		&"vis_setStretch",
 		&"vis_changeStretch",
 		&"vis_stretch",
@@ -59,6 +61,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 	&"transform": [
 		&"trans_setPosition",
 		&"trans_setPositionOption",
+		&"trans_moveSteps",
 		&"trans_setX",
 		&"trans_setY",
 		&"trans_changeX",

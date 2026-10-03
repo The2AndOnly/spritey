@@ -19,6 +19,7 @@ extends Node
 ## 2 - events
 ## 3 - keyboard keys
 ## 4 - global and local variables
+## 5 - frames
 # special value (not shown on block but passed through block definition):
 # [&"special", Variant]
 
@@ -108,6 +109,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	&"trans_moveSteps": {
+		&"structure": ["move", 0, "steps"],
+		0: [&"input", 1, "10"],
+		&"color": &"transform",
+		&"shape": BlockShape.blockShapes.STACK
+	},
 	&"trans_setX": {
 		&"structure": ["set X to", 0],
 		0: [&"input", 1, "0"],
@@ -122,13 +129,13 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"trans_changeX": {
 		&"structure": ["change X by", 0],
-		0: [&"input", 1, "0"],
+		0: [&"input", 1, "10"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"trans_changeY": {
 		&"structure": ["change Y by", 0],
-		0: [&"input", 1, "0"],
+		0: [&"input", 1, "10"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -467,7 +474,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_changeSize": {
 		&"structure": ["change size by", 0],
-		0: [&"input", 1, "2"],
+		0: [&"input", 1, "5"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -486,7 +493,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"vis_changeStretch": {
 		&"structure": ["change", 0, "stretch by", 1],
 		0: [&"options", 0, 0, ["horizontal", "vertical"]],
-		1: [&"input", 1, "2"],
+		1: [&"input", 1, "5"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},
@@ -525,6 +532,18 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["opacity"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"vis_changeFrame": {
+		&"structure": ["change frame by", 0],
+		0: [&"input", 0, "1"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_setFrame": {
+		&"structure": ["set frame to", 0],
+		0: [&"options", 5, 0, []],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	
 	## VARIABLES

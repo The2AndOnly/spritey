@@ -80,6 +80,12 @@ func H_getPositionFromOption(option: int) -> Vector2:
 			return gameView.getRandomCoord()
 	return spritePos
 
+func trans_moveSteps(inputs: Array) -> float:
+	var rotated: Vector2 = Vector2.RIGHT.rotated(rotation)
+	rotated.y = -rotated.y
+	spritePos += rotated * inputs[0]
+	return -1.0
+
 func trans_glideToPosition(inputs: Array) -> float:
 	return H_glideToDestination(inputs, Vector2(inputs[1], inputs[2]))
 func trans_glideToOption(inputs: Array) -> float:
@@ -118,7 +124,7 @@ func trans_turnDegrees(inputs: Array) -> float:
 func trans_pointTowards(inputs: Array) -> float:
 	if inputs[0] == 0:
 		look_at(get_global_mouse_position())
-		direction = rotation_degrees + 90.0
+		direction = snappedf(rotation_degrees + 90.0, 0.1)
 	else:
 		direction = randi_range(-179, 180)
 	return -1.0
@@ -246,7 +252,7 @@ func exp_multiply(inputs: Array) -> float:
 func exp_divide(inputs: Array) -> float:
 	return inputs[0] / inputs[1]
 func exp_mod(inputs: Array) -> float:
-	return fmod(inputs[0], inputs[1])
+	return fposmod(inputs[0], inputs[1])
 func exp_exponent(inputs: Array) -> float:
 	return inputs[0] ** inputs[1]
 
@@ -389,6 +395,13 @@ func vis_changeOpacity(inputs: Array) -> float:
 	return -1.0
 func vis_opacity() -> float:
 	return opacity
+
+func vis_changeFrame(inputs: Array) -> float:
+	frame = posmod(frame + inputs[0], frameNames.size())
+	return -1.0
+func vis_setFrame(inputs: Array) -> float:
+	frame = inputs[0]
+	return -1.0
 
 ## INTERACTION
 

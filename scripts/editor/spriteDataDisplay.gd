@@ -51,10 +51,14 @@ func setDisplays() -> void:
 	ypos = ParseData.stringNumber(currentSprite.spritePos.y)
 	direction = ParseData.stringNumber(currentSprite.direction)
 	spriteSize = ParseData.stringNumber(currentSprite.size)
-	if xposField.text != xpos: xposField.text = xpos
-	if yposField.text != ypos: yposField.text = ypos
-	if directionField.text != direction: directionField.text = direction
-	if sizeField.text != spriteSize: sizeField.text = spriteSize
+	if !xposField.has_focus():
+		if xposField.text != xpos: xposField.text = xpos
+	if !yposField.has_focus():
+		if yposField.text != ypos: yposField.text = ypos
+	if !directionField.has_focus():
+		if directionField.text != direction: directionField.text = direction
+	if !sizeField.has_focus():
+		if sizeField.text != spriteSize: sizeField.text = spriteSize
 	
 	if currentSprite.visible:
 		visibleTrue.button_pressed = true
