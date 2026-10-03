@@ -384,6 +384,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
+	&"inter_touching": {
+		&"structure": ["touching", 0],
+		0: [&"options", 1, 0, ["pointer"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
 	
 	## CONTROL
 	

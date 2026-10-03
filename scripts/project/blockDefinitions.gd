@@ -467,6 +467,9 @@ func inter_timeSince1970() -> float:
 func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
+func inter_touching(inputs: Array) -> bool:
+	return false
+
 ## VARIABLES
 
 func var_value(inputs: Array) -> Variant:
