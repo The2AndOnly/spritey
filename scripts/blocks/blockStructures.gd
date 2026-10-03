@@ -284,15 +284,15 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"exp_charOf": {
 		&"structure": ["char", 0, "of", 1],
-		0: [&"input", 0, "0"],
+		0: [&"input", 0, "1"],
 		1: [&"input", 2, "text"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
 	&"exp_substring": {
 		&"structure": ["chars", 0, "to", 1, "of", 2],
-		0: [&"input", 0, "0"],
-		1: [&"input", 0, "2"],
+		0: [&"input", 0, "1"],
+		1: [&"input", 0, "3"],
 		2: [&"input", 2, "text"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
@@ -524,7 +524,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_changeOpacity": {
 		&"structure": ["change opacity by", 0],
-		0: [&"input", 1, "-2"],
+		0: [&"input", 1, "-5"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},

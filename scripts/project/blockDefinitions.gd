@@ -291,11 +291,17 @@ func exp_random(inputs: Array) -> Variant:
 
 func exp_join(inputs: Array) -> String:
 	return inputs[0] + inputs[1]
+
 func exp_charOf(inputs: Array) -> String:
 	var index: int = inputs[0]
 	var text: String = inputs[1]
 	if index < 0:
 		index += text.length()
+		index = maxi(index, 0)
+	elif index > 0:
+		index -= 1
+	else:
+		return ""
 	return text.substr(index, 1)
 func exp_substring(inputs: Array) -> String:
 	var index: int = inputs[0]
@@ -303,12 +309,22 @@ func exp_substring(inputs: Array) -> String:
 	var text: String = inputs[2]
 	if index < 0:
 		index += text.length()
+		index = maxi(index, 0)
+	elif index > 0:
+		index -= 1
+	else:
+		return ""
 	if lastIndex < 0:
 		lastIndex += text.length()
+		lastIndex = maxi(lastIndex, 0)
+	elif lastIndex > 0:
+		lastIndex -= 1
+	else:
+		return ""
 	if lastIndex > index:
 		return text.substr(index, (lastIndex - index) + 1)
 	else:
-		return text.substr(lastIndex, (index - lastIndex) + 1)
+		return text.substr(lastIndex, (index - lastIndex) + 1).reverse()
 
 func exp_textLength(inputs: Array) -> int:
 	return inputs[0].length()
