@@ -22,6 +22,7 @@ extends Node
 ## 5 - frames
 # special value (not shown on block but passed through block definition):
 # [&"special", Variant]
+# blockOptions with ability to insert value blocks (as string): &"soptions"
 
 static var categoryColors: Dictionary[StringName, Color] = {
 	&"transform": Color("0050a6ff"),
@@ -541,7 +542,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_setFrame": {
 		&"structure": ["set frame to", 0],
-		0: [&"options", 5, 0, []],
+		0: [&"soptions", 5, 0, []],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},

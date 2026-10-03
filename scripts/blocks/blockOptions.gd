@@ -7,6 +7,8 @@ var id: int
 # For non-addon items, the item is an int of the item index
 var items: Array[Variant] = []
 var itemSelected: Variant = 0
+var acceptBlocks := false
+var highlight: Panel
 
 func _ready() -> void:
 	mouse_behavior_recursive = Control.MOUSE_BEHAVIOR_DISABLED

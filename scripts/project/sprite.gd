@@ -7,9 +7,9 @@ extends BlockDefinitions
 # &"next": int | ID of the block to run next, if missing then no block is next
 # &"value": bool | True if this block is a value block
 # &"nest": int | ID of the first block in nest, if missing then no nest or blocks in nest
-# &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 # &"pos": Vector2 | Position of the block, only for top-level blocks
 # &"z": int | Child index of the block, only for top-level blocks
+# &"inputs": Array[Array] | Maps out each input (index is input ID), inner array is input data
 ## Read type 0 (raw input): [read type, input type, input]
 # - input type: 0=integer, 1=float, 2=string, 3=positiveInt, 4=positiveFloat, 5=bool
 # - input is string (raw input)

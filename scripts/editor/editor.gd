@@ -95,7 +95,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 	block.parentBlock = parent
 	block.parentInputLoadID = parentInput
 	block.parentNest = parentNest
-	if blockData.has(&"pos"): block.loadPosition = blockData[&"pos"]
+	if blockData.has(&"pos"): block.loadPosition = Vector2(blockData[&"pos"])
 	if blockData.has(&"z"): indexes.append([block, blockData[&"z"]])
 	# Set up block's values (may involve creating value blocks)
 	if blockData.has(&"inputs"):

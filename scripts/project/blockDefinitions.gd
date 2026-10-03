@@ -31,8 +31,6 @@ func event_keyboard(inputs: Array, eventData: Array[Variant]) -> bool:
 func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
-	print(inputs)
-	print(eventData)
 	return inputs == eventData
 
 func event_signal(inputs: Array) -> float:
@@ -416,7 +414,14 @@ func vis_changeFrame(inputs: Array) -> float:
 	frame = posmod(frame + inputs[0], frameNames.size())
 	return -1.0
 func vis_setFrame(inputs: Array) -> float:
-	frame = inputs[0]
+	var option: Variant = inputs[0]
+	if option is String:
+		if option.is_valid_float():
+			frame = posmod(int(option) - 1, frameNames.size())
+		else:
+			frame = frameNames.find(option)
+	else:
+		frame = inputs[0]
 	return -1.0
 
 ## INTERACTION

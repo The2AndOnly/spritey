@@ -124,7 +124,8 @@ func _ready() -> void:
 			content.add_child(label)
 		# Data inputs
 		if i is int:
-			match blockStructure[i][0]:
+			var inputType: StringName = blockStructure[i][0]
+			match inputType:
 				&"input":
 					var input: BlockInputEdit = BlockInputEdit.new()
 					input.type = blockStructure[i][1]
@@ -139,7 +140,7 @@ func _ready() -> void:
 						input.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					else:
 						addInputArea(input)
-				&"options":
+				&"options", &"soptions":
 					var options: BlockOptions = BlockOptions.new()
 					options.id = i
 					if !valuesToLoad.is_empty():
@@ -148,13 +149,14 @@ func _ready() -> void:
 						options.itemSelected = blockStructure[i][2]
 					setOptionsList(options)
 					options.block = self
+					options.acceptBlocks = inputType == &"soptions"
 					options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					inputIds.append(options)
 					content.add_child(options)
 					if preview:
 						options.mouse_filter = Control.MOUSE_FILTER_IGNORE
 					else:
-						addInputArea(options)
+						addInputArea(options, options.acceptBlocks)
 				&"bool":
 					var boolean: BlockBoolPanel = BlockBoolPanel.new()
 					boolean.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -193,7 +195,7 @@ func _ready() -> void:
 		if sprite: BuildSpriteScript.updateBlock(self, sprite)
 
 # Create collision for the input so the mouse/value blocks can detect it
-func addInputArea(blockInput: Control) -> void:
+func addInputArea(blockInput: Control, optionsAcceptBlocks: bool = false) -> void:
 	var detection: Area2D = Area2D.new()
 	detection.monitoring = false
 	detection.set_collision_layer_value(1, false)
@@ -208,6 +210,8 @@ func addInputArea(blockInput: Control) -> void:
 			detection.add_to_group(&"blockValueDrop")
 			detection.mouse_entered.connect(blockInput.mouseEntered)
 			detection.mouse_exited.connect(blockInput.mouseExited)
+		elif optionsAcceptBlocks:
+			detection.add_to_group(&"blockValueDrop")
 	blockInput.add_child(detection)
 	var detectionShape: CollisionShape2D = CollisionShape2D.new()
 	detectionShape.shape = RectangleShape2D.new()

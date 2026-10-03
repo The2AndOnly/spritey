@@ -62,15 +62,7 @@ func setLineEditProperties(lineEdit: LineEdit) -> void:
 		lineEdit.custom_minimum_size = Vector2(60.0, 55.0)
 		lineEdit.custom_maximum_size = Vector2(-1.0, 55.0)
 		lineEdit.alignment = HORIZONTAL_ALIGNMENT_CENTER
-		# Create a highlight for if a value block is dragged over it
-		var highlight: Panel = Panel.new()
-		highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
-		highlight.add_theme_stylebox_override(&"panel", BLOCK_VALUE_HIGHLIGHT)
-		highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		highlight.show_behind_parent = true
-		highlight.visible = false
-		lineEdit.add_child(highlight)
-		lineEdit.highlight = highlight
+		addHighlight(lineEdit, BLOCK_VALUE_HIGHLIGHT)
 	# Search bar in popup
 	else:
 		lineEdit.add_theme_stylebox_override(&"normal", searchStyle)
@@ -79,15 +71,7 @@ func setBooleanPanelProperties(boolPanel: BlockBoolPanel) -> void:
 	boolPanel.custom_minimum_size = Vector2(80.0, 55.0)
 	boolPanel.custom_maximum_size = Vector2(-1.0, 55.0)
 	boolPanel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	# Create a highlight for if a value block is dragged over it
-	var highlight: Panel = Panel.new()
-	highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
-	highlight.add_theme_stylebox_override(&"panel", BLOCK_BOOL_HIGHLIGHT)
-	highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	highlight.show_behind_parent = true
-	highlight.visible = false
-	boolPanel.add_child(highlight)
-	boolPanel.highlight = highlight
+	addHighlight(boolPanel, BLOCK_BOOL_HIGHLIGHT)
 
 func setOptionButtonProperties(optionButton: BlockOptions) -> void:
 	optionButton.fit_to_longest_item = false
@@ -98,6 +82,19 @@ func setOptionButtonProperties(optionButton: BlockOptions) -> void:
 	optionButton.custom_minimum_size = Vector2(60.0, 55.0)
 	optionButton.custom_maximum_size = Vector2(-1.0, 55.0)
 	optionButton.allow_reselect = true
+	if optionButton.acceptBlocks:
+		addHighlight(optionButton, BLOCK_VALUE_HIGHLIGHT)
+
+# Create a highlight for if a value block is dragged over it
+func addHighlight(content: Control, style: StyleBoxFlat) -> void:
+	var highlight: Panel = Panel.new()
+	highlight.set_anchors_preset(Control.PRESET_FULL_RECT)
+	highlight.add_theme_stylebox_override(&"panel", style)
+	highlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	highlight.show_behind_parent = true
+	highlight.visible = false
+	content.add_child(highlight)
+	content.highlight = highlight
 
 func optionsOpened(optionButton: BlockOptions) -> void:
 	# Get the search bar of the options popup

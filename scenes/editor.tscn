@@ -707,6 +707,7 @@ theme_override_constants/separation = 20
 [node name="empty" type="Button" parent="frames/newFrame" unique_id=1422607045 node_paths=PackedStringArray("editor", "bitmapEdit", "frameNameField", "frameEntryContainer")]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 25
 text = "empty"
 script = ExtResource("13_8g6du")
 action = &"empty"
@@ -718,6 +719,7 @@ frameEntryContainer = NodePath("../../previews/ScrollContainer/MarginContainer/V
 [node name="upload" type="Button" parent="frames/newFrame" unique_id=271634577 node_paths=PackedStringArray("editor", "bitmapEdit", "frameNameField", "frameEntryContainer", "fileDialog")]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 25
 text = "upload"
 script = ExtResource("13_8g6du")
 action = &"upload"
