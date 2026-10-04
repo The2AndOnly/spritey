@@ -1,0 +1,14 @@
+[remap]
+
+importer="glsl"
+type="RDShaderFile"
+uid="uid://dvtmfv0s1regf"
+path="res://.godot/imported/spriteCollision.glsl-966618e61f05068aa3f0b2a53674d1fe.res"
+
+[deps]
+
+source_file="res://shaders/spriteCollision.glsl"
+dest_files=["res://.godot/imported/spriteCollision.glsl-966618e61f05068aa3f0b2a53674d1fe.res"]
+
+[params]
+

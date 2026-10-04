@@ -629,6 +629,9 @@ metadata/_edit_lock_ = true
 zoom = Vector2(0.9, 0.9)
 limit_enabled = false
 
+[node name="SpriteCollision" type="Node" parent="frames/SubViewportContainer/FrameView" unique_id=313119718]
+script = ExtResource("20_aa8l6")
+
 [node name="color" type="HBoxContainer" parent="frames" unique_id=613395225]
 layout_mode = 1
 anchors_preset = -1
@@ -1175,6 +1178,3 @@ editor = NodePath("../../../..")
 [node name="dialogBox" parent="." unique_id=1426297197 instance=ExtResource("12_78fwb")]
 visible = false
 layout_mode = 1
-
-[node name="Node" type="Node" parent="." unique_id=313119718]
-script = ExtResource("20_aa8l6")

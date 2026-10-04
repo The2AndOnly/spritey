@@ -1,156 +1,129 @@
 class_name SpriteCollision
 extends Node
 
-static var rd: RenderingDevice
-static var shader_rid: RID
-static var pipeline_rid: RID
+const CollisionShader: RDShaderFile = preload("uid://dvtmfv0s1regf")
 
-static var default_sampler_rid: RID
+static var renderer: RenderingDevice
+static var shader: RID
+static var pipeline: RID
+static var sampler: RID
 
 func _ready() -> void:
-	rd = RenderingServer.get_rendering_device()
-	if not rd:
-		return
-		
-	# Create a default linear-clamp sampler for texture sampling
-	var sampler_state = RDSamplerState.new()
-	sampler_state.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler_state.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	default_sampler_rid = rd.sampler_create(sampler_state)
+	renderer = RenderingServer.get_rendering_device()
+	var samplerState = RDSamplerState.new()
+	samplerState.mag_filter = RenderingDevice.SAMPLER_FILTER_NEAREST
+	samplerState.min_filter = RenderingDevice.SAMPLER_FILTER_NEAREST
+	sampler = renderer.sampler_create(samplerState)
+	shader = renderer.shader_create_from_spirv(CollisionShader.get_spirv())
+	pipeline = renderer.compute_pipeline_create(shader)
+
+static func spritesTouching(sprite1: AnimatedSprite2D, sprite2: AnimatedSprite2D) -> bool:
+	if (!sprite1.visible) or !sprite2.visible: return false
 	
-	# Load and compile GLSL shader
-	var shader_file = preload("uid://dvtmfv0s1regf")
-	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
-	shader_rid = rd.shader_create_from_spirv(shader_spirv)
-	pipeline_rid = rd.compute_pipeline_create(shader_rid)
-
-
-static func get_animated_sprite_rect(sprite: AnimatedSprite2D) -> Rect2:
-	if not sprite.sprite_frames or not sprite.sprite_frames.has_animation(sprite.animation):
-		return Rect2()
-	var tex: Texture2D = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
-	if not tex:
-		return Rect2()
-	var size = tex.get_size()
-	var offset = sprite.offset
-	if sprite.centered:
-		offset -= size * 0.5
-	return Rect2(offset, size)
-
-
-static func check_gpu_collision(sprite_a: AnimatedSprite2D, sprite_b: AnimatedSprite2D) -> bool:
-	if not rd:
-		return false
-		
-	# 1. Broad Phase AABB
-	var rect_a_local = get_animated_sprite_rect(sprite_a)
-	var rect_b_local = get_animated_sprite_rect(sprite_b)
+	var sprite1Texture: Texture2D = sprite1.sprite_frames.get_frame_texture(&"default", sprite1.frame)
+	var sprite2Texture: Texture2D = sprite2.sprite_frames.get_frame_texture(&"default", sprite2.frame)
 	
-	var rect_a_world = sprite_a.get_global_transform() * rect_a_local
-	var rect_b_world = sprite_b.get_global_transform() * rect_b_local
-	var inter: Rect2 = rect_a_world.intersection(rect_b_world)
+	# Get the axis-aligned bounding boxes
+	var sprite1Rect: Rect2 = getTextureRect(sprite1Texture)
+	var sprite2Rect: Rect2 = getTextureRect(sprite2Texture)
+	var sprite1Transform: Transform2D = getTransform(sprite1)
+	var sprite2Transform: Transform2D = getTransform(sprite2)
+	var globalSprite1Rect: Rect2 = sprite1Transform * sprite1Rect
+	var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * sprite2Rect)
+	if (intersection.size.x <= 0) or intersection.size.y <= 0: return false
 	
-	if inter.size.x <= 0 or inter.size.y <= 0:
-		return false
-
-# 2. Build Inputs Buffer with std430 alignment
-	var input_bytes = PackedByteArray()
+	# Send data to the shader
+	var inputs: PackedByteArray = PackedByteArray()
+	# Construct data for sprite1
+	inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
+	inputs.append_array(vector2Bytes(sprite1Rect.size))
+	inputs.append_array(vector2Bytes(sprite1Rect.position))
+	# Construct data for sprite2
+	inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
+	inputs.append_array(vector2Bytes(sprite2Rect.size))
+	inputs.append_array(vector2Bytes(sprite2Rect.position))
+	# Construct data for the intersection rect
+	inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
+	var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)
 	
-	var xform_a_inv = sprite_a.get_global_transform().affine_inverse()
-	var xform_b_inv = sprite_b.get_global_transform().affine_inverse()
+	# Default output is 0 (no collision)
+	var outputData: PackedByteArray = PackedByteArray([0, 0, 0, 0])
+	var outputBuffer: RID = renderer.storage_buffer_create(outputData.size(), outputData)
 	
-	# Pack Sprite A (80 bytes total)
-	input_bytes.append_array(transform_to_bytes(xform_a_inv))               # 64 bytes
-	input_bytes.append_array(vector2_to_bytes(rect_a_local.size))            # 8 bytes
-	input_bytes.append_array(vector2_to_bytes(rect_a_local.position))        # 8 bytes
+	# Create uniforms to communicate with collision.glsl
+	var uniformInputs: RDUniform = RDUniform.new()
+	uniformInputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	uniformInputs.binding = 0
+	uniformInputs.add_id(inputBuffer)
+	var uniformOutputs: RDUniform = RDUniform.new()
+	uniformOutputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+	uniformOutputs.binding = 1
+	uniformOutputs.add_id(outputBuffer)
+	# Bind to the sampler2Ds for the sprite textures
+	var uniformTexture1: RDUniform = RDUniform.new()
+	uniformTexture1.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	uniformTexture1.binding = 2
+	uniformTexture1.add_id(sampler)
+	uniformTexture1.add_id(RenderingServer.texture_get_rd_texture(sprite1Texture.get_rid()))
+	var uniformTexture2: RDUniform = RDUniform.new()
+	uniformTexture2.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	uniformTexture2.binding = 3
+	uniformTexture2.add_id(sampler)
+	uniformTexture2.add_id(RenderingServer.texture_get_rd_texture(sprite2Texture.get_rid()))
+	# Build the uniform set
+	var uniformSet = renderer.uniform_set_create(
+		[uniformInputs, uniformOutputs, uniformTexture1, uniformTexture2],
+		shader, 0)
 	
-	# Pack Sprite B (80 bytes total)
-	input_bytes.append_array(transform_to_bytes(xform_b_inv))               # 64 bytes
-	input_bytes.append_array(vector2_to_bytes(rect_b_local.size))            # 8 bytes
-	input_bytes.append_array(vector2_to_bytes(rect_b_local.position))        # 8 bytes
+	# Execute the shader
+	var compute: int = renderer.compute_list_begin()
+	renderer.compute_list_bind_compute_pipeline(compute, pipeline)
+	renderer.compute_list_bind_uniform_set(compute, uniformSet, 0)
+	var xGroups: int = int(ceil(intersection.size.x / 16.0))
+	var yGroups: int = int(ceil(intersection.size.y / 16.0))
+	renderer.compute_list_dispatch(compute, xGroups, yGroups, 1)
+	renderer.compute_list_end()
+	# Get the results and clean up RIDs
+	var result: PackedByteArray = renderer.buffer_get_data(outputBuffer)
+	renderer.free_rid(inputBuffer)
+	renderer.free_rid(outputBuffer)
 	
-	# Pack Intersection Rect (16 bytes)
-	input_bytes.append_array(vector4_to_bytes(Vector4(inter.position.x, inter.position.y, inter.size.x, inter.size.y)))
+	return result.decode_u32(0) > 0
 
-	var input_buffer = rd.storage_buffer_create(input_bytes.size(), input_bytes)
+static func getTextureRect(texture: Texture2D) -> Rect2:
+	var size: Vector2 = texture.get_size()
+	return Rect2(Vector2.ZERO - (size * 0.5), size)
 
-	# 3. Build Output Buffer (Binding 1)
-	var output_bytes = PackedByteArray([0, 0, 0, 0]) # 32-bit uint initialized to 0
-	var output_buffer = rd.storage_buffer_create(output_bytes.size(), output_bytes)
+# This exists to fix detection with flipped sprites
+static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:
+	var transform: Transform2D = sprite.get_global_transform()
+	if sprite.flip_h:
+		transform = transform.scaled_local(Vector2(-1, 1))
+	if sprite.flip_v:
+		transform = transform.scaled_local(Vector2(1, -1))
+	return transform
 
-# 4. Fetch Texture RIDs
-	var tex_a_rid = sprite_a.sprite_frames.get_frame_texture(sprite_a.animation, sprite_a.frame).get_rid()
-	var tex_b_rid = sprite_b.sprite_frames.get_frame_texture(sprite_b.animation, sprite_b.frame).get_rid()
-	
-	var rd_tex_a = RenderingServer.texture_get_rd_texture(tex_a_rid)
-	var rd_tex_b = RenderingServer.texture_get_rd_texture(tex_b_rid)
+static func transformBytes(transform: Transform2D) -> PackedByteArray:
+	# glsl uses mat4 to represent transform
+	return PackedFloat32Array([
+		transform.x.x, transform.x.y, 0.0, 0.0,
+		transform.y.x, transform.y.y, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		transform.origin.x, transform.origin.y, 0.0, 1.0
+	]).to_byte_array()
 
-	# 5. Create RDUniforms for Set 0
-	var u_inputs := RDUniform.new()
-	u_inputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	u_inputs.binding = 0
-	u_inputs.add_id(input_buffer)
+static func vector4Bytes(vector: Vector4) -> PackedByteArray:
+	return PackedFloat32Array([vector.x, vector.y, vector.z, vector.w]).to_byte_array()
 
-	var u_output := RDUniform.new()
-	u_output.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	u_output.binding = 1
-	u_output.add_id(output_buffer)
+static func vector2Bytes(vector: Vector2) -> PackedByteArray:
+	return PackedFloat32Array([vector.x, vector.y]).to_byte_array()
 
-	# --- FIXED: Pass BOTH Sampler AND Texture IDs for sampler2D ---
-	var u_tex_a := RDUniform.new()
-	u_tex_a.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	u_tex_a.binding = 2
-	u_tex_a.add_id(default_sampler_rid) # 1st ID: Sampler
-	u_tex_a.add_id(rd_tex_a)              # 2nd ID: Texture
-
-	var u_tex_b := RDUniform.new()
-	u_tex_b.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	u_tex_b.binding = 3
-	u_tex_b.add_id(default_sampler_rid) # 1st ID: Sampler
-	u_tex_b.add_id(rd_tex_b)              # 2nd ID: Texture
-
-	# Create Uniform Set
-	var uniform_set = rd.uniform_set_create([u_inputs, u_output, u_tex_a, u_tex_b], shader_rid, 0)
-
-	# 6. Execute Compute Pipeline
-	var x_groups = int(ceil(inter.size.x / 16.0))
-	var y_groups = int(ceil(inter.size.y / 16.0))
-
-	var compute_list = rd.compute_list_begin()
-	rd.compute_list_bind_compute_pipeline(compute_list, pipeline_rid)
-	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
-	rd.compute_list_dispatch(compute_list, x_groups, y_groups, 1)
-	rd.compute_list_end()
-
-	# --- FIXED: Don't call submit()/sync() on the main RenderingDevice ---
-	# Read buffer directly (Godot handles synchronization automatically)
-	var result_bytes = rd.buffer_get_data(output_buffer)
-	var has_collision = result_bytes.decode_u32(0) > 0
-
-	# Cleanup temporary buffers
-	rd.free_rid(input_buffer)
-	rd.free_rid(output_buffer)
-	
-	return has_collision
-
-# --- Helper Packing Functions ---
-
-static func transform_to_bytes(t: Transform2D) -> PackedByteArray:
-	# Mat4 identity with Transform2D embedded
-	var floats = PackedFloat32Array([
-		t.x.x, t.x.y, 0.0, 0.0,
-		t.y.x, t.y.y, 0.0, 0.0,
-		0.0,   0.0,   1.0, 0.0,
-		t.origin.x, t.origin.y, 0.0, 1.0
-	])
-	return floats.to_byte_array()
-
-static func vector4_to_bytes(v: Vector4) -> PackedByteArray:
-	return PackedFloat32Array([v.x, v.y, v.z, v.w]).to_byte_array()
-
-static func vector2_to_bytes(v: Vector2) -> PackedByteArray:
-	return PackedFloat32Array([v.x, v.y]).to_byte_array()
-
+# These RIDs have to be manually freed
 func _exit_tree() -> void:
-	if rd and default_sampler_rid.is_valid():
-		rd.free_rid(default_sampler_rid)
+	if !renderer: return
+	if sampler.is_valid():
+		renderer.free_rid(sampler)
+	if pipeline.is_valid():
+		renderer.free_rid(pipeline)
+	if shader.is_valid():
+		renderer.free_rid(shader)

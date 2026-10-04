@@ -468,7 +468,7 @@ func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
 func inter_touching(inputs: Array) -> bool:
-	return SpriteCollision.check_gpu_collision(self, inputs[0])
+	return SpriteCollision.spritesTouching(self, inputs[0])
 
 ## VARIABLES
 
