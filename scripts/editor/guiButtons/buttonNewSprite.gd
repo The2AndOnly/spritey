@@ -9,6 +9,7 @@ const SPRITE_SELECTOR_GROUP: ButtonGroup = preload("uid://g30w58c26scg")
 
 const ORANGE_MOE_1: Texture2D = preload("uid://dhmontm0rmbj8")
 const ORANGE_MOE_2: Texture2D = preload("uid://duqpnvqse6a60")
+const ORANGE_MOE_3: Texture2D = preload("uid://nwlo51p3pbda")
 
 func _ready() -> void:
 	pressed.connect(onPress)
@@ -26,6 +27,7 @@ func onPress() -> void:
 	sprite.sprite_frames = spriteFrames
 	sprite.addFrame(ORANGE_MOE_1, "orange-moe-1")
 	sprite.addFrame(ORANGE_MOE_2, "orange-moe-2")
+	sprite.addFrame(ORANGE_MOE_3, "orange-moe-3")
 	spriteEntry.previewTexture = sprite.sprite_frames.get_frame_texture(&"default", 0)
 	# Find a unique name and ID for the sprite
 	var names: Array[String] = []
