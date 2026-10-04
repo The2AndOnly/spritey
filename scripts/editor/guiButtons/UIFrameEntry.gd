@@ -29,6 +29,7 @@ func updateFrame(newFrame: Texture2D) -> void:
 	textureData = newFrame
 	entryTexture.texture = ParseData.cropTexture(newFrame)
 	sprite.sprite_frames.set_frame(&"default", frameID, newFrame)
+	sprite.frameSizes[frameID] = Vector2i(entryTexture.texture.get_size())
 	updateInfo()
 
 func updateName(newName: String) -> void:
@@ -37,7 +38,7 @@ func updateName(newName: String) -> void:
 	updateInfo()
 
 func updateInfo() -> void:
-	var textureSize: Vector2 = entryTexture.texture.get_size()
+	var textureSize: Vector2i = sprite.frameSizes[frameID]
 	sizeLabel.text = "%d x %d" % [textureSize.x, textureSize.y]
 	nameLabel.text = sprite.frameNames[frameID]
 	idLabel.text = str(frameID + 1)

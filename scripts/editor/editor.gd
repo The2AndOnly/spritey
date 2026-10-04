@@ -34,6 +34,7 @@ var currentView: StringName = &"sprites":
 				if spriteFramesLoaded != selectedSprite:
 					loadSpriteFrames()
 					spriteFramesLoaded = selectedSprite
+				selectCurrentFrame()
 		changedView.emit(value)
 var clampedMousePos: Vector2 = Vector2.ZERO
 # Having this set disables interaction with several things
@@ -135,8 +136,11 @@ func loadSpriteFrames() -> void:
 		entry.nameField = frameNameField
 		frameEntryContainer.add_child(entry)
 		entry.button_group = FRAME_SELECTOR_GROUP
-		if selectedSprite.frame == i: entry.button_pressed = true
-	# Automatically select the frame the sprite was on
+
+func selectCurrentFrame() -> void:
+	for i: FrameEntry in frameEntryContainer.get_children():
+		if i.frameID == selectedSprite.frame:
+			i.button_pressed = true
 	var currentID: int = selectedSprite.frame
 	bitmapEdit.showFrame(selectedSprite.sprite_frames.get_frame_texture(&"default", currentID), currentID)
 	frameNameField.text = selectedSprite.frameNames[currentID]

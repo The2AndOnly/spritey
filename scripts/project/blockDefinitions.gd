@@ -424,6 +424,18 @@ func vis_setFrame(inputs: Array) -> float:
 		frame = inputs[0]
 	return -1.0
 
+func vis_frame(inputs: Array) -> Variant:
+	match inputs[0]:
+		0:
+			return frame + 1
+		1:
+			return frameNames[frame]
+		2:
+			return frameSizes[frame].x
+		3:
+			return frameSizes[frame].y
+	return ""
+
 ## INTERACTION
 
 func inter_pointerX() -> float:

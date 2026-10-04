@@ -50,6 +50,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_size",
 		&"vis_changeFrame",
 		&"vis_setFrame",
+		&"vis_frame",
 		&"vis_setStretch",
 		&"vis_changeStretch",
 		&"vis_stretch",
