@@ -23,7 +23,6 @@ extends BlockDefinitions
 # - used by special values (see blockStructures.gd)
 ## Empty bool panel: [3, false]
 
-var spriteScript: Dictionary[int, Dictionary] = {}
 # Contains all value blocks (they are all a singular stack) | blockID: block
 var valueBlocks: Dictionary[int, CompiledBlock] = {}
 # This holds the compiled script, but only the top-level blocks are listed in their category
@@ -33,6 +32,18 @@ var scriptsCompiled := false
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# If this sprite was cloned, copy properties from the sprite that cloned it
+	if original:
+		gameView = original.gameView
+		spriteScript = original.spriteScript
+		frameNames = original.frameNames
+		croppedFrames = original.croppedFrames
+		frameImages = original.frameImages
+		spritePos = original.spritePos
+		rotation = original.rotation
+		size = original.size
+		stretch = original.stretch
+		opacity = original.opacity
 
 func compileAll() -> void:
 	# First, clear previous compilation

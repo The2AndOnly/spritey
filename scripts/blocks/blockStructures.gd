@@ -1,6 +1,8 @@
 class_name BlockStructures
 extends Node
 
+# TODO: Add an "in editor" boolean block
+
 # INPUT DOCS:
 # Inputs are expected to start from 0 and increment by 1 from left to right
 # blockInputEdit (lineEdit):
@@ -426,7 +428,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"ctrl_ifElse": {
 		&"structure": ["if   ", 0, "then"],
-		&"nestEnd": "else",
+		&"nestEnd": &"else",
 		0: [&"bool"],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.DOUBLE_NEST
@@ -472,6 +474,17 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"ctrl_stopOther": {
 		&"structure": ["stop other stacks in sprite"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_cloneStart": {
+		&"structure": ["when created as clone"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
+	&"ctrl_createClone": {
+		&"structure": ["clone", 0],
+		0: [&"options", 1, 0, ["this sprite"]],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STACK
 	},

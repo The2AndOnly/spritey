@@ -31,7 +31,9 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"ctrl_break",
 		&"ctrl_continue",
 		&"ctrl_stopOther",
-		&"ctrl_stopStacks"
+		&"ctrl_stopStacks",
+		&"ctrl_cloneStart",
+		&"ctrl_createClone"
 	],
 	&"interaction": [
 		&"inter_pointerX",

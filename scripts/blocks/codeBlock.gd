@@ -259,7 +259,10 @@ func setOptionsList(options: BlockOptions) -> void:
 	for i in range(optionsList.size()): options.items.append(i)
 	match blockStructure[options.id][1]:
 		1: # Sprites
-			var sortedSprites: Array[Sprite] = gameView.sprites.duplicate()
+			var sortedSprites: Array[Sprite] = []
+			# Get non-clones
+			for i: Sprite in gameView.sprites:
+				if !i.original: sortedSprites.append(i)
 			sortedSprites.sort_custom(func(a: Sprite, b: Sprite) -> bool:
 				return a.spriteName.naturalnocasecmp_to(b.spriteName) < 0)
 			sortedSprites.erase(editor.selectedSprite)

@@ -262,6 +262,26 @@ func ctrl_stopOther() -> float:
 		i.terminate()
 	return -1.0
 
+func ctrl_createClone(inputs: Array) -> float:
+	var clone: Sprite
+	var option: Variant = inputs[0]
+	if option is int:
+		clone = duplicate()
+		clone.original = self
+		clones.append(clone)
+		gameView.add_child(clone)
+		# Move child so that it appears behind the original sprite
+		gameView.move_child(clone, get_index())
+	else:
+		clone = option.duplicate()
+		clone.original = option
+		option.clones.append(clone)
+		gameView.add_child(clone)
+		gameView.move_child(clone, option.get_index())
+	gameView.sprites.append(clone)
+	gameView.triggerCloneEvent(clone)
+	return -1.0
+
 ## EXPRESSIONS
 
 func exp_add(inputs: Array) -> float:
@@ -521,7 +541,9 @@ func inter_touching(inputs: Array) -> bool:
 	if option is int:
 		return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
 	else:
-		return SpriteCollision.spritesTouching(self, inputs[0])
+		for i: Sprite in option.clones:
+			if SpriteCollision.spritesTouching(self, i): return true
+		return SpriteCollision.spritesTouching(self, option)
 
 ## VARIABLES
 

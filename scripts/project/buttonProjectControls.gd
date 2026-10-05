@@ -9,6 +9,8 @@ func _ready() -> void:
 func onPress() -> void:
 	match action:
 		&"start":
+			gameView.stopAllStacks()
+			gameView.deleteAllClones()
 			gameView.event(&"event_start", [])
 		&"stop":
 			gameView.stopAllStacks()

@@ -2,7 +2,6 @@ class_name SpriteData
 extends AnimatedSprite2D
 
 #const VAR_GRAPHIC: PackedScene = preload("uid://bawekqtjf8tpg")
-var gameView: GameView
 
 #@onready var directionGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 #@onready var xposGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
@@ -10,7 +9,11 @@ var gameView: GameView
 #@onready var sizeGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 #@onready var opacityGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 
+var gameView: GameView
+var spriteScript: Dictionary[int, Dictionary] = {}
 var variables: Array[Variable] = []
+var clones: Array[Sprite] = []
+var original: Sprite = null
 # Index is the frame number
 var frameNames: Array[String] = []
 var croppedFrames: Array[Texture2D] = []

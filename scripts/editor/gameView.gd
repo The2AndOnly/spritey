@@ -81,7 +81,7 @@ func _process(delta: float) -> void:
 	while stackIterator < activeStacks.size():
 		currentStack = activeStacks[stackIterator]
 		stackIterator += 1
-		if currentStack.terminated:
+		if currentStack.terminated or !currentStack.sprite:
 			stackIterator -= 1
 			activeStacks.remove_at(stackIterator)
 			continue
@@ -177,6 +177,12 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 		activeStacks.append(newStack)
 		return newStack
 
+func triggerCloneEvent(clone: Sprite) -> void:
+	clone.compileAll()
+	if !clone.topLevelBlocks.has(&"ctrl_cloneStart"): return
+	for i: CompiledBlock in clone.topLevelBlocks[&"ctrl_cloneStart"]:
+		createStackFromEvent(i, [])
+
 func stopAllStacks() -> void:
 	for sprite: Sprite in sprites:
 		for i: ScriptStack in activeStacks:
@@ -195,16 +201,27 @@ func finishWaitBlock() -> void:
 func toLocalCoords(position: Vector2) -> Vector2:
 	return Vector2(
 		(position.x * scaledSize.x) + halfSize.x,
-		halfSize.y - (position.y * scaledSize.y)
-	)
+		halfSize.y - (position.y * scaledSize.y))
 # Input is local coords, output is game coords
 func toGameCoords(position: Vector2) -> Vector2:
 	return Vector2(
 		(position.x - halfSize.x) / originalZoom,
-		(halfSize.y - position.y) / originalZoom
-	)
+		(halfSize.y - position.y) / originalZoom)
 func setMousePosition() -> void:
 	mousePosition = toGameCoords(get_mouse_position())
+
+func deleteSpriteClones(sprite: Sprite) -> void:
+	for i: Sprite in sprite.clones:
+		i.queue_free()
+	# Filtering array to avoid calling "erase()" every iteration
+	var filteredSprites: Array = sprites.filter(
+		func(i) -> bool: return !sprite.clones.has(i))
+	sprites.assign(filteredSprites)
+	sprite.clones.clear()
+
+func deleteAllClones() -> void:
+	for i: Sprite in sprites:
+		deleteSpriteClones(i)
 
 # Send input events
 func _input(inputEvent: InputEvent) -> void:
