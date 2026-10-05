@@ -12,9 +12,11 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"event_start",
 		&"event_keyboard",
 		&"event_mouse",
+		&"event_clicked",
 		&"event_scrolled",
 		&"event_receive",
 		&"event_signal",
+		&"event_signalAndWait",
 		&"test_print"
 	],
 	&"control": [
@@ -95,10 +97,10 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"exp_substring",
 		&"exp_textLength",
 		&"exp_mod",
-		&"exp_exponent",
 		&"exp_abs",
 		&"exp_round",
-		&"exp_math"
+		&"exp_math",
+		&"exp_doubleMath"
 	],
 	&"variables": [
 		&"var_setTo",

@@ -33,9 +33,24 @@ func event_mouse(inputs: Array, eventData: Array[Variant]) -> bool:
 func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
+func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
+	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position()): return false
+	return inputs == eventData
+
 func event_signal(inputs: Array) -> float:
 	gameView.event(&"event_receive", inputs)
 	return -1.0
+
+func event_signalAndWait(inputs: Array) -> float:
+	if gameView.currentStack.executeWait:
+		for i: ScriptStack in gameView.currentStack.createdStacks:
+			if gameView.activeStacks.has(i):
+				return 1.0
+		return -1.0
+	else:
+		gameView.event(&"event_receive", inputs, true)
+		gameView.currentStack.executeWait = true
+		return 1.0
 
 func event_receive(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
@@ -251,8 +266,6 @@ func exp_divide(inputs: Array) -> float:
 	return inputs[0] / inputs[1]
 func exp_mod(inputs: Array) -> float:
 	return fposmod(inputs[0], inputs[1])
-func exp_exponent(inputs: Array) -> float:
-	return inputs[0] ** inputs[1]
 
 func exp_and(inputs: Array) -> bool:
 	return inputs[0] and inputs[1]
@@ -345,10 +358,26 @@ func exp_math(inputs: Array) -> float:
 		5: return rad_to_deg(asin(inputs[1]))
 		6: return rad_to_deg(acos(inputs[1]))
 		7: return rad_to_deg(atan(inputs[1]))
-		8: return sqrt(inputs[1])
-		9: return log(inputs[1])
-		10: return log(inputs[1]) / log(10.0)
-		11: return exp(inputs[1])
+		8: return sign(inputs[1])
+		9: return sqrt(inputs[1])
+		10: return log(inputs[1])
+		11: return log(inputs[1]) / log(10.0)
+		12: return exp(inputs[1])
+		13: return ~int(inputs[1])
+	return 0.0
+
+func exp_doubleMath(inputs: Array) -> float:
+	match inputs[0]:
+		0: return maxf(inputs[1], inputs[2])
+		1: return minf(inputs[1], inputs[2])
+		2: return inputs[1] ** inputs[2]
+		3: return atan2(inputs[1], inputs[2])
+		4: return sqrt((inputs[1] ** 2) + (inputs[2] ** 2))
+		5: return int(inputs[1]) & int(inputs[2])
+		6: return int(inputs[1]) | int(inputs[2])
+		7: return int(inputs[1]) ^ int(inputs[2])
+		8: return int(inputs[1]) << int(inputs[2])
+		9: return int(inputs[1]) >> int(inputs[2])
 	return 0.0
 
 ## VISUALS
@@ -431,9 +460,9 @@ func vis_frame(inputs: Array) -> Variant:
 		1:
 			return frameNames[frame]
 		2:
-			return frameSizes[frame].x
+			return int(croppedFrames[frame].get_size().x)
 		3:
-			return frameSizes[frame].y
+			return int(croppedFrames[frame].get_size().y)
 	return ""
 
 ## INTERACTION
@@ -480,7 +509,11 @@ func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
 func inter_touching(inputs: Array) -> bool:
-	return SpriteCollision.spritesTouching(self, inputs[0])
+	var option: Variant = inputs[0]
+	if option is int:
+		return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+	else:
+		return SpriteCollision.spritesTouching(self, inputs[0])
 
 ## VARIABLES
 

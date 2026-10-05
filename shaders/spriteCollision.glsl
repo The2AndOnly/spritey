@@ -40,7 +40,7 @@ void main() {
         (uv2.x >= 0.0) && (uv2.x <= 1.0) && (uv2.y >= 0.0) && (uv2.y <= 1.0)) {
         float alpha1 = texture(texture1, uv1).a;
         float alpha2 = texture(texture2, uv2).a;
-        if ((alpha1 > 0.1) && (alpha2 > 0.1)) {
+        if ((alpha1 > 0.01) && (alpha2 > 0.01)) {
             atomicOr(collision, 1u);
         }
     }

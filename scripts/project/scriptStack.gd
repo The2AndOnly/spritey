@@ -16,6 +16,8 @@ var loops: Array[CompiledBlock] = []
 var loopData: Array[float] = []
 # Any data used by the execute wait block
 var blockData: Array[Variant] = []
+# Used by "send signal and wait" blocks
+var createdStacks: Array[ScriptStack] = []
 var terminated := false
 
 func _init(stackSprite: Sprite, startBlock: CompiledBlock, eventBlock: CompiledBlock) -> void:

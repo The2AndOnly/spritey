@@ -17,7 +17,8 @@ func _ready() -> void:
 	shader = renderer.shader_create_from_spirv(CollisionShader.get_spirv())
 	pipeline = renderer.compute_pipeline_create(shader)
 
-static func spritesTouching(sprite1: AnimatedSprite2D, sprite2: AnimatedSprite2D) -> bool:
+# Detecting sprite touching uses the GPU
+static func spritesTouching(sprite1: Sprite, sprite2: Sprite) -> bool:
 	if (!sprite1.visible) or !sprite2.visible: return false
 	
 	var sprite1Texture: Texture2D = sprite1.sprite_frames.get_frame_texture(&"default", sprite1.frame)
@@ -90,12 +91,30 @@ static func spritesTouching(sprite1: AnimatedSprite2D, sprite2: AnimatedSprite2D
 	
 	return result.decode_u32(0) > 0
 
+# Checking for a point is just a single CPU pixel check
+static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
+	if !sprite.visible: return false
+	
+	var image: Image = sprite.frameImages[sprite.frame]
+	var spriteRect: Rect2 = getTextureRect(sprite.sprite_frames.get_frame_texture(&"default", sprite.frame))
+	var localPoint: Vector2 = getTransform(sprite).affine_inverse() * point
+	if !spriteRect.has_point(localPoint):
+		return false
+	
+	var pixelPosition: Vector2i = Vector2i(localPoint - spriteRect.position)
+	# All sprite frames are always 1280 x 720
+	if (pixelPosition.x < 0) or (pixelPosition.x >= 1280) or\
+	(pixelPosition.y < 0) or (pixelPosition.y >= 720):
+		return false
+	
+	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
+
 static func getTextureRect(texture: Texture2D) -> Rect2:
 	var size: Vector2 = texture.get_size()
 	return Rect2(Vector2.ZERO - (size * 0.5), size)
 
 # This exists to fix detection with flipped sprites
-static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:
+static func getTransform(sprite: Sprite) -> Transform2D:
 	var transform: Transform2D = sprite.get_global_transform()
 	if sprite.flip_h:
 		transform = transform.scaled_local(Vector2(-1, 1))

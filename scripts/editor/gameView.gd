@@ -140,14 +140,20 @@ func _process(delta: float) -> void:
 			stackIterator -= 1
 			activeStacks.remove_at(stackIterator)
 
-func event(eventBlockName: StringName, eventData: Array[Variant]) -> void:
+func event(eventBlockName: StringName, eventData: Array[Variant], storeNewStacks: bool = false) -> void:
 	for sprite: Sprite in sprites:
 		if !sprite.scriptsCompiled: sprite.compileAll()
 		if !sprite.topLevelBlocks.has(eventBlockName): continue
-		for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
-			createStackFromEvent(i, eventData)
+		# storing the created stacks is used by "send signal and wait" blocks
+		if storeNewStacks:
+			currentStack.createdStacks.clear()
+			for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
+				currentStack.createdStacks.append(createStackFromEvent(i, eventData))
+		else:
+			for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
+				createStackFromEvent(i, eventData)
 
-func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> void:
+func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> ScriptStack:
 	# The first block must be an event, so if it has inputs then pass the eventData
 	if !startBlock.inputs.is_empty():
 		# If the event block returns false, then don't continue
@@ -158,16 +164,17 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 		if i.startEvent == startBlock:
 			hadActiveStacks = true
 			i.terminate()
-	# If a stack was interrupted, then the new stack will be processed on the next frame
-	# Otherwise, it gets processed at the end of this frame
-	# The reason is to allow for recursive events, but also be able to
-	# start events in the same process
+	var newStack: ScriptStack = ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock)
+	# If a stack was interrupted, then the new stack will be processed on the next frame.
+	# If nothing was interrupted, it gets processed at the end of this frame. The reason
+	# is to allow for recursive events, but also be able to start events in the same process.
 	if hadActiveStacks:
-		activeStacks.push_front(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
+		activeStacks.push_front(newStack)
 		stackIterator += 1
-		return
+		return newStack
 	else:
-		activeStacks.append(ScriptStack.new(startBlock.sprite, startBlock.nextBlock, startBlock))
+		activeStacks.append(newStack)
+		return newStack
 
 func stopAllStacks() -> void:
 	for sprite: Sprite in sprites:
@@ -221,5 +228,16 @@ func _input(inputEvent: InputEvent) -> void:
 	elif inputEvent.is_action_released(&"mouseWheelDown"):
 		event(&"event_scrolled", [1])
 	elif inputEvent is InputEventMouseButton:
-		if inputEvent.button_index > 2: return
-		event(&"event_mouse", [inputEvent.button_index - 1, 0 if inputEvent.pressed else 1])
+		if inputEvent.button_index == 1:
+			if inputEvent.pressed:
+				event(&"event_mouse", [0, 0])
+				event(&"event_clicked", [0])
+				if inputEvent.double_click: event(&"event_clicked", [1])
+			else:
+				event(&"event_mouse", [0, 1])
+		elif inputEvent.button_index == 2:
+			if inputEvent.pressed:
+				event(&"event_mouse", [1, 0])
+				event(&"event_clicked", [2])
+			else:
+				event(&"event_mouse", [1, 1])

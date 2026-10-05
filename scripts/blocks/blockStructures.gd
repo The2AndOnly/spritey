@@ -76,6 +76,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
+	&"event_clicked": {
+		&"structure": ["when", 0, "clicked this sprite"],
+		0: [&"options", 0, 0, ["left", "double", "right"]],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
 	&"event_receive": {
 		&"structure": ["when signal", 0, "received"],
 		0: [&"options", 2, 0, []],
@@ -84,6 +90,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"event_signal": {
 		&"structure": ["send signal", 0],
+		0: [&"options", 2, 0, []],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"event_signalAndWait": {
+		&"structure": ["send signal", 0, "and wait"],
 		0: [&"options", 2, 0, []],
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.STACK
@@ -311,13 +323,6 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
-	&"exp_exponent": {
-		&"structure": [0, "^", 1],
-		0: [&"input", 1, "0"],
-		1: [&"input", 1, "2"],
-		&"color": &"expressions",
-		&"shape": BlockShape.blockShapes.VALUE
-	},
 	&"exp_abs": {
 		&"structure": ["abs", 0],
 		0: [&"input", 1, "-1"],
@@ -332,8 +337,16 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"exp_math": {
 		&"structure": [0, "of", 1],
-		0: [&"options", 0, 0, ["floor", "ceiling", "sin", "cos", "tan", "asin", "acos", "atan", "sqrt", "ln", "log", "e^"]],
+		0: [&"options", 0, 0, ["floor", "ceiling", "sin", "cos", "tan", "asin", "acos", "atan", "sign", "sqrt", "ln", "log", "e^"]],
 		1: [&"input", 1, "0"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_doubleMath": {
+		&"structure": [0, "of", 1, "and", 2],
+		0: [&"options", 0, 0, ["max", "min", "power", "atan2", "hypotenuse"]],
+		1: [&"input", 1, "1"],
+		2: [&"input", 1, "5"],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},

@@ -1,6 +1,14 @@
 class_name BitmapFrame
 extends TextureRect
 
+# BRUSH:
+# The preview will be overlaid on the editable image as just the stroke, modulated with the alpha.
+# On mouse release, it will be blended with the editable image.
+# ERASER:
+# The editable image will be hidden while erasing, and the preview will be shown as
+# the full editable image but with the eraser strokes.
+# On mouse release, the editable image will be replaced with the preview
+
 const CANVAS_SIZE := Vector2i(1280, 720)
 @export var brushStampPreview: TextureRect
 enum Tools {
@@ -91,8 +99,9 @@ func _input(event: InputEvent) -> void:
 		currentPosition = Vector2i(get_local_mouse_position())
 		drawing = true
 		lastPosition = currentPosition
-		texture = null
-		queuedImage.blit_rect(editableImage, Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y), Vector2i.ZERO)
+		if toolSelected == Tools.ERASER:
+			texture = null
+			queuedImage.blit_rect(editableImage, Rect2i(0, 0, CANVAS_SIZE.x, CANVAS_SIZE.y), Vector2i.ZERO)
 		stampOnPreview(currentPosition)
 		newPoints = true
 	elif (event is InputEventMouseMotion) and drawing:
@@ -111,7 +120,10 @@ func _draw() -> void:
 	if !drawing: return
 	# The draw function needs a texture version of the queued image
 	previewTexture.update(queuedImage)
-	draw_texture(previewTexture, Vector2.ZERO)
+	if toolSelected == Tools.BRUSH:
+		draw_texture(previewTexture, Vector2.ZERO, Color(1.0, 1.0, 1.0, alpha))
+	else:
+		draw_texture(previewTexture, Vector2.ZERO)
 
 # Create an image and texture for the brush stamp
 func setBrushStamp() -> void:
@@ -134,7 +146,7 @@ func setBrushStamp() -> void:
 					brushStamp.set_pixel(x, y, color)
 	# Set stamp preview
 	brushStampPreview.texture = ImageTexture.create_from_image(brushStamp)
-	brushStampPreview.modulate.a = alpha
+	brushStampPreview.modulate.a = alpha if toolSelected == Tools.BRUSH else 1.0
 	brushStampPreview.set_deferred(&"size", Vector2(0.0, 0.0))
 
 # Stamp the brush onto the preview
@@ -154,12 +166,28 @@ func stampOnPreview(center: Vector2i) -> void:
 		# The brush tool simply blends the brush stamp onto the image
 		queuedImage.blend_rect(brushStamp, Rect2i(0, 0, brushRadius, brushRadius), trueCenter)
 
-# Update the image by setting the actual texture to the preview
+# Update the image
 func bakePreview() -> void:
-	editableImage.blit_rect(queuedImage, Rect2i(Vector2i.ZERO, CANVAS_SIZE), Vector2i.ZERO)
+	if toolSelected == Tools.ERASER:
+		editableImage.blit_rect(queuedImage, Rect2i(Vector2i.ZERO, CANVAS_SIZE), Vector2i.ZERO)
+	else:
+		queuedImage = setImageAlpha(queuedImage, alpha)
+		editableImage.blend_rect(queuedImage, Rect2i(Vector2i.ZERO, CANVAS_SIZE), Vector2i.ZERO)
 	texture = ImageTexture.create_from_image(editableImage)
 	queuedImage.fill(Color(0.0, 0.0, 0.0, 0.0))
 	frameUpdated.emit(texture)
+
+# Change the alpha of a full image by changing its bytes to avoid setting each pixel
+func setImageAlpha(image: Image, newAlpha: float) -> Image:
+	var data: PackedByteArray = image.get_data()
+	for i: int in range(3, data.size(), 4):
+		data[i] = int(data[i] * newAlpha)
+	return Image.create_from_data(
+		image.get_width(),
+		image.get_height(),
+		image.has_mipmaps(),
+		Image.FORMAT_RGBA8,
+		data)
 
 #func withinCanvas(coord: Vector2i) -> bool:
 	#return (coord.x >= 0) and (coord.x < CANVAS_SIZE.x) and (coord.y >= 0) and (coord.y < CANVAS_SIZE.y)

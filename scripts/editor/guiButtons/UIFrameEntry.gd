@@ -27,9 +27,11 @@ func onPress() -> void:
 func updateFrame(newFrame: Texture2D) -> void:
 	if bitmapEdit.frameID != frameID: return
 	textureData = newFrame
-	entryTexture.texture = ParseData.cropTexture(newFrame)
 	sprite.sprite_frames.set_frame(&"default", frameID, newFrame)
-	sprite.frameSizes[frameID] = Vector2i(entryTexture.texture.get_size())
+	var cropped: Texture2D = ParseData.cropTexture(newFrame)
+	sprite.croppedFrames[frameID] = cropped
+	sprite.frameImages[frameID] = newFrame.get_image()
+	entryTexture.texture = cropped
 	updateInfo()
 
 func updateName(newName: String) -> void:
@@ -38,7 +40,7 @@ func updateName(newName: String) -> void:
 	updateInfo()
 
 func updateInfo() -> void:
-	var textureSize: Vector2i = sprite.frameSizes[frameID]
+	var textureSize: Vector2i = Vector2i(sprite.croppedFrames[frameID].get_size())
 	sizeLabel.text = "%d x %d" % [textureSize.x, textureSize.y]
 	nameLabel.text = sprite.frameNames[frameID]
 	idLabel.text = str(frameID + 1)

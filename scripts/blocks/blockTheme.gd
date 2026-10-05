@@ -101,5 +101,17 @@ func optionsOpened(optionButton: BlockOptions) -> void:
 	var lineEdits: Array[Node] = optionButton.get_popup().find_children("*", "LineEdit", true, false)
 	setLineEditProperties(lineEdits[0])
 	#optionButton.block.editor.uiFocused = lineEdits[0]
-	optionButton.get_popup().min_size.x = 200
-	optionButton.get_popup().max_size.y = 500
+	# Set size of the popup
+	var popup: PopupMenu = optionButton.get_popup()
+	popup.min_size = Vector2i.ZERO
+	popup.max_size = Vector2i(0, 500)
+	var godotSize: Vector2 = popup.get_contents_minimum_size()
+	var scaleOffset: float = optionButton.get_global_transform_with_canvas().get_scale().x
+	var trueWidth: int = int(godotSize.x * scaleOffset)
+	# Right margin
+	trueWidth += int(30.0 * scaleOffset)
+	# Minimum width
+	trueWidth = clampi(trueWidth, int(200.0 * scaleOffset), int(1000.0 * scaleOffset))
+	# The popup menu size seems to only react to setting min/max size
+	popup.min_size.x = trueWidth
+	popup.max_size.x = trueWidth
