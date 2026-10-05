@@ -58,6 +58,8 @@ func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> Co
 	# Compile any nest
 	if rawBlock.has(&"nest"):
 		compiledBlock.firstInNest = compileStack(sprite, rawBlock[&"nest"], compiledBlock)
+	if rawBlock.has(&"nest2"):
+		compiledBlock.firstInNest2 = compileStack(sprite, rawBlock[&"nest2"], compiledBlock)
 	if parentNest: compiledBlock.parentNest = parentNest
 	return compiledBlock
 
@@ -109,21 +111,20 @@ func _process(delta: float) -> void:
 		# Process stack
 		while currentStack.currentBlock:
 			result = currentStack.sprite.executeBlock(currentStack.currentBlock)
+			if result >= 0.0:
+				currentStack.waitTime = result
+				break
 			match result:
-				-1.0: # Go to next block
-					currentStack.currentBlock = currentStack.currentBlock.nextBlock
+				# Go to next block
+				-1.0: currentStack.currentBlock = currentStack.currentBlock.nextBlock
 				# Enter nest/loop
-				-3.0:
-					currentStack.currentBlock = currentStack.currentBlock.firstInNest
+				-3.0: currentStack.currentBlock = currentStack.currentBlock.firstInNest
 				# Do nothing / The block set which block is next
 				-5.0: pass
 				# Exit frame process
 				-6.0: break
-				# If a block returns >= 0.0, wait for that many seconds
-				# If the wait time is zero, then it will wait one frame
-				_:
-					currentStack.waitTime = result
-					break
+				# Enter nest2
+				-7.0: currentStack.currentBlock = currentStack.currentBlock.firstInNest2
 			# After finding next block to run
 			if currentStack.terminated:
 				break
@@ -157,7 +158,7 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 	# The first block must be an event, so if it has inputs then pass the eventData
 	if !startBlock.inputs.is_empty():
 		# If the event block returns false, then don't continue
-		if !startBlock.definition.call(startBlock.inputs, eventData): return
+		if !startBlock.definition.call(startBlock.inputs, eventData): return null
 	# Terminate all stacks that are currently running this event
 	var hadActiveStacks := false
 	for i: ScriptStack in activeStacks:

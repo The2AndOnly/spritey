@@ -6,6 +6,7 @@ var definition: Callable
 var inputs: Array = []
 var nextBlock: CompiledBlock = null
 var firstInNest: CompiledBlock = null
+var firstInNest2: CompiledBlock = null
 var parentNest: CompiledBlock = null
 
 func execute() -> void:

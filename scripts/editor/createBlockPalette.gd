@@ -23,6 +23,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"ctrl_wait",
 		&"ctrl_waitUntil",
 		&"ctrl_if",
+		&"ctrl_ifElse",
 		&"ctrl_repeat",
 		&"ctrl_repeatSeconds",
 		&"ctrl_forever",
@@ -116,6 +117,7 @@ func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 	match shape:
 		BlockShape.blockShapes.EVENT: return -28.0
 		BlockShape.blockShapes.NEST: return 80.0
+		BlockShape.blockShapes.DOUBLE_NEST: return 150.0
 		_: return 0.0
 
 func _ready() -> void:

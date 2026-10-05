@@ -6,6 +6,10 @@ var nestEnd: float = 100.0:
 	set(value):
 		nestEnd = value
 		if previewShape: previewShape.nestEnd = nestEnd
+var nest2End: float = 0.0:
+	set(value):
+		nest2End = value
+		if previewShape: previewShape.nestEnd2 = nest2End
 var previewShape: BlockShape
 
 func _ready() -> void:

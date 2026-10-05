@@ -424,6 +424,13 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.NEST
 	},
+	&"ctrl_ifElse": {
+		&"structure": ["if   ", 0, "then"],
+		&"nestEnd": "else",
+		0: [&"bool"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.DOUBLE_NEST
+	},
 	&"ctrl_repeat": {
 		&"structure": ["repeat", 0],
 		0: [&"input", 3, "20"],

@@ -18,6 +18,7 @@ extends SpriteData
 # -3.0 - Enter nest
 # -5.0 - Does nothing
 # -6.0 - Exit process this frame
+# -7.0 - Enter nest2
 
 ## EVENTS
 
@@ -223,6 +224,13 @@ func ctrl_if(inputs: Array) -> float:
 		return -3.0
 	else:
 		return -1.0
+
+func ctrl_ifElse(inputs: Array) -> float:
+	gameView.currentStack.exitNest.append(gameView.currentStack.currentBlock.nextBlock)
+	if inputs[0]:
+		return -3.0
+	else:
+		return -7.0
 
 func ctrl_break() -> float:
 	if !gameView.currentStack.loops.is_empty():

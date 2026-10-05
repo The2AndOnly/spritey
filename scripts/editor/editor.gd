@@ -78,13 +78,13 @@ func loadSpriteBlocks() -> void:
 	for i: int in spriteScript:
 		# Only load top level blocks with this loop
 		if !spriteScript[i][&"top"]: continue
-		topBlocks.append(loadBlock(spriteScript, i, null, null, -1, indexes))
+		topBlocks.append(loadBlock(spriteScript, i, null, null, null, -1, indexes))
 	# Load the layers of the stack
 	indexes.sort_custom(func(a, b) -> bool: return a[1] < b[1])
 	for i: Array in indexes:
 		i[0].setToFront()
 
-func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeBlock, parentNest: CodeBlock, parentInput: int, indexes: Array[Array]) -> CodeBlock:
+func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeBlock, parentNest: CodeBlock, parentNest2: CodeBlock, parentInput: int, indexes: Array[Array]) -> CodeBlock:
 	var blockData: Dictionary = spriteScript[id]
 	var block: CodeBlock = CODE_BLOCK.instantiate()
 	block.loading = true
@@ -96,6 +96,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 	block.parentBlock = parent
 	block.parentInputLoadID = parentInput
 	block.parentNest = parentNest
+	block.parentNest2 = parentNest2
 	if blockData.has(&"pos"): block.loadPosition = Vector2(blockData[&"pos"])
 	if blockData.has(&"z"): indexes.append([block, blockData[&"z"]])
 	# Set up block's values (may involve creating value blocks)
@@ -106,7 +107,7 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 				0: # raw value
 					block.valuesToLoad.append(inputData[2])
 				1: # value block
-					block.childValueBlocksToLoad.append(loadBlock(spriteScript, inputData[2], block, null, i, indexes))
+					block.childValueBlocksToLoad.append(loadBlock(spriteScript, inputData[2], block, null, null, i, indexes))
 					block.valuesToLoad.append("")
 				2: # options
 					block.valuesToLoad.append(inputData[1])
@@ -114,9 +115,11 @@ func loadBlock(spriteScript: Dictionary[int, Dictionary], id: int, parent: CodeB
 					block.valuesToLoad.append(false)
 	# Set up child blocks
 	if blockData.has(&"next"):
-		block.childBlock = loadBlock(spriteScript, blockData[&"next"], block, parentNest, -1, indexes)
+		block.childBlock = loadBlock(spriteScript, blockData[&"next"], block, parentNest, parentNest2, -1, indexes)
 	if blockData.has(&"nest"):
-		block.childNest = loadBlock(spriteScript, blockData[&"nest"], null, block, -1, indexes)
+		block.childNest = loadBlock(spriteScript, blockData[&"nest"], null, block, null, -1, indexes)
+	if blockData.has(&"nest2"):
+		block.childNest2 = loadBlock(spriteScript, blockData[&"nest2"], null, null, block, -1, indexes)
 	scriptView.add_child(block)
 	return block
 

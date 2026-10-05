@@ -10,7 +10,7 @@ size = Vector2(68, 45)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_cp11l"]
 size = Vector2(63, 100)
 
-[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "contentMargin", "topDetection", "bottomDetection", "valueDrop", "nestDetection", "shapeNode", "grabArea")]
+[node name="CodeBlock" type="MarginContainer" unique_id=114259305 node_paths=PackedStringArray("content", "contentMargin", "topDetection", "bottomDetection", "valueDrop", "nestDetection", "shapeNode", "grabArea", "nest2Detection", "nestEndContent")]
 custom_minimum_size = Vector2(145, 85)
 anchors_preset = -1
 anchor_right = 0.076000005
@@ -29,6 +29,8 @@ valueDrop = NodePath("valueDrop")
 nestDetection = NodePath("innerNest")
 shapeNode = NodePath("shape")
 grabArea = NodePath("grabArea")
+nest2Detection = NodePath("innerNest2")
+nestEndContent = NodePath("nestEndContent")
 metadata/_edit_use_anchors_ = true
 
 [node name="shape" type="Control" parent="." unique_id=2067203640 node_paths=PackedStringArray("grabShape")]
@@ -60,6 +62,14 @@ position = Vector2(32, 85)
 input_pickable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="innerNest" unique_id=1950814858]
+position = Vector2(60, 1.5)
+shape = SubResource("RectangleShape2D_ncklg")
+
+[node name="innerNest2" type="Area2D" parent="." unique_id=809671656 groups=["blockSnapNest2"]]
+position = Vector2(32, 85)
+input_pickable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="innerNest2" unique_id=1852691172]
 position = Vector2(60, 1.5)
 shape = SubResource("RectangleShape2D_ncklg")
 
@@ -98,3 +108,30 @@ mouse_filter = 2
 mouse_behavior_recursive = 1
 script = ExtResource("3_avub8")
 metadata/_edit_use_anchors_ = true
+
+[node name="nestEndContent" type="Node2D" parent="." unique_id=1057779490]
+
+[node name="MarginContainer" type="MarginContainer" parent="nestEndContent" unique_id=1264592491]
+custom_minimum_size = Vector2(200, 0)
+custom_maximum_size = Vector2(-1, 50)
+offset_right = 145.0
+offset_bottom = 50.0
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="nestEndContent/MarginContainer" unique_id=1041899795]
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="else" type="Label" parent="nestEndContent/MarginContainer/HBoxContainer" unique_id=709174528]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 33
+text = "else"
+vertical_alignment = 1

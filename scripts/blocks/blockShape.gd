@@ -8,7 +8,8 @@ enum blockShapes {
 	EVENT,
 	VALUE,
 	NEST,
-	BOOLEAN
+	BOOLEAN,
+	DOUBLE_NEST
 }
 # The horizontal minimum size
 var minimumSizes: Dictionary[blockShapes, float] = {
@@ -17,7 +18,8 @@ var minimumSizes: Dictionary[blockShapes, float] = {
 	blockShapes.EVENT: 250.0,
 	blockShapes.VALUE: 100.0,
 	blockShapes.NEST: 250.0,
-	blockShapes.BOOLEAN: 100.0
+	blockShapes.BOOLEAN: 100.0,
+	blockShapes.DOUBLE_NEST: 250.0
 }
 # Determines which parts of the block can connect
 # [top connector, bottom connector]
@@ -28,7 +30,8 @@ var connectors: Dictionary[blockShapes, Array] = {
 	blockShapes.EVENT: [false, true],
 	blockShapes.VALUE: [false, false],
 	blockShapes.NEST: [true, true],
-	blockShapes.BOOLEAN: [false, false]
+	blockShapes.BOOLEAN: [false, false],
+	blockShapes.DOUBLE_NEST: [true, true]
 }
 
 @export var blockColor: Color = Color("636363ff"):
@@ -43,16 +46,21 @@ var connectors: Dictionary[blockShapes, Array] = {
 	set(value):
 		nestEnd = value
 		queue_redraw()
+@export var nestEnd2: float = 100.0:
+	set(value):
+		nestEnd2 = value
+		queue_redraw()
 @export var grabShape: CollisionPolygon2D
 var points: PackedVector2Array = PackedVector2Array()
 var cr: float = 10.0 # Corner radius
 var notchWidth: float = 60.0
 var notchHeight: float = 15.0
 var notchDistance: float = 30.0 # Distance from left of block
+var drawBottomNotch := true
 var nestSideWidth: float = 30.0
 var nestEndHeight: float = 55.0
-var drawBottomNotch := true
 var drawNestEndIndent := true
+var drawSecondNestEndIndent := true
 # I don't know about math so I just use random angles until it works
 const angleRight: float = PI * 1.5
 const angleDown: float = PI * 2.0
@@ -78,6 +86,9 @@ func _draw() -> void:
 			shapeNest()
 		blockShapes.BOOLEAN:
 			shapeBoolean()
+		blockShapes.DOUBLE_NEST:
+			RenderingServer.canvas_item_set_custom_rect(get_canvas_item(), true, Rect2(0.0, -INF, size.x, INF))
+			shapeDoubleNest()
 	if !Engine.is_editor_hint():
 		if grabShape: grabShape.polygon = points
 
@@ -191,6 +202,24 @@ func shapeNest() -> void:
 	var nestEndBottom: float = size.y + nestEnd
 	var nestEndTop: float = nestEndBottom - nestEndHeight
 	var notchDistanceFromNest: float = nestSideWidth + notchDistance + 2.0
+	
+	nestUpperHalf(nestEndBottom, nestEndTop, notchDistanceFromNest)
+	
+	# Nest end bottom notch (protrusion)
+	points.append(Vector2(notchDistance + notchWidth, nestEndBottom))
+	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), nestEndBottom + notchHeight))
+	points.append(Vector2(notchDistance + notchWidth / 3.0, nestEndBottom + notchHeight))
+	points.append(Vector2(notchDistance, nestEndBottom))
+	
+	# Nest end bottom left corner
+	points.append_array(drawArc(Vector2(cr, nestEndBottom - cr), cr, angleLeft, PI))
+	
+	# Fill and outline
+	draw_polygon(points, PackedColorArray([blockColor]))
+	points.append(points[0])
+	draw_polyline(points, blockColor.darkened(0.2), 2.0)
+
+func nestUpperHalf(nestEndBottom: float, nestEndTop: float, notchDistanceFromNest: float) -> void:
 	points.clear()
 	
 	# Top left corner
@@ -216,7 +245,7 @@ func shapeNest() -> void:
 	
 	# Inside of nest side
 	points.append_array(drawArc(Vector2(nestSideWidth + cr, size.y + cr), cr, angleRight, PI))
-	points.append_array(drawArc(Vector2(nestSideWidth + cr, (nestEndTop) - cr), cr, PI, angleLeft))
+	points.append_array(drawArc(Vector2(nestSideWidth + cr, nestEndTop - cr), cr, PI, angleLeft))
 	
 	# Nest end top notch (indent)
 	if drawNestEndIndent:
@@ -230,16 +259,48 @@ func shapeNest() -> void:
 	
 	# Nest end bottom right corner
 	points.append_array(drawArc(Vector2(size.x - cr, nestEndBottom - cr), cr, 0.0, angleLeft))
+
+func shapeDoubleNest() -> void:
+	var nestEndBottom: float = size.y + nestEnd
+	var nestEndTop: float = nestEndBottom - nestEndHeight
+	var notchDistanceFromNest: float = nestSideWidth + notchDistance + 2.0
+	
+	var nestEnd2Bottom: float = nestEndBottom + nestEnd2
+	var nestEnd2Top: float = nestEnd2Bottom - nestEndHeight
+	
+	nestUpperHalf(nestEndBottom, nestEndTop, notchDistanceFromNest)
 	
 	# Nest end bottom notch (protrusion)
-	if drawBottomNotch:
-		points.append(Vector2(notchDistance + notchWidth, nestEndBottom))
-		points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), nestEndBottom + notchHeight))
-		points.append(Vector2(notchDistance + notchWidth / 3.0, nestEndBottom + notchHeight))
-		points.append(Vector2(notchDistance, nestEndBottom))
+	points.append(Vector2(notchDistanceFromNest + notchWidth, nestEndBottom))
+	points.append(Vector2(notchDistanceFromNest + ((notchWidth / 3.0) * 2.0), nestEndBottom + notchHeight))
+	points.append(Vector2(notchDistanceFromNest + notchWidth / 3.0, nestEndBottom + notchHeight))
+	points.append(Vector2(notchDistanceFromNest, nestEndBottom))
 	
-	# Stack end bottom left corner
-	points.append_array(drawArc(Vector2(cr, nestEndBottom - cr), cr, angleLeft, PI))
+	# Inside of nest2 side
+	points.append_array(drawArc(Vector2(nestSideWidth + cr, nestEndBottom + cr), cr, angleRight, PI))
+	points.append_array(drawArc(Vector2(nestSideWidth + cr, nestEnd2Top - cr), cr, PI, angleLeft))
+	
+	# Nest end2 top notch (indent)
+	if drawSecondNestEndIndent:
+		points.append(Vector2(notchDistanceFromNest, nestEnd2Top))
+		points.append(Vector2(notchDistanceFromNest + notchWidth / 3.0, nestEnd2Top + notchHeight))
+		points.append(Vector2(notchDistanceFromNest + ((notchWidth / 3.0) * 2.0), nestEnd2Top + notchHeight))
+		points.append(Vector2(notchDistanceFromNest + notchWidth, nestEnd2Top))
+	
+	# Nest end2 top right corner
+	points.append_array(drawArc(Vector2(size.x - cr, nestEnd2Top + cr), cr, angleRight, angleDown))
+	
+	# Nest end2 bottom right corner
+	points.append_array(drawArc(Vector2(size.x - cr, nestEnd2Bottom - cr), cr, 0.0, angleLeft))
+	
+	# Nest end2 bottom notch (protrusion)
+	points.append(Vector2(notchDistance + notchWidth, nestEnd2Bottom))
+	points.append(Vector2(notchDistance + ((notchWidth / 3.0) * 2.0), nestEnd2Bottom + notchHeight))
+	points.append(Vector2(notchDistance + notchWidth / 3.0, nestEnd2Bottom + notchHeight))
+	points.append(Vector2(notchDistance, nestEnd2Bottom))
+	
+	# Nest end2 bottom left corner
+	points.append_array(drawArc(Vector2(cr, nestEnd2Bottom - cr), cr, angleLeft, PI))
 	
 	# Fill and outline
 	draw_polygon(points, PackedColorArray([blockColor]))

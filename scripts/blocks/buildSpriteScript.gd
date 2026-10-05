@@ -6,7 +6,7 @@ extends Node
 static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	var spriteScriptBlock: Dictionary[StringName, Variant] = {}
 	spriteScriptBlock[&"block"] = block.blockName
-	if (block.parentBlock == null) and !block.parentNest:
+	if (!block.parentBlock) and (!block.parentNest) and !block.parentNest2:
 		spriteScriptBlock[&"top"] = true
 		spriteScriptBlock[&"pos"] = Vector2i(block.global_position)
 		spriteScriptBlock[&"z"] = block.get_index()
@@ -15,6 +15,7 @@ static func updateBlock(block: CodeBlock, sprite: Sprite) -> void:
 	spriteScriptBlock[&"value"] = block.parentInput != null
 	if block.childBlock: spriteScriptBlock[&"next"] = block.childBlock.blockID
 	if block.childNest: spriteScriptBlock[&"nest"] = block.childNest.blockID
+	if block.childNest2: spriteScriptBlock[&"nest2"] = block.childNest2.blockID
 	# Build inputs
 	var inputs: Array[Array] = []
 	for i: Node in block.content.get_children():
