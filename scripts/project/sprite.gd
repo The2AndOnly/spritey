@@ -36,6 +36,7 @@ func _ready() -> void:
 	if original:
 		gameView = original.gameView
 		spriteScript = original.spriteScript
+		master = original.master
 		frameNames = original.frameNames
 		croppedFrames = original.croppedFrames
 		frameImages = original.frameImages
@@ -44,6 +45,18 @@ func _ready() -> void:
 		size = original.size
 		stretch = original.stretch
 		opacity = original.opacity
+		variables = original.variables
+		# Instead of using the values from the variable objects, clones use their own dictionary
+		if original.original:
+			# If cloning from a clone
+			for i: Variable in variables:
+				localValues[i] = original.localValues[i]
+		else:
+			for i: Variable in variables:
+				localValues[i] = i.value
+	else:
+		# Not created from a clone
+		master = self
 
 func compileAll() -> void:
 	# First, clear previous compilation

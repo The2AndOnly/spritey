@@ -268,7 +268,7 @@ func ctrl_createClone(inputs: Array) -> float:
 	if option is int:
 		clone = duplicate()
 		clone.original = self
-		clones.append(clone)
+		master.clones.append(clone)
 		gameView.add_child(clone)
 		# Move child so that it appears behind the original sprite
 		gameView.move_child(clone, get_index())
@@ -547,13 +547,28 @@ func inter_touching(inputs: Array) -> bool:
 
 ## VARIABLES
 
+# Global variables and local variables on original sprites will use the variable object directly
+# Local variables on clones use their own dictionary of values
 func var_value(inputs: Array) -> Variant:
-	return inputs[0].value
+	var variable: Variable = inputs[0]
+	if variable.sprite:
+		if gameView.currentStack.cloned:
+			return localValues[variable]
+	return variable.value
 func var_setTo(inputs: Array) -> float:
-	inputs[0].value = inputs[1]
+	var variable: Variable = inputs[0]
+	if variable.sprite:
+		if gameView.currentStack.cloned:
+			localValues[variable] = inputs[1]
+			return -1.0
+	variable.value = inputs[1]
 	return -1.0
 func var_changeBy(inputs: Array) -> float:
 	var variable: Variable = inputs[0]
+	if variable.sprite:
+		if gameView.currentStack.cloned:
+			localValues[variable] = str(float(localValues[variable]) + inputs[1])
+			return -1.0
 	variable.value = str(float(variable.value) + inputs[1])
 	return -1.0
 func var_showVar(inputs: Array) -> float:

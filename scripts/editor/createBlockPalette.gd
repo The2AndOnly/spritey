@@ -207,7 +207,10 @@ func updateList() -> void:
 			# Create var_value blocks
 			var structureName: StringName
 			for i: Variable in sortedVars:
-				structureName = &"var_value:" + i.name
+				if i.sprite:
+					structureName = &"var_value:" + i.name + &":" + i.sprite.spriteName
+				else:
+					structureName = &"var_value:" + i.name
 				BlockStructures.structures[structureName] = {
 					&"structure": [0, i.name],
 					0: [&"special", i],
@@ -217,3 +220,4 @@ func updateList() -> void:
 				var checkbox: VarGraphicCheckbox = VarGraphicCheckbox.new()
 				checkbox.variable = i
 				createBlock(structureName, checkbox, true, 0.0)
+			print(BlockStructures.structures)

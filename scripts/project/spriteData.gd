@@ -12,8 +12,13 @@ extends AnimatedSprite2D
 var gameView: GameView
 var spriteScript: Dictionary[int, Dictionary] = {}
 var variables: Array[Variable] = []
+# Used only by clones
+var localValues: Dictionary[Variable, String]
 var clones: Array[Sprite] = []
+# The sprite this was cloned from
 var original: Sprite = null
+# The very original sprite
+var master: Sprite = null
 # Index is the frame number
 var frameNames: Array[String] = []
 var croppedFrames: Array[Texture2D] = []
