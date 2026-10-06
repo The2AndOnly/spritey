@@ -262,25 +262,86 @@ func ctrl_stopOther() -> float:
 		i.terminate()
 	return -1.0
 
+func ctrl_cloneStartName(inputs: Array, eventData: Array[Variant]) -> bool:
+	return inputs == eventData
+
 func ctrl_createClone(inputs: Array) -> float:
-	var clone: Sprite
 	var option: Variant = inputs[0]
 	if option is int:
-		clone = duplicate()
-		clone.original = self
-		master.clones.append(clone)
-		gameView.add_child(clone)
-		# Move child so that it appears behind the original sprite
-		gameView.move_child(clone, get_index())
+		H_clone(self, spriteName)
 	else:
-		clone = option.duplicate()
-		clone.original = option
-		option.clones.append(clone)
-		gameView.add_child(clone)
-		gameView.move_child(clone, option.get_index())
+		H_clone(option, option.spriteName)
+	return -1.0
+func ctrl_createCloneName(inputs: Array) -> float:
+	var option: Variant = inputs[0]
+	if option is int:
+		H_clone(self, inputs[1])
+	else:
+		H_clone(option, inputs[1])
+	return -1.0
+func H_clone(sprite: Sprite, cloneName: String) -> void:
+	if gameView.cloneCount >= 1000: return
+	gameView.cloneCount += 1
+	var clone: Sprite
+	clone = sprite.duplicate()
+	clone.original = sprite
+	clone.spriteName = cloneName
+	sprite.master.clones.append(clone)
+	gameView.add_child(clone)
+	# Move child so that it appears behind the original sprite
+	gameView.move_child(clone, sprite.get_index())
 	gameView.sprites.append(clone)
 	gameView.triggerCloneEvent(clone)
+
+func ctrl_deleteThisClone() -> float:
+	# Checking if "original" exists
+	if original:
+		queue_free()
+		master.clones.erase(self)
+		gameView.sprites.erase(self)
+		gameView.cloneCount -= 1
 	return -1.0
+
+func ctrl_deleteClones(inputs: Array) -> float:
+	var option: Variant = inputs[0]
+	if option is int:
+		if option == 0:
+			gameView.deleteSpriteClones(self)
+		else:
+			gameView.deleteAllClones()
+	else:
+		gameView.deleteSpriteClones(option)
+	return -1.0
+
+func ctrl_deleteCloneName(inputs: Array) -> float:
+	var cloneName: String = inputs[0]
+	var sprites: Array[Sprite] = gameView.sprites
+	var queueDelete: Array[Sprite] = []
+	for i: int in range(sprites.size() - 1, -1, -1):
+		var targetClones: Array[Sprite] = sprites[i].clones
+		for j: int in range(targetClones.size() - 1, -1, -1):
+			var clone: Sprite = targetClones[j]
+			if clone.spriteName == cloneName:
+				clone.queue_free()
+				gameView.cloneCount -= 1
+				targetClones.remove_at(j)
+				queueDelete.append(clone)
+	for i: Sprite in queueDelete:
+		sprites.erase(i)
+	return -1.0
+
+func ctrl_cloneName() -> String:
+	return spriteName
+func ctrl_cloneCount(inputs: Array) -> int:
+	var option: Variant = inputs[0]
+	if option is int:
+		if option == 0:
+			option = master
+		else:
+			return gameView.cloneCount
+	return option.clones.size()
+func ctrl_isClone() -> bool:
+	return original != null
 
 ## EXPRESSIONS
 
@@ -539,11 +600,18 @@ func inter_deltaTime() -> float:
 func inter_touching(inputs: Array) -> bool:
 	var option: Variant = inputs[0]
 	if option is int:
-		return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
-	else:
-		for i: Sprite in option.clones:
-			if SpriteCollision.spritesTouching(self, i): return true
-		return SpriteCollision.spritesTouching(self, option)
+		if option == 1:
+			option = master
+		else:
+			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+	var checkTouching: Array[Sprite] = []
+	setCollisionData()
+	for i: Sprite in option.clones:
+		checkTouching.append(i)
+		i.setCollisionData()
+	checkTouching.append(option)
+	option.setCollisionData()
+	return SpriteCollision.spritesTouching(self, checkTouching)
 
 ## VARIABLES
 

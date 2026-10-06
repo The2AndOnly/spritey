@@ -18,86 +18,91 @@ func _ready() -> void:
 	pipeline = renderer.compute_pipeline_create(shader)
 
 # Detecting sprite touching uses the GPU
-static func spritesTouching(sprite1: Sprite, sprite2: Sprite) -> bool:
-	if (!sprite1.visible) or !sprite2.visible: return false
+static func spritesTouching(sprite1: Sprite, checkTouching: Array[Sprite]) -> bool:
+	# Get sprite 1 data
+	var sprite1Rect: Rect2 = sprite1.frameRects[sprite1.frame]
+	var sprite1Transform: Transform2D = sprite1.globalTransform
+	var globalSprite1Rect: Rect2 = sprite1.globalRect
 	
-	var sprite1Texture: Texture2D = sprite1.sprite_frames.get_frame_texture(&"default", sprite1.frame)
-	var sprite2Texture: Texture2D = sprite2.sprite_frames.get_frame_texture(&"default", sprite2.frame)
-	
-	# Get the axis-aligned bounding boxes
-	var sprite1Rect: Rect2 = getTextureRect(sprite1Texture)
-	var sprite2Rect: Rect2 = getTextureRect(sprite2Texture)
-	var sprite1Transform: Transform2D = getTransform(sprite1)
-	var sprite2Transform: Transform2D = getTransform(sprite2)
-	var globalSprite1Rect: Rect2 = sprite1Transform * sprite1Rect
-	var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * sprite2Rect)
-	if (intersection.size.x <= 0) or intersection.size.y <= 0: return false
-	
-	# Send data to the shader
-	var inputs: PackedByteArray = PackedByteArray()
-	# Construct data for sprite1
-	inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
-	inputs.append_array(vector2Bytes(sprite1Rect.size))
-	inputs.append_array(vector2Bytes(sprite1Rect.position))
-	# Construct data for sprite2
-	inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
-	inputs.append_array(vector2Bytes(sprite2Rect.size))
-	inputs.append_array(vector2Bytes(sprite2Rect.position))
-	# Construct data for the intersection rect
-	inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
-	var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)
-	
-	# Default output is 0 (no collision)
-	var outputData: PackedByteArray = PackedByteArray([0, 0, 0, 0])
-	var outputBuffer: RID = renderer.storage_buffer_create(outputData.size(), outputData)
-	
-	# Create uniforms to communicate with collision.glsl
-	var uniformInputs: RDUniform = RDUniform.new()
-	uniformInputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	uniformInputs.binding = 0
-	uniformInputs.add_id(inputBuffer)
-	var uniformOutputs: RDUniform = RDUniform.new()
-	uniformOutputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
-	uniformOutputs.binding = 1
-	uniformOutputs.add_id(outputBuffer)
-	# Bind to the sampler2Ds for the sprite textures
-	var uniformTexture1: RDUniform = RDUniform.new()
-	uniformTexture1.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	uniformTexture1.binding = 2
-	uniformTexture1.add_id(sampler)
-	uniformTexture1.add_id(RenderingServer.texture_get_rd_texture(sprite1Texture.get_rid()))
-	var uniformTexture2: RDUniform = RDUniform.new()
-	uniformTexture2.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	uniformTexture2.binding = 3
-	uniformTexture2.add_id(sampler)
-	uniformTexture2.add_id(RenderingServer.texture_get_rd_texture(sprite2Texture.get_rid()))
-	# Build the uniform set
-	var uniformSet = renderer.uniform_set_create(
-		[uniformInputs, uniformOutputs, uniformTexture1, uniformTexture2],
-		shader, 0)
-	
-	# Execute the shader
-	var compute: int = renderer.compute_list_begin()
-	renderer.compute_list_bind_compute_pipeline(compute, pipeline)
-	renderer.compute_list_bind_uniform_set(compute, uniformSet, 0)
-	var xGroups: int = int(ceil(intersection.size.x / 16.0))
-	var yGroups: int = int(ceil(intersection.size.y / 16.0))
-	renderer.compute_list_dispatch(compute, xGroups, yGroups, 1)
-	renderer.compute_list_end()
-	# Get the results and clean up RIDs
-	var result: PackedByteArray = renderer.buffer_get_data(outputBuffer)
-	renderer.free_rid(inputBuffer)
-	renderer.free_rid(outputBuffer)
-	
-	return result.decode_u32(0) > 0
+	for sprite2: Sprite in checkTouching:
+		if (!sprite1.visible) or !sprite2.visible: continue
+		if sprite1 == sprite2: continue
+		
+		var intersection: Rect2 = globalSprite1Rect.intersection(sprite2.globalRect)
+		if (intersection.size.x <= 0) or intersection.size.y <= 0: continue
+		
+		# Get textures and sprite 2 data
+		var sprite2Rect: Rect2 = sprite2.frameRects[sprite2.frame]
+		var sprite2Transform: Transform2D = sprite2.globalTransform
+		var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
+		var sprite2Texture: Texture2D = sprite2.frameTextures[sprite2.frame]
+		
+		# Send data to the shader
+		var inputs: PackedByteArray = PackedByteArray()
+		# Construct data for sprite1
+		inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
+		inputs.append_array(vector2Bytes(sprite1Rect.size))
+		inputs.append_array(vector2Bytes(sprite1Rect.position))
+		# Construct data for sprite2
+		inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
+		inputs.append_array(vector2Bytes(sprite2Rect.size))
+		inputs.append_array(vector2Bytes(sprite2Rect.position))
+		# Construct data for the intersection rect
+		inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
+		var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)
+		
+		# Default output is 0 (no collision)
+		var outputData: PackedByteArray = PackedByteArray([0, 0, 0, 0])
+		var outputBuffer: RID = renderer.storage_buffer_create(outputData.size(), outputData)
+		
+		# Create uniforms to communicate with collision.glsl
+		var uniformInputs: RDUniform = RDUniform.new()
+		uniformInputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		uniformInputs.binding = 0
+		uniformInputs.add_id(inputBuffer)
+		var uniformOutputs: RDUniform = RDUniform.new()
+		uniformOutputs.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		uniformOutputs.binding = 1
+		uniformOutputs.add_id(outputBuffer)
+		# Bind to the sampler2Ds for the sprite textures
+		var uniformTexture1: RDUniform = RDUniform.new()
+		uniformTexture1.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+		uniformTexture1.binding = 2
+		uniformTexture1.add_id(sampler)
+		uniformTexture1.add_id(RenderingServer.texture_get_rd_texture(sprite1Texture.get_rid()))
+		var uniformTexture2: RDUniform = RDUniform.new()
+		uniformTexture2.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+		uniformTexture2.binding = 3
+		uniformTexture2.add_id(sampler)
+		uniformTexture2.add_id(RenderingServer.texture_get_rd_texture(sprite2Texture.get_rid()))
+		# Build the uniform set
+		var uniformSet = renderer.uniform_set_create(
+			[uniformInputs, uniformOutputs, uniformTexture1, uniformTexture2],
+			shader, 0)
+		
+		# Execute the shader
+		var compute: int = renderer.compute_list_begin()
+		renderer.compute_list_bind_compute_pipeline(compute, pipeline)
+		renderer.compute_list_bind_uniform_set(compute, uniformSet, 0)
+		var xGroups: int = int(ceil(intersection.size.x / 16.0))
+		var yGroups: int = int(ceil(intersection.size.y / 16.0))
+		renderer.compute_list_dispatch(compute, xGroups, yGroups, 1)
+		renderer.compute_list_end()
+		# Get the results and clean up RIDs
+		var result: PackedByteArray = renderer.buffer_get_data(outputBuffer)
+		renderer.free_rid(inputBuffer)
+		renderer.free_rid(outputBuffer)
+		
+		if result.decode_u32(0) > 0: return true
+	return false
 
 # Checking for a point is just a single CPU pixel check
 static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
 	if !sprite.visible: return false
 	
 	var image: Image = sprite.frameImages[sprite.frame]
-	var spriteRect: Rect2 = getTextureRect(sprite.sprite_frames.get_frame_texture(&"default", sprite.frame))
-	var localPoint: Vector2 = getTransform(sprite).affine_inverse() * point
+	var spriteRect: Rect2 = sprite.frameRects[sprite.frame]
+	var localPoint: Vector2 = sprite.globalTransform.affine_inverse() * point
 	if !spriteRect.has_point(localPoint):
 		return false
 	
@@ -109,26 +114,13 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
 
-static func getTextureRect(texture: Texture2D) -> Rect2:
-	var size: Vector2 = texture.get_size()
-	return Rect2(Vector2.ZERO - (size * 0.5), size)
-
-# This exists to fix detection with flipped sprites
-static func getTransform(sprite: Sprite) -> Transform2D:
-	var transform: Transform2D = sprite.get_global_transform()
-	if sprite.flip_h:
-		transform = transform.scaled_local(Vector2(-1, 1))
-	if sprite.flip_v:
-		transform = transform.scaled_local(Vector2(1, -1))
-	return transform
-
-static func transformBytes(transform: Transform2D) -> PackedByteArray:
+static func transformBytes(transform2d: Transform2D) -> PackedByteArray:
 	# glsl uses mat4 to represent transform
 	return PackedFloat32Array([
-		transform.x.x, transform.x.y, 0.0, 0.0,
-		transform.y.x, transform.y.y, 0.0, 0.0,
+		transform2d.x.x, transform2d.x.y, 0.0, 0.0,
+		transform2d.y.x, transform2d.y.y, 0.0, 0.0,
 		0.0, 0.0, 1.0, 0.0,
-		transform.origin.x, transform.origin.y, 0.0, 1.0
+		transform2d.origin.x, transform2d.origin.y, 0.0, 1.0
 	]).to_byte_array()
 
 static func vector4Bytes(vector: Vector4) -> PackedByteArray:

@@ -35,7 +35,7 @@ size = Vector2(7000, 4500)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
-[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "frameEntryContainer", "bitmapEdit", "frameNameField")]
+[node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "cloneCountLabel", "frameEntryContainer", "bitmapEdit", "frameNameField")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,6 +47,7 @@ script = ExtResource("1_q68jb")
 gameView = NodePath("sprites/SubViewportContainer/GameView")
 scriptView = NodePath("scripts/SubViewportContainer/ScriptView")
 mousePosLabel = NodePath("sprites/mousePosition")
+cloneCountLabel = NodePath("sprites/cloneCount")
 frameEntryContainer = NodePath("frames/previews/ScrollContainer/MarginContainer/VBoxContainer")
 bitmapEdit = NodePath("frames/SubViewportContainer/FrameView/bitmapFrame")
 frameNameField = NodePath("frames/frameName/LineEdit2")
@@ -149,7 +150,7 @@ camera = NodePath("Camera2D")
 [node name="Camera2D" type="Camera2D" parent="sprites/SubViewportContainer/GameView" unique_id=937611384]
 limit_enabled = false
 
-[node name="SpriteCollision" type="Node" parent="sprites/SubViewportContainer/GameView" unique_id=313119718]
+[node name="SpriteCollision" type="Node" parent="sprites/SubViewportContainer/GameView" unique_id=1831745314]
 script = ExtResource("20_aa8l6")
 
 [node name="SpritePanel" type="Panel" parent="sprites" unique_id=1850654370]
@@ -240,12 +241,26 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.0234375
 anchor_top = 0.76111114
-anchor_right = 0.2203125
+anchor_right = 0.119791664
 anchor_bottom = 0.8138889
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 35
 text = "0, 0"
+metadata/_edit_use_anchors_ = true
+
+[node name="cloneCount" type="Label" parent="sprites" unique_id=539244753]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.14010416
+anchor_top = 0.76111114
+anchor_right = 0.23645833
+anchor_bottom = 0.8138889
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.36, 0.8933333, 1, 1)
+theme_override_font_sizes/font_size = 35
+text = "0"
 metadata/_edit_use_anchors_ = true
 
 [node name="spriteData" type="VBoxContainer" parent="sprites" unique_id=1974200215 node_paths=PackedStringArray("editor", "gameView", "nameField", "xposField", "yposField", "directionField", "sizeField", "visibleTrue", "visibleFalse")]

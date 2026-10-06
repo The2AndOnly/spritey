@@ -4,6 +4,7 @@ extends Control
 @export var gameView: GameView
 @export var scriptView: SubViewport
 @export var mousePosLabel: Label
+@export var cloneCountLabel: Label
 @export var frameEntryContainer: VBoxContainer
 @export var bitmapEdit: BitmapFrame
 @export var frameNameField: LineEdit
@@ -52,6 +53,13 @@ signal updateBlockOptions()
 @warning_ignore("unused_signal")
 signal switchBlockGroup(newGroup: StringName)
 signal updateSpriteScript()
+
+func _process(_delta: float) -> void:
+	if gameView.cloneCount == 0:
+		cloneCountLabel.visible = false
+	else:
+		cloneCountLabel.visible = true
+		cloneCountLabel.text = str(gameView.cloneCount)
 
 func setMousePosition() -> void:
 	gameView.setMousePosition()

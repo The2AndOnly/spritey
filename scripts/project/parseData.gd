@@ -67,3 +67,7 @@ static func cropTexture(source: Texture2D) -> Texture2D:
 			var empty: ImageTexture = ImageTexture.create_from_image(Image.create_empty(1, 1, false, Image.FORMAT_RGBA8))
 			return empty
 	return ImageTexture.create_from_image(sourceImage.get_region(usedRect))
+
+static func getTextureRect(texture: Texture2D) -> Rect2:
+	var textureSize: Vector2 = texture.get_size()
+	return Rect2(Vector2.ZERO - (textureSize * 0.5), textureSize)

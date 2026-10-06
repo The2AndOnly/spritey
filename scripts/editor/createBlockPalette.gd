@@ -33,7 +33,15 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"ctrl_stopOther",
 		&"ctrl_stopStacks",
 		&"ctrl_cloneStart",
-		&"ctrl_createClone"
+		&"ctrl_cloneStartName",
+		&"ctrl_createClone",
+		&"ctrl_createCloneName",
+		&"ctrl_deleteThisClone",
+		&"ctrl_deleteClones",
+		&"ctrl_deleteCloneName",
+		&"ctrl_cloneName",
+		&"ctrl_cloneCount",
+		&"ctrl_isClone"
 	],
 	&"interaction": [
 		&"inter_pointerX",
@@ -220,4 +228,3 @@ func updateList() -> void:
 				var checkbox: VarGraphicCheckbox = VarGraphicCheckbox.new()
 				checkbox.variable = i
 				createBlock(structureName, checkbox, true, 0.0)
-			print(BlockStructures.structures)

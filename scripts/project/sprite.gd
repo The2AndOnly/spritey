@@ -40,6 +40,8 @@ func _ready() -> void:
 		frameNames = original.frameNames
 		croppedFrames = original.croppedFrames
 		frameImages = original.frameImages
+		frameTextures = original.frameTextures
+		frameRects = original.frameRects
 		spritePos = original.spritePos
 		rotation = original.rotation
 		size = original.size

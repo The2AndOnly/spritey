@@ -401,7 +401,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"inter_touching": {
 		&"structure": ["touching", 0],
-		0: [&"options", 1, 0, ["pointer"]],
+		0: [&"options", 1, 0, ["pointer", "this sprite"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
@@ -482,11 +482,57 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
+	&"ctrl_cloneStartName": {
+		&"structure": ["when created as clone with name", 0],
+		0: [&"input", 2, ""],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
 	&"ctrl_createClone": {
 		&"structure": ["clone", 0],
 		0: [&"options", 1, 0, ["this sprite"]],
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_createCloneName": {
+		&"structure": ["clone", 0, "with name", 1],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 2, ""],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_deleteThisClone": {
+		&"structure": ["delete this clone"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STOP
+	},
+	&"ctrl_deleteClones": {
+		&"structure": ["delete clones in", 0],
+		0: [&"options", 1, 0, ["this sprite", "project"]],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_deleteCloneName": {
+		&"structure": ["delete clones with name", 0],
+		0: [&"input", 2, ""],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"ctrl_cloneName": {
+		&"structure": ["clone name"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"ctrl_cloneCount": {
+		&"structure": ["clone count of", 0],
+		0: [&"options", 1, 0, ["this sprite", "project"]],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"ctrl_isClone": {
+		&"structure": ["is clone"],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
 	
 	## VISUALS

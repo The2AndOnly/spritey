@@ -27,7 +27,10 @@ var result: Variant
 var stackIterator: int = 0
 
 var sprites: Array[Sprite] = []
+# Used for loops that need to delete sprites
+var queueDeleteSprites: Array[Sprite] = []
 var variables: Array[Variable] = []
+var cloneCount: int = 0
 # Index is the ID of the signal
 var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
@@ -76,6 +79,7 @@ func parseInput(inputs: Array) -> Array:
 	return parsed
 
 func _process(delta: float) -> void:
+	print("new frame")
 	# Stacks can be removed and appended while processing
 	stackIterator = 0
 	while stackIterator < activeStacks.size():
@@ -179,9 +183,12 @@ func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) 
 
 func triggerCloneEvent(clone: Sprite) -> void:
 	clone.compileAll()
-	if !clone.topLevelBlocks.has(&"ctrl_cloneStart"): return
-	for i: CompiledBlock in clone.topLevelBlocks[&"ctrl_cloneStart"]:
-		createStackFromEvent(i, [])
+	if clone.topLevelBlocks.has(&"ctrl_cloneStart"):
+		for i: CompiledBlock in clone.topLevelBlocks[&"ctrl_cloneStart"]:
+			createStackFromEvent(i, [])
+	if clone.topLevelBlocks.has(&"ctrl_cloneStartName"):
+		for i: CompiledBlock in clone.topLevelBlocks[&"ctrl_cloneStartName"]:
+			createStackFromEvent(i, [clone.spriteName])
 
 func stopAllStacks() -> void:
 	for sprite: Sprite in sprites:
@@ -210,18 +217,23 @@ func toGameCoords(position: Vector2) -> Vector2:
 func setMousePosition() -> void:
 	mousePosition = toGameCoords(get_mouse_position())
 
-func deleteSpriteClones(sprite: Sprite) -> void:
+func deleteSpriteClones(sprite: Sprite, deletingAll: bool = false) -> void:
 	for i: Sprite in sprite.clones:
 		i.queue_free()
-	# Filtering array to avoid calling "erase()" every iteration
-	var filteredSprites: Array = sprites.filter(
-		func(i) -> bool: return !sprite.clones.has(i))
-	sprites.assign(filteredSprites)
+		cloneCount -= 1
+		queueDeleteSprites.append(i)
 	sprite.clones.clear()
+	if deletingAll: return
+	for i: Sprite in queueDeleteSprites:
+		sprites.erase(i)
+	queueDeleteSprites.clear()
 
 func deleteAllClones() -> void:
 	for i: Sprite in sprites:
-		deleteSpriteClones(i)
+		deleteSpriteClones(i, true)
+	for i: Sprite in queueDeleteSprites:
+		sprites.erase(i)
+	queueDeleteSprites.clear()
 
 # Send input events
 func _input(inputEvent: InputEvent) -> void:
