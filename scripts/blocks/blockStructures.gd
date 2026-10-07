@@ -379,7 +379,14 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"inter_distanceTo": {
 		&"structure": ["distance to", 0],
-		0: [&"options", 1, 0, ["pointer"]],
+		0: [&"options", 1, 0, ["pointer", "this sprite"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"inter_distanceToName": {
+		&"structure": ["distance to", 0, "of name", 1],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 2, ""],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -402,6 +409,13 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"inter_touching": {
 		&"structure": ["touching", 0],
 		0: [&"options", 1, 0, ["pointer", "this sprite"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"inter_touchingName": {
+		&"structure": ["touching", 0, "of name", 1],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 2, ""],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},

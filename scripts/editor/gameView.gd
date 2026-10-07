@@ -36,8 +36,6 @@ var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
 # Stores key names to their index in BlockStructures.keyOptions
 var actionToIndex: Dictionary[StringName, int] = {}
-var globalRects: Dictionary[Sprite, Rect2]
-var spriteTransforms: Dictionary[Sprite, Transform2D]
 
 func _ready() -> void:
 	if editor:
@@ -81,7 +79,6 @@ func parseInput(inputs: Array) -> Array:
 	return parsed
 
 func _process(delta: float) -> void:
-	getGlobalRects()
 	# Stacks can be removed and appended while processing
 	stackIterator = 0
 	while stackIterator < activeStacks.size():
@@ -236,13 +233,6 @@ func deleteAllClones() -> void:
 	for i: Sprite in queueDeleteSprites:
 		sprites.erase(i)
 	queueDeleteSprites.clear()
-
-func getGlobalRects() -> void:
-	globalRects.clear()
-	spriteTransforms.clear()
-	for sprite: Sprite in sprites:
-		spriteTransforms[sprite] = sprite.getTransform()
-		globalRects[sprite] = sprite.getGlobalRect()
 
 # Send input events
 func _input(inputEvent: InputEvent) -> void:

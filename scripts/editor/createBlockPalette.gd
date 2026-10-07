@@ -47,9 +47,11 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"inter_pointerX",
 		&"inter_pointerY",
 		&"inter_touching",
+		&"inter_touchingName",
 		&"inter_keyPressed",
 		&"inter_mousePressed",
 		&"inter_distanceTo",
+		&"inter_distanceToName",
 		&"inter_deltaTime",
 		&"inter_localTime",
 		&"inter_timeSince1970"

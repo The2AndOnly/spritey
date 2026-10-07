@@ -35,7 +35,7 @@ func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
 func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
-	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteTransforms): return false
+	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position()): return false
 	return inputs == eventData
 
 func event_signal(inputs: Array) -> float:
@@ -576,9 +576,41 @@ func inter_mousePressed(inputs: Array) -> bool:
 func inter_distanceTo(inputs: Array) -> float:
 	var option: Variant = inputs[0]
 	if option is int:
-		return spritePos.round().distance_to(gameView.mousePosition.round())
+		if option == 0:
+			return spritePos.round().distance_to(gameView.mousePosition.round())
+		else:
+			option = master
+	var roundedPos: Vector2 = spritePos.round()
+	var distance: float = 0.0
+	var shortest: float = 0.0
+	if !clones.is_empty():
+		shortest = INF
 	else:
-		return spritePos.round().distance_to(option.spritePos.round())
+		shortest = roundedPos.distance_to(option.spritePos.round())
+	for i: Sprite in option.clones:
+		if i == self: continue
+		distance = roundedPos.distance_to(i.spritePos.round())
+		if distance < shortest: shortest = distance
+	return shortest
+func inter_distanceToName(inputs: Array) -> float:
+	var option: Variant = inputs[0]
+	var filterName: String = inputs[1]
+	if option is int: option = master
+	var roundedPos: Vector2 = spritePos.round()
+	var distance: float = 0.0
+	var shortest: float = 0.0
+	if !clones.is_empty():
+		shortest = INF
+	else:
+		if option.spriteName == filterName:
+			shortest = roundedPos.distance_to(option.spritePos.round())
+		else:
+			shortest = INF
+	for i: Sprite in option.clones:
+		if (i == self) or i.spriteName != filterName: continue
+		distance = roundedPos.distance_to(i.spritePos.round())
+		if distance < shortest: shortest = distance
+	return shortest
 
 func inter_localTime(inputs: Array) -> int:
 	var date: Dictionary = Time.get_datetime_dict_from_system(false)
@@ -604,13 +636,24 @@ func inter_touching(inputs: Array) -> bool:
 		if option == 1:
 			option = master
 		else:
-			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteTransforms)
+			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
 	var checkTouching: Array[Sprite] = []
 	for i: Sprite in option.clones:
 		if i == self: continue
 		checkTouching.append(i)
 	if option != self: checkTouching.append(option)
-	return SpriteCollision.spritesTouching(self, checkTouching, gameView.globalRects, gameView.spriteTransforms)
+	return SpriteCollision.spritesTouching(self, checkTouching)
+func inter_touchingName(inputs: Array) -> bool:
+	if !visible: return false
+	var option: Variant = inputs[0]
+	var filterName: String = inputs[1]
+	if option is int: option = master
+	var checkTouching: Array[Sprite] = []
+	for i: Sprite in option.clones:
+		if (i == self) or i.spriteName != filterName: continue
+		checkTouching.append(i)
+	if (option != self) and option.spriteName == filterName: checkTouching.append(option)
+	return SpriteCollision.spritesTouching(self, checkTouching)
 
 ## VARIABLES
 
