@@ -32,7 +32,7 @@ func updateFrame(newFrame: Texture2D) -> void:
 	sprite.croppedFrames[frameID] = cropped
 	sprite.frameImages[frameID] = newFrame.get_image()
 	sprite.frameTextures[frameID] = newFrame
-	sprite.frameRects[frameID] = ParseData.getTextureRect(newFrame)
+	sprite.frameRects[frameID] = ParseData.getTextureRect(cropped)
 	entryTexture.texture = cropped
 	updateInfo()
 

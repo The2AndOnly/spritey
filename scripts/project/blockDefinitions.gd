@@ -35,7 +35,7 @@ func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
 func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
-	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position()): return false
+	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteTransforms): return false
 	return inputs == eventData
 
 func event_signal(inputs: Array) -> float:
@@ -598,20 +598,19 @@ func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
 func inter_touching(inputs: Array) -> bool:
+	if !visible: return false
 	var option: Variant = inputs[0]
 	if option is int:
 		if option == 1:
 			option = master
 		else:
-			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteTransforms)
 	var checkTouching: Array[Sprite] = []
-	setCollisionData()
 	for i: Sprite in option.clones:
+		if i == self: continue
 		checkTouching.append(i)
-		i.setCollisionData()
-	checkTouching.append(option)
-	option.setCollisionData()
-	return SpriteCollision.spritesTouching(self, checkTouching)
+	if option != self: checkTouching.append(option)
+	return SpriteCollision.spritesTouching(self, checkTouching, gameView.globalRects, gameView.spriteTransforms)
 
 ## VARIABLES
 

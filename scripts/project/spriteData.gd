@@ -26,25 +26,6 @@ var frameImages: Array[Image] = []
 var frameTextures: Array[Texture2D] = []
 var frameRects: Array[Rect2] = []
 
-# This optimizes checking collisions
-var globalTransform: Transform2D
-var globalRect: Rect2
-var lastCollisionFrame: int = -1
-
-func setCollisionData() -> void:
-	var currentFrame: int = Engine.get_process_frames()
-	if currentFrame == lastCollisionFrame:
-		return
-	lastCollisionFrame = currentFrame
-	
-	var newTransform: Transform2D = get_global_transform()
-	if flip_h:
-		newTransform = newTransform.scaled_local(Vector2(-1, 1))
-	if flip_v:
-		newTransform = newTransform.scaled_local(Vector2(1, -1))
-	globalTransform = newTransform
-	globalRect = newTransform * frameRects[frame]
-
 var spriteName: String = "?"
 var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
@@ -81,12 +62,13 @@ func updateSize() -> void:
 
 func addFrame(newFrame: Texture2D, frameName: String) -> void:
 	var resizedTexture: Texture2D = ParseData.forceTextureSize(newFrame)
+	var croppedTexture: Texture2D = ParseData.cropTexture(newFrame)
 	sprite_frames.add_frame(&"default", resizedTexture)
 	frameNames.append(ParseData.findUniqueName(frameName, frameNames))
-	croppedFrames.append(ParseData.cropTexture(newFrame))
+	croppedFrames.append(croppedTexture)
 	frameImages.append(resizedTexture.get_image())
 	frameTextures.append(resizedTexture)
-	frameRects.append(ParseData.getTextureRect(resizedTexture))
+	frameRects.append(ParseData.getTextureRect(croppedTexture))
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)

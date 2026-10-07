@@ -48,6 +48,8 @@ func _ready() -> void:
 		stretch = original.stretch
 		opacity = original.opacity
 		variables = original.variables
+		gameView.globalRects[self] = getGlobalRect()
+		gameView.spriteTransforms[self] = getTransform()
 		# Instead of using the values from the variable objects, clones use their own dictionary
 		if original.original:
 			# If cloning from a clone
@@ -99,3 +101,13 @@ func executeBlock(block: CompiledBlock) -> Variant:
 				returnedValues.append(i)
 			return block.definition.call(returnedValues)
 	return -1.0
+
+func getTransform() -> Transform2D:
+	var globalTransform: Transform2D = get_global_transform()
+	if flip_h: globalTransform = globalTransform.scaled_local(Vector2(-1, 1))
+	if flip_v: globalTransform = globalTransform.scaled_local(Vector2(1, -1))
+	return globalTransform
+
+func getGlobalRect() -> Rect2:
+	var frameRect: Rect2 = frameRects[frame]
+	return Rect2(global_position + (frameRect.position * scale), frameRect.size * scale)

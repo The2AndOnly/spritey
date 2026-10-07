@@ -7,6 +7,7 @@ static var renderer: RenderingDevice
 static var shader: RID
 static var pipeline: RID
 static var sampler: RID
+const fullTextureRect: Rect2 = Rect2(Vector2(-640.0, -360.0), Vector2(1280.0, 720.0))
 
 func _ready() -> void:
 	renderer = RenderingServer.get_rendering_device()
@@ -18,35 +19,31 @@ func _ready() -> void:
 	pipeline = renderer.compute_pipeline_create(shader)
 
 # Detecting sprite touching uses the GPU
-static func spritesTouching(sprite1: Sprite, checkTouching: Array[Sprite]) -> bool:
-	# Get sprite 1 data
-	var sprite1Rect: Rect2 = sprite1.frameRects[sprite1.frame]
-	var sprite1Transform: Transform2D = sprite1.globalTransform
-	var globalSprite1Rect: Rect2 = sprite1.globalRect
-	
+static func spritesTouching(sprite: Sprite, checkTouching: Array[Sprite], globalRects: Dictionary[Sprite, Rect2], globalTransforms: Dictionary[Sprite, Transform2D]) -> bool:
+	var myFrame: int = sprite.frame
+	var myTransform: Transform2D = globalTransforms[sprite]
 	for sprite2: Sprite in checkTouching:
-		if (!sprite1.visible) or !sprite2.visible: continue
-		if sprite1 == sprite2: continue
+		if !sprite2.visible: continue
 		
-		var intersection: Rect2 = globalSprite1Rect.intersection(sprite2.globalRect)
-		if (intersection.size.x <= 0) or intersection.size.y <= 0: continue
+		var intersection: Rect2 = globalRects[sprite].intersection(globalRects[sprite2])
+		if !intersection.has_area(): continue
 		
-		# Get textures and sprite 2 data
-		var sprite2Rect: Rect2 = sprite2.frameRects[sprite2.frame]
-		var sprite2Transform: Transform2D = sprite2.globalTransform
-		var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
-		var sprite2Texture: Texture2D = sprite2.frameTextures[sprite2.frame]
+		# Get textures and sprite data
+		var sprite2Frame: int = sprite2.frame
+		var sprite2Transform: Transform2D = globalTransforms[sprite2]
+		var spriteTexture: Texture2D = sprite.frameTextures[myFrame]
+		var sprite2Texture: Texture2D = sprite2.frameTextures[sprite2Frame]
 		
 		# Send data to the shader
 		var inputs: PackedByteArray = PackedByteArray()
-		# Construct data for sprite1
-		inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
-		inputs.append_array(vector2Bytes(sprite1Rect.size))
-		inputs.append_array(vector2Bytes(sprite1Rect.position))
+		# Construct data for sprite
+		inputs.append_array(transformBytes(myTransform.affine_inverse()))
+		inputs.append_array(vector2Bytes(fullTextureRect.size))
+		inputs.append_array(vector2Bytes(fullTextureRect.position))
 		# Construct data for sprite2
 		inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
-		inputs.append_array(vector2Bytes(sprite2Rect.size))
-		inputs.append_array(vector2Bytes(sprite2Rect.position))
+		inputs.append_array(vector2Bytes(fullTextureRect.size))
+		inputs.append_array(vector2Bytes(fullTextureRect.position))
 		# Construct data for the intersection rect
 		inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
 		var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)
@@ -69,7 +66,7 @@ static func spritesTouching(sprite1: Sprite, checkTouching: Array[Sprite]) -> bo
 		uniformTexture1.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
 		uniformTexture1.binding = 2
 		uniformTexture1.add_id(sampler)
-		uniformTexture1.add_id(RenderingServer.texture_get_rd_texture(sprite1Texture.get_rid()))
+		uniformTexture1.add_id(RenderingServer.texture_get_rd_texture(spriteTexture.get_rid()))
 		var uniformTexture2: RDUniform = RDUniform.new()
 		uniformTexture2.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
 		uniformTexture2.binding = 3
@@ -97,16 +94,16 @@ static func spritesTouching(sprite1: Sprite, checkTouching: Array[Sprite]) -> bo
 	return false
 
 # Checking for a point is just a single CPU pixel check
-static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
+static func spriteTouchingPoint(sprite: Sprite, point: Vector2, globalTransforms: Dictionary[Sprite, Transform2D]) -> bool:
 	if !sprite.visible: return false
 	
 	var image: Image = sprite.frameImages[sprite.frame]
-	var spriteRect: Rect2 = sprite.frameRects[sprite.frame]
-	var localPoint: Vector2 = sprite.globalTransform.affine_inverse() * point
-	if !spriteRect.has_point(localPoint):
+	var myFrameRect: Rect2 = sprite.frameRects[sprite.frame]
+	var localPoint: Vector2 = globalTransforms[sprite].affine_inverse() * point
+	if !myFrameRect.has_point(localPoint):
 		return false
 	
-	var pixelPosition: Vector2i = Vector2i(localPoint - spriteRect.position)
+	var pixelPosition: Vector2i = Vector2i(localPoint - fullTextureRect.position)
 	# All sprite frames are always 1280 x 720
 	if (pixelPosition.x < 0) or (pixelPosition.x >= 1280) or\
 	(pixelPosition.y < 0) or (pixelPosition.y >= 720):
