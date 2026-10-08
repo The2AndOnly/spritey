@@ -9,7 +9,7 @@ var frameDispaly: int = 0
 @export var entryTexture: TextureRect
 
 func _ready() -> void:
-	entryTexture.texture = ParseData.cropTexture(previewTexture)
+	entryTexture.texture = ParseData.cropTexture(previewTexture.get_image())
 	editor.changedView.connect(changedView)
 	pressed.connect(onPress)
 	var refreshTimer: Timer = Timer.new()

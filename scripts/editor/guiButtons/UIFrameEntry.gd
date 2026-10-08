@@ -14,7 +14,7 @@ var nameField: LineEdit
 
 func _ready() -> void:
 	bitmapEdit.frameUpdated.connect(updateFrame)
-	entryTexture.texture = ParseData.cropTexture(textureData)
+	entryTexture.texture = ParseData.cropTexture(textureData.get_image())
 	nameField.changeFrameName.connect(updateName)
 	updateInfo()
 	pressed.connect(onPress)
@@ -22,16 +22,16 @@ func _ready() -> void:
 func onPress() -> void:
 	bitmapEdit.showFrame(textureData, frameID)
 	nameField.text = nameLabel.text
-	sprite.frame = frameID
+	sprite.spriteFrame = frameID
 
 func updateFrame(newFrame: Texture2D) -> void:
 	if bitmapEdit.frameID != frameID: return
 	textureData = newFrame
 	sprite.sprite_frames.set_frame(&"default", frameID, newFrame)
 	var image: Image = newFrame.get_image()
-	var cropped: Texture2D = ParseData.cropTexture(newFrame, image)
+	var cropped: Texture2D = ParseData.cropTexture(image)
 	sprite.croppedFrames[frameID] = cropped
-	sprite.frameImages[frameID] = newFrame.get_image()
+	sprite.frameImages[frameID] = image
 	sprite.frameTextures[frameID] = newFrame
 	entryTexture.texture = cropped
 	updateInfo()

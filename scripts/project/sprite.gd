@@ -38,17 +38,31 @@ func _ready() -> void:
 		gameView = original.gameView
 		spriteScript = original.spriteScript
 		master = original.master
+		
+		# Set up frames
 		frameNames = original.frameNames
 		croppedFrames = original.croppedFrames
 		frameImages = original.frameImages
 		frameTextures = original.frameTextures
+		var area: Area2D = get_child(0)
+		var frameNumber: int = 0
+		for i: SpriteCollisionShape in area.get_children():
+			frameNumber = i.frameNumber
+			if frameCollisions.has(frameNumber):
+				frameCollisions[frameNumber].append(i)
+			else:
+				frameCollisions[frameNumber] = [i]
+		area.area_entered.connect(collisionEntered)
+		area.area_exited.connect(collisionExited)
+		
+		# Set up transform
 		spritePos = original.spritePos
 		rotation = original.rotation
 		size = original.size
 		stretch = original.stretch
 		opacity = original.opacity
-		get_child(0).area_entered.connect(collisionEntered)
-		get_child(0).area_exited.connect(collisionExited)
+		
+		# Set up variables
 		variables = original.variables
 		# Instead of using the values from the variable objects, clones use their own dictionary
 		if original.original:

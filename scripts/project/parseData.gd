@@ -59,11 +59,22 @@ static func forceTextureSize(source: Texture2D, size: Vector2i = Vector2i(1280, 
 	newImage.blit_rect(sourceImage, Rect2i(Vector2i.ZERO, sourceSize), Vector2i(sourceX, sourceY))
 	return ImageTexture.create_from_image(newImage)
 
-static func cropTexture(source: Texture2D, image: Image = null) -> Texture2D:
-	var sourceImage: Image = image if image else source.get_image()
+static func cropTexture(sourceImage: Image) -> Texture2D:
 	var usedRect: Rect2i = sourceImage.get_used_rect()
 	# An empty image becomes a 1x1 transparent texture
-	if (usedRect.size.x <= 0) or usedRect.size.y <= 0:
+	if !usedRect.has_area():
 			var empty: ImageTexture = ImageTexture.create_from_image(Image.create_empty(1, 1, false, Image.FORMAT_RGBA8))
 			return empty
 	return ImageTexture.create_from_image(sourceImage.get_region(usedRect))
+
+static func imageRectToCollision(sourceRect: Rect2i) -> SpriteCollisionShape:
+	var collision: SpriteCollisionShape = SpriteCollisionShape.new()
+	var shape: RectangleShape2D = RectangleShape2D.new()
+	shape.size = sourceRect.size
+	collision.shape = shape
+	# Sprite center origin offset
+	collision.position = sourceRect.position - Vector2i(640, 360)
+	# Shape center origin offset
+	collision.position += shape.size / 2.0
+	collision.autoShape = true
+	return collision

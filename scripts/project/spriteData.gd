@@ -24,6 +24,8 @@ var frameNames: Array[String] = []
 var croppedFrames: Array[Texture2D] = []
 var frameImages: Array[Image] = []
 var frameTextures: Array[Texture2D] = []
+# frame number: Array of SpriteCollisionShape
+var frameCollisions: Dictionary[int, Array] = {}
 
 # master: clones touching
 var collisions: Dictionary[Sprite, int]
@@ -55,6 +57,15 @@ var opacity: float = 100.0:
 		opacity = clampf(value, 0.0, 100.0)
 		modulate.a = opacity / 100.0
 
+var spriteFrame: int = 0:
+	set(value):
+		frame = value
+		for i: SpriteCollisionShape in frameCollisions[spriteFrame]:
+			i.disabled = true
+		for i: SpriteCollisionShape in frameCollisions[value]:
+			i.disabled = false
+		spriteFrame = value
+
 func updateSize() -> void:
 	var baseScale: float = size / 100.0
 	scale = Vector2(
@@ -62,15 +73,32 @@ func updateSize() -> void:
 		baseScale * ((stretch.y / 100.0) + 1.0)
 	)
 
-func addFrame(newFrame: Texture2D, frameName: String) -> void:
+# Only disable autoCollision if another script adds its own collision to the frame
+func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true) -> void:
 	var resizedTexture: Texture2D = ParseData.forceTextureSize(newFrame)
 	var image: Image = resizedTexture.get_image()
-	var croppedTexture: Texture2D = ParseData.cropTexture(newFrame, image)
+	var croppedTexture: Texture2D = ParseData.cropTexture(image)
 	sprite_frames.add_frame(&"default", resizedTexture)
 	frameNames.append(ParseData.findUniqueName(frameName, frameNames))
 	croppedFrames.append(croppedTexture)
 	frameImages.append(image)
 	frameTextures.append(resizedTexture)
+	# Add a basic bounding collision to the new frame
+	if !autoCollision: return
+	var usedRect: Rect2i = image.get_used_rect()
+	var frameNumber: int = frameCollisions.size()
+	if usedRect.has_area():
+		var collision: SpriteCollisionShape = ParseData.imageRectToCollision(usedRect)
+		get_child(0).add_child(collision)
+		collision.frameNumber = frameNumber
+		collision.disabled = true
+		frameCollisions[frameNumber] = [collision]
+	else:
+		var placeholder: SpriteCollisionShape = SpriteCollisionShape.new()
+		placeholder.autoShape = true
+		placeholder.frameNumber = frameNumber
+		placeholder.disabled = true
+		frameCollisions[frameNumber] = [placeholder]
 
 func collisionEntered(area: Area2D) -> void:
 	var detected: Sprite = area.get_parent().master

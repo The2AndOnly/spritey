@@ -406,19 +406,25 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
+	&"inter_colliding": {
+		&"structure": ["colliding with", 0],
+		0: [&"options", 1, 0, ["this sprite"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
 	&"inter_touching": {
 		&"structure": ["touching", 0],
-		0: [&"options", 1, 0, ["pointer", "this sprite"]],
+		0: [&"options", 1, 0, ["pointer"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
-	&"inter_touchingName": {
-		&"structure": ["touching", 0, "of name", 1],
-		0: [&"options", 1, 0, ["this sprite"]],
-		1: [&"input", 2, ""],
-		&"color": &"interaction",
-		&"shape": BlockShape.blockShapes.BOOLEAN
-	},
+	#&"inter_touchingName": {
+		#&"structure": ["touching", 0, "of name", 1],
+		#0: [&"options", 1, 0, ["this sprite"]],
+		#1: [&"input", 2, ""],
+		#&"color": &"interaction",
+		#&"shape": BlockShape.blockShapes.BOOLEAN
+	#},
 	
 	## CONTROL
 	

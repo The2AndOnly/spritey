@@ -528,29 +528,29 @@ func vis_opacity() -> float:
 	return opacity
 
 func vis_changeFrame(inputs: Array) -> float:
-	frame = posmod(frame + inputs[0], frameNames.size())
+	spriteFrame = posmod(spriteFrame + inputs[0], frameNames.size())
 	return -1.0
 func vis_setFrame(inputs: Array) -> float:
 	var option: Variant = inputs[0]
 	if option is String:
 		if option.is_valid_float():
-			frame = posmod(int(option) - 1, frameNames.size())
+			spriteFrame = posmod(int(option) - 1, frameNames.size())
 		else:
-			frame = frameNames.find(option)
+			spriteFrame = frameNames.find(option)
 	else:
-		frame = inputs[0]
+		spriteFrame = inputs[0]
 	return -1.0
 
 func vis_frame(inputs: Array) -> Variant:
 	match inputs[0]:
 		0:
-			return frame + 1
+			return spriteFrame + 1
 		1:
-			return frameNames[frame]
+			return frameNames[spriteFrame]
 		2:
-			return int(croppedFrames[frame].get_size().x)
+			return int(croppedFrames[spriteFrame].get_size().x)
 		3:
-			return int(croppedFrames[frame].get_size().y)
+			return int(croppedFrames[spriteFrame].get_size().y)
 	return ""
 
 ## INTERACTION
@@ -628,32 +628,30 @@ func inter_timeSince1970() -> float:
 func inter_deltaTime() -> float:
 	return get_process_delta_time()
 
+func inter_colliding(inputs: Array) -> bool:
+	var option: Variant = inputs[0]
+	if option is int:
+		option = master
+	return collisions.has(option)
+
 func inter_touching(inputs: Array) -> bool:
 	if !visible: return false
 	var option: Variant = inputs[0]
 	if option is int:
-		if option == 1:
-			option = master
-		else:
-			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
-	return collisions.has(option)
-	var checkTouching: Array[Sprite] = []
-	for i: Sprite in option.clones:
-		if i == self: continue
-		checkTouching.append(i)
-	if option != self: checkTouching.append(option)
-	return SpriteCollision.spritesTouching(self, checkTouching)
-func inter_touchingName(inputs: Array) -> bool:
-	if !visible: return false
-	var option: Variant = inputs[0]
-	var filterName: String = inputs[1]
-	if option is int: option = master
-	var checkTouching: Array[Sprite] = []
-	for i: Sprite in option.clones:
-		if (i == self) or i.spriteName != filterName: continue
-		checkTouching.append(i)
-	if (option != self) and option.spriteName == filterName: checkTouching.append(option)
-	return SpriteCollision.spritesTouching(self, checkTouching)
+		return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+	if !option.visible: return false
+	return SpriteCollision.spritesTouching(self, option)
+#func inter_touchingName(inputs: Array) -> bool:
+	#if !visible: return false
+	#var option: Variant = inputs[0]
+	#var filterName: String = inputs[1]
+	#if option is int: option = master
+	#var checkTouching: Array[Sprite] = []
+	#for i: Sprite in option.clones:
+		#if (i == self) or i.spriteName != filterName: continue
+		#checkTouching.append(i)
+	#if (option != self) and option.spriteName == filterName: checkTouching.append(option)
+	#return SpriteCollision.spritesTouching(self, checkTouching)
 
 ## VARIABLES
 
