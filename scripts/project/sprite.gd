@@ -32,6 +32,7 @@ var scriptsCompiled := false
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	
 	# If this sprite was cloned, copy properties from the sprite that cloned it
 	if original:
 		gameView = original.gameView
@@ -41,12 +42,13 @@ func _ready() -> void:
 		croppedFrames = original.croppedFrames
 		frameImages = original.frameImages
 		frameTextures = original.frameTextures
-		frameRects = original.frameRects
 		spritePos = original.spritePos
 		rotation = original.rotation
 		size = original.size
 		stretch = original.stretch
 		opacity = original.opacity
+		get_child(0).area_entered.connect(collisionEntered)
+		get_child(0).area_exited.connect(collisionExited)
 		variables = original.variables
 		# Instead of using the values from the variable objects, clones use their own dictionary
 		if original.original:

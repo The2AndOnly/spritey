@@ -287,9 +287,8 @@ func H_clone(sprite: Sprite, cloneName: String) -> void:
 	clone.original = sprite
 	clone.spriteName = cloneName
 	sprite.master.clones.append(clone)
+	clone.z_index -= 1
 	gameView.add_child(clone)
-	# Move child so that it appears behind the original sprite
-	gameView.move_child(clone, sprite.get_index())
 	gameView.sprites.append(clone)
 	gameView.triggerCloneEvent(clone)
 
@@ -637,6 +636,7 @@ func inter_touching(inputs: Array) -> bool:
 			option = master
 		else:
 			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+	return collisions.has(option)
 	var checkTouching: Array[Sprite] = []
 	for i: Sprite in option.clones:
 		if i == self: continue

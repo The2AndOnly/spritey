@@ -28,11 +28,11 @@ func updateFrame(newFrame: Texture2D) -> void:
 	if bitmapEdit.frameID != frameID: return
 	textureData = newFrame
 	sprite.sprite_frames.set_frame(&"default", frameID, newFrame)
-	var cropped: Texture2D = ParseData.cropTexture(newFrame)
+	var image: Image = newFrame.get_image()
+	var cropped: Texture2D = ParseData.cropTexture(newFrame, image)
 	sprite.croppedFrames[frameID] = cropped
 	sprite.frameImages[frameID] = newFrame.get_image()
 	sprite.frameTextures[frameID] = newFrame
-	sprite.frameRects[frameID] = ParseData.getTextureRect(cropped)
 	entryTexture.texture = cropped
 	updateInfo()
 

@@ -24,7 +24,9 @@ var frameNames: Array[String] = []
 var croppedFrames: Array[Texture2D] = []
 var frameImages: Array[Image] = []
 var frameTextures: Array[Texture2D] = []
-var frameRects: Array[Rect2] = []
+
+# master: clones touching
+var collisions: Dictionary[Sprite, int]
 
 var spriteName: String = "?"
 var spritePos: Vector2 = Vector2.ZERO:
@@ -62,13 +64,26 @@ func updateSize() -> void:
 
 func addFrame(newFrame: Texture2D, frameName: String) -> void:
 	var resizedTexture: Texture2D = ParseData.forceTextureSize(newFrame)
-	var croppedTexture: Texture2D = ParseData.cropTexture(newFrame)
+	var image: Image = resizedTexture.get_image()
+	var croppedTexture: Texture2D = ParseData.cropTexture(newFrame, image)
 	sprite_frames.add_frame(&"default", resizedTexture)
 	frameNames.append(ParseData.findUniqueName(frameName, frameNames))
 	croppedFrames.append(croppedTexture)
-	frameImages.append(resizedTexture.get_image())
+	frameImages.append(image)
 	frameTextures.append(resizedTexture)
-	frameRects.append(ParseData.getTextureRect(croppedTexture))
+
+func collisionEntered(area: Area2D) -> void:
+	var detected: Sprite = area.get_parent().master
+	collisions[detected] = collisions.get(detected, 0) + 1
+
+func collisionExited(area: Area2D) -> void:
+	var detected: Sprite = area.get_parent().master
+	if collisions.has(detected):
+		var count: int = collisions[detected] - 1
+		if count <= 0:
+			collisions.erase(detected)
+		else:
+			collisions[detected] = count
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)

@@ -28,6 +28,7 @@ func onPress() -> void:
 	sprite.addFrame(ORANGE_MOE_1, "orange-moe-1")
 	sprite.addFrame(ORANGE_MOE_2, "orange-moe-2")
 	sprite.addFrame(ORANGE_MOE_3, "orange-moe-3")
+	sprite.spriteScript = { 0: { &"block": &"event_start", &"top": true, &"pos": Vector2(0, 0), &"z": 3, &"value": false, &"next": 1 }, 1: { &"block": &"vis_setSize", &"top": false, &"value": false, &"next": 2, &"inputs": [[0, 1, "30"]] }, 2: { &"block": &"ctrl_repeat", &"top": false, &"value": false, &"nest": 3, &"inputs": [[0, 3, "300"]] }, 3: { &"block": &"ctrl_createClone", &"top": false, &"value": false, &"inputs": [[2, 0]] }, 4: { &"block": &"ctrl_cloneStart", &"top": true, &"pos": Vector2(563, 18), &"z": 7, &"value": false, &"next": 5 }, 5: { &"block": &"ctrl_forever", &"top": false, &"value": false, &"nest": 6 }, 6: { &"block": &"trans_glideToOption", &"top": false, &"value": false, &"inputs": [[0, 4, "5"], [2, 1]] }, 7: { &"block": &"ctrl_forever", &"top": false, &"value": false, &"nest": 8 }, 8: { &"block": &"ctrl_ifElse", &"top": false, &"value": false, &"nest": 12, &"nest2": 11, &"inputs": [[1, 5, 10]] }, 9: { &"block": &"ctrl_cloneStart", &"top": true, &"pos": Vector2(561, 439), &"z": 10, &"value": false, &"next": 7 }, 10: { &"block": &"inter_touching", &"top": false, &"value": true, &"inputs": [[2, 1]] }, 11: { &"block": &"vis_setFrame", &"top": false, &"value": false, &"inputs": [[2, 0]] }, 12: { &"block": &"vis_setFrame", &"top": false, &"value": false, &"inputs": [[2, 1]] } }
 	spriteEntry.previewTexture = sprite.sprite_frames.get_frame_texture(&"default", 0)
 	# Find a unique name and ID for the sprite
 	var names: Array[String] = []
@@ -36,6 +37,16 @@ func onPress() -> void:
 	sprite.spriteName = ParseData.findUniqueName("sprite1", names)
 	
 	gameView.add_child(sprite)
+	var area2D: Area2D = Area2D.new()
+	sprite.add_child(area2D)
+	var collision: CollisionShape2D = CollisionShape2D.new()
+	var rectangle: RectangleShape2D = RectangleShape2D.new()
+	rectangle.size = Vector2(100.0, 100.0)
+	collision.shape = rectangle
+	area2D.add_child(collision)
+	area2D.area_entered.connect(sprite.collisionEntered)
+	area2D.area_exited.connect(sprite.collisionExited)
+	
 	spriteEntryContainer.add_child(spriteEntry)
 	sprite.spritePos = Vector2.ZERO
 	spriteEntry.sprite = sprite

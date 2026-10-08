@@ -13,8 +13,8 @@ func _ready() -> void:
 	editor.changedView.connect(changedView)
 	pressed.connect(onPress)
 	var refreshTimer: Timer = Timer.new()
-	refreshTimer.wait_time = 1.0
-	refreshTimer.timeout.connect(onRefresh.bind(false))
+	refreshTimer.wait_time = 0.3
+	refreshTimer.timeout.connect(onRefresh)
 	add_child(refreshTimer)
 	refreshTimer.start()
 
@@ -23,11 +23,7 @@ func onPress() -> void:
 
 func changedView(view: StringName) -> void:
 	if view == &"sprites":
-		onRefresh(true)
+		onRefresh()
 
-# If one of the frames could have been changed by editing it, then update the texture no matter what
-func onRefresh(possibleChange: bool) -> void:
-	if (frameDispaly == sprite.frame) and !possibleChange: return
-	frameDispaly = sprite.frame
-	var spriteTexture: Texture2D = sprite.sprite_frames.get_frame_texture(&"default", frameDispaly)
-	entryTexture.texture = ParseData.cropTexture(spriteTexture)
+func onRefresh() -> void:
+	entryTexture.texture = sprite.croppedFrames[sprite.frame]

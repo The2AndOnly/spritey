@@ -18,41 +18,32 @@ func _ready() -> void:
 	shader = renderer.shader_create_from_spirv(CollisionShader.get_spirv())
 	pipeline = renderer.compute_pipeline_create(shader)
 
-# This causes lag when running on dozens of sprites all checking for dozens of sprites
-# I've spent days trying to optimize this but just couldn't
-# The biggest concern is that just the bounding box check alone causes lag
-# The only solution I can think of, is instead of looping through "checkSprites" it
-# could somehow treat every sprite as one and pass that through the shader
-static func spritesTouching(sprite1: Sprite, checkSprites: Array[Sprite]) -> bool:
-	# Get sprite1 data
-	var rect1: Rect2 = getCroppedRect(sprite1)
-	var sprite1Transform: Transform2D = getTransform(sprite1)
+static func spritesTouching(sprite1: Sprite, checkTouching: Array[Sprite]) -> bool:
 	var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
-	var globalSprite1Rect: Rect2 = sprite1Transform * fullTextureRect
+	var sprite1Rect: Rect2 = getTextureRect(sprite1Texture)
+	var sprite1Transform: Transform2D = getTransform(sprite1)
+	var globalSprite1Rect: Rect2 = sprite1Transform * sprite1Rect
 	
-	for sprite2: Sprite in checkSprites:
+	for sprite2 in checkTouching:
 		if !sprite2.visible: continue
 		
-		var rect2: Rect2 = getCroppedRect(sprite2)
-		if (rect1.position.x >= rect2.end.x) or (rect1.end.x <= rect2.position.x) or\
-		(rect1.position.y >= rect2.end.y) or (rect1.end.y <= rect2.position.y):
-			continue
-		
-		# Get intersection and sprite2 data
-		var sprite2Transform: Transform2D = getTransform(sprite2)
+		# Get collision data
 		var sprite2Texture: Texture2D = sprite2.frameTextures[sprite2.frame]
-		var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * fullTextureRect)
+		var sprite2Rect: Rect2 = getTextureRect(sprite2Texture)
+		var sprite2Transform: Transform2D = getTransform(sprite2)
+		var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * sprite2Rect)
+		if (intersection.size.x <= 0) or intersection.size.y <= 0: continue
 		
 		# Send data to the shader
 		var inputs: PackedByteArray = PackedByteArray()
 		# Construct data for sprite1
 		inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
-		inputs.append_array(vector2Bytes(fullTextureRect.size))
-		inputs.append_array(vector2Bytes(fullTextureRect.position))
+		inputs.append_array(vector2Bytes(sprite1Rect.size))
+		inputs.append_array(vector2Bytes(sprite1Rect.position))
 		# Construct data for sprite2
 		inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
-		inputs.append_array(vector2Bytes(fullTextureRect.size))
-		inputs.append_array(vector2Bytes(fullTextureRect.position))
+		inputs.append_array(vector2Bytes(sprite2Rect.size))
+		inputs.append_array(vector2Bytes(sprite2Rect.position))
 		# Construct data for the intersection rect
 		inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
 		var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)
@@ -102,7 +93,6 @@ static func spritesTouching(sprite1: Sprite, checkSprites: Array[Sprite]) -> boo
 		if result.decode_u32(0) > 0: return true
 	return false
 
-# Checking for a point is just a single CPU pixel check
 static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
 	if !sprite.visible: return false
 	
@@ -120,7 +110,11 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
 
-# This exists to fix detection with flipped sprites
+static func getTextureRect(texture: Texture2D) -> Rect2:
+	var size: Vector2 = texture.get_size()
+	return Rect2(Vector2.ZERO - (size * 0.5), size)
+
+# Fix detection with flipped sprites
 static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:
 	var transform: Transform2D = sprite.get_global_transform()
 	if sprite.flip_h:
@@ -131,8 +125,14 @@ static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:
 
 static func getCroppedRect(sprite: Sprite) -> Rect2:
 	var frameRect: Rect2 = sprite.frameRects[sprite.frame]
-	var scale: Vector2 = sprite.scale
-	return Rect2(sprite.global_position + (frameRect.position * scale), frameRect.size * scale)
+	var pos := sprite.global_position
+	var scl := sprite.scale
+	
+	# Shift top-left back to node origin center (-640, -360), then scale
+	var local_center_offset := frameRect.position - Vector2(640.0, 360.0)
+	var world_origin := pos + (local_center_offset * scl)
+	
+	return Rect2(world_origin, frameRect.size * scl)
 
 static func transformBytes(transform: Transform2D) -> PackedByteArray:
 	# glsl uses mat4 to represent transform
