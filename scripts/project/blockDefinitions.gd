@@ -280,7 +280,7 @@ func ctrl_createCloneName(inputs: Array) -> float:
 		H_clone(option, inputs[1])
 	return -1.0
 func H_clone(sprite: Sprite, cloneName: String) -> void:
-	if gameView.cloneCount >= 1000: return
+	if gameView.cloneCount >= 500: return
 	gameView.cloneCount += 1
 	var clone: Sprite
 	clone = sprite.duplicate()

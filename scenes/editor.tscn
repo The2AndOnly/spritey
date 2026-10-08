@@ -15,6 +15,7 @@
 [ext_resource type="Script" uid="uid://lskcnug2l5x6" path="res://scripts/editor/frameEditor/buttonSelectTool.gd" id="8_0u1f5"]
 [ext_resource type="Script" uid="uid://hh8jhs3mcgte" path="res://scripts/editor/frameEditor/frameToolSettingColor.gd" id="8_q8l03"]
 [ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
+[ext_resource type="Script" uid="uid://bl8w2nh3fyqni" path="res://scripts/editor/frameEditor/buttonMode.gd" id="9_k1sck"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
@@ -29,10 +30,20 @@ bg_color = Color(0.22, 0.22, 0.22, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xls0"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
+bg_color = Color(0, 0.58766675, 0.86, 0.46666667)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+
+[sub_resource type="Theme" id="Theme_xh0pi"]
+Panel/styles/panel = SubResource("StyleBoxFlat_ncklg")
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5tm2q"]
 size = Vector2(7000, 4500)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aa8l6"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
 
 [node name="editor" type="Control" unique_id=1205298598 node_paths=PackedStringArray("gameView", "scriptView", "mousePosLabel", "cloneCountLabel", "frameEntryContainer", "bitmapEdit", "frameNameField")]
@@ -112,6 +123,7 @@ editor = NodePath("../..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -139,7 +151,7 @@ metadata/_edit_use_anchors_ = true
 disable_3d = true
 handle_input_locally = false
 size = Vector2i(1180, 664)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 projectUI = NodePath("UI")
@@ -452,7 +464,6 @@ virtual_keyboard_enabled = false
 caret_blink = true
 
 [node name="frames" type="Control" parent="." unique_id=1330480262]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -498,215 +509,6 @@ metadata/_edit_use_anchors_ = true
 layout_mode = 2
 theme_override_constants/separation = 10
 metadata/_edit_use_anchors_ = true
-
-[node name="toolSettings" type="Control" parent="frames" unique_id=1135755254]
-layout_mode = 1
-anchor_left = 0.3125
-anchor_top = 0.16018519
-anchor_right = 0.909375
-anchor_bottom = 0.24444444
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="brush" type="HBoxContainer" parent="frames/toolSettings" unique_id=977624693]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.08791209
-anchor_right = 1.0
-anchor_bottom = 0.9120879
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 40
-metadata/_edit_use_anchors_ = true
-
-[node name="size" type="HBoxContainer" parent="frames/toolSettings/brush" unique_id=834563850]
-layout_mode = 2
-theme_override_constants/separation = 15
-
-[node name="Label" type="Label" parent="frames/toolSettings/brush/size" unique_id=1682862726]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Size"
-
-[node name="LineEdit2" type="LineEdit" parent="frames/toolSettings/brush/size" unique_id=1254956202 node_paths=PackedStringArray("bitmapFrame")]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "10"
-placeholder_text = "-"
-alignment = 1
-context_menu_enabled = false
-emoji_menu_enabled = false
-middle_mouse_paste_enabled = false
-drag_and_drop_selection_enabled = false
-virtual_keyboard_enabled = false
-caret_blink = true
-script = ExtResource("7_5tdu1")
-bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
-setting = &"brushSize"
-
-[node name="tools" type="VBoxContainer" parent="frames" unique_id=2015994550]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18541667
-anchor_top = 0.26759258
-anchor_right = 0.2765625
-anchor_bottom = 0.92685187
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 15
-metadata/_edit_use_anchors_ = true
-
-[node name="brush" type="Button" parent="frames/tools" unique_id=1517976653 node_paths=PackedStringArray("bitmapFrame")]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "Brush"
-script = ExtResource("8_0u1f5")
-bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
-
-[node name="eraser" type="Button" parent="frames/tools" unique_id=1115921652 node_paths=PackedStringArray("bitmapFrame")]
-custom_minimum_size = Vector2(0, 80)
-layout_mode = 2
-theme_override_font_sizes/font_size = 36
-text = "Eraser"
-script = ExtResource("8_0u1f5")
-tool = 1
-bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="frames" unique_id=1559469628]
-z_index = 1
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2953907
-anchor_top = 0.26759258
-anchor_right = 0.96216667
-anchor_bottom = 0.934
-offset_right = -0.20983887
-offset_bottom = 0.27996826
-grow_horizontal = 2
-grow_vertical = 2
-stretch = true
-mouse_target = true
-metadata/_edit_use_anchors_ = true
-
-[node name="FrameView" type="SubViewport" parent="frames/SubViewportContainer" unique_id=898406173 node_paths=PackedStringArray("camera")]
-disable_3d = true
-handle_input_locally = false
-physics_object_picking = true
-physics_object_picking_sort = true
-physics_object_picking_first_only = true
-size = Vector2i(1280, 720)
-render_target_update_mode = 0
-script = ExtResource("7_2w0at")
-camera = NodePath("Camera2D")
-
-[node name="brushStampPreview" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=364172529]
-z_index = 2
-texture_filter = 1
-
-[node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356 node_paths=PackedStringArray("brushStampPreview")]
-texture_filter = 1
-anchors_preset = -1
-anchor_left = -0.5
-anchor_top = -0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("7_74j0u")
-brushStampPreview = NodePath("../brushStampPreview")
-
-[node name="transparency" type="TextureRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=1506137497]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("8_sdh1e")
-
-[node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
-layer = -1
-
-[node name="ColorRect" type="ColorRect" parent="frames/SubViewportContainer/FrameView/CanvasLayer" unique_id=606471634]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.21960784, 0.21960784, 0.21960784, 1)
-metadata/_edit_lock_ = true
-
-[node name="Camera2D" type="Camera2D" parent="frames/SubViewportContainer/FrameView" unique_id=1966488675]
-zoom = Vector2(0.9, 0.9)
-limit_enabled = false
-
-[node name="color" type="HBoxContainer" parent="frames" unique_id=613395225]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18400002
-anchor_top = 0.16800001
-anchor_right = 0.27600002
-anchor_bottom = 0.23700002
-offset_left = 0.7199707
-offset_top = -0.4400177
-offset_right = -0.92004395
-offset_bottom = 0.039978027
-theme_override_constants/separation = 15
-
-[node name="Label" type="Label" parent="frames/color" unique_id=363892508]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Color"
-
-[node name="ColorPickerButton" type="ColorPickerButton" parent="frames/color" unique_id=1394899095 node_paths=PackedStringArray("bitmapFrame")]
-custom_minimum_size = Vector2(75, 0)
-layout_mode = 2
-color = Color(1, 0.55, 0, 1)
-script = ExtResource("8_q8l03")
-bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
-setting = &"brushColor"
-
-[node name="frameName" type="HBoxContainer" parent="frames" unique_id=1551576237]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.192375
-anchor_top = 0.062962964
-anchor_right = 0.37600002
-anchor_bottom = 0.133
-offset_left = -0.36001587
-offset_right = -0.92004395
-offset_bottom = 0.3600006
-grow_vertical = 2
-theme_override_constants/separation = 15
-metadata/_edit_use_anchors_ = true
-
-[node name="Label" type="Label" parent="frames/frameName" unique_id=1091542709]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Name"
-
-[node name="LineEdit2" type="LineEdit" parent="frames/frameName" unique_id=1483465988 node_paths=PackedStringArray("bitmapFrame", "editor")]
-custom_minimum_size = Vector2(250, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-placeholder_text = "Name"
-context_menu_enabled = false
-emoji_menu_enabled = false
-middle_mouse_paste_enabled = false
-drag_and_drop_selection_enabled = false
-virtual_keyboard_enabled = false
-caret_blink = true
-script = ExtResource("7_5tdu1")
-bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
-editor = NodePath("../../..")
-setting = &"frameName"
 
 [node name="newFrame" type="HBoxContainer" parent="frames" unique_id=200012496]
 layout_mode = 1
@@ -755,6 +557,261 @@ file_mode = 1
 access = 2
 filters = PackedStringArray("*.png, *.jpg, *.jpeg, *.webp, *.apng, *.jfif, *.pjpeg, *.pjp ; Supported Images")
 use_native_dialog = true
+
+[node name="frameName" type="HBoxContainer" parent="frames" unique_id=1551576237]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.192375
+anchor_top = 0.062962964
+anchor_right = 0.37600002
+anchor_bottom = 0.133
+offset_left = -0.36001587
+offset_right = -0.92004395
+offset_bottom = 0.3600006
+grow_vertical = 2
+theme_override_constants/separation = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="frames/frameName" unique_id=1091542709]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Name"
+
+[node name="LineEdit2" type="LineEdit" parent="frames/frameName" unique_id=1483465988 node_paths=PackedStringArray("bitmapFrame", "editor")]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+placeholder_text = "Name"
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
+script = ExtResource("7_5tdu1")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+editor = NodePath("../../..")
+setting = &"frameName"
+
+[node name="color" type="HBoxContainer" parent="frames" unique_id=613395225]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18400002
+anchor_top = 0.16800001
+anchor_right = 0.27600002
+anchor_bottom = 0.23700002
+offset_left = 0.7199707
+offset_top = -0.4400177
+offset_right = -0.92004395
+offset_bottom = 0.039978027
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="frames/color" unique_id=363892508]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Color"
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="frames/color" unique_id=1394899095 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+color = Color(1, 0.55, 0, 1)
+script = ExtResource("8_q8l03")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+setting = &"brushColor"
+
+[node name="paintToolSettings" type="Control" parent="frames" unique_id=1135755254]
+layout_mode = 1
+anchor_left = 0.3125
+anchor_top = 0.14537036
+anchor_right = 0.909375
+anchor_bottom = 0.22962964
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="brush" type="HBoxContainer" parent="frames/paintToolSettings" unique_id=977624693]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.08791209
+anchor_right = 1.0
+anchor_bottom = 0.9120879
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+metadata/_edit_use_anchors_ = true
+
+[node name="size" type="HBoxContainer" parent="frames/paintToolSettings/brush" unique_id=834563850]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Label" type="Label" parent="frames/paintToolSettings/brush/size" unique_id=1682862726]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Size"
+
+[node name="LineEdit2" type="LineEdit" parent="frames/paintToolSettings/brush/size" unique_id=1254956202 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "10"
+placeholder_text = "-"
+alignment = 1
+context_menu_enabled = false
+emoji_menu_enabled = false
+middle_mouse_paste_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+caret_blink = true
+script = ExtResource("7_5tdu1")
+bitmapFrame = NodePath("../../../../SubViewportContainer/FrameView/bitmapFrame")
+setting = &"brushSize"
+
+[node name="paintTools" type="VBoxContainer" parent="frames" unique_id=2015994550]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.18541667
+anchor_top = 0.26759258
+anchor_right = 0.2765625
+anchor_bottom = 0.92685187
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+metadata/_edit_use_anchors_ = true
+
+[node name="brush" type="Button" parent="frames/paintTools" unique_id=1517976653 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Brush"
+script = ExtResource("8_0u1f5")
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+
+[node name="eraser" type="Button" parent="frames/paintTools" unique_id=1115921652 node_paths=PackedStringArray("bitmapFrame")]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Eraser"
+script = ExtResource("8_0u1f5")
+tool = 1
+bitmapFrame = NodePath("../../SubViewportContainer/FrameView/bitmapFrame")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="frames" unique_id=1559469628]
+z_index = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2953907
+anchor_top = 0.24537037
+anchor_right = 0.96216667
+anchor_bottom = 0.9117778
+offset_right = -0.20983887
+offset_bottom = 0.27996826
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+mouse_target = true
+metadata/_edit_use_anchors_ = true
+
+[node name="FrameView" type="SubViewport" parent="frames/SubViewportContainer" unique_id=898406173 node_paths=PackedStringArray("camera")]
+disable_3d = true
+handle_input_locally = false
+physics_object_picking = true
+physics_object_picking_sort = true
+physics_object_picking_first_only = true
+size = Vector2i(1280, 720)
+render_target_update_mode = 4
+script = ExtResource("7_2w0at")
+camera = NodePath("Camera2D")
+
+[node name="brushStampPreview" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=364172529]
+z_index = 2
+texture_filter = 1
+
+[node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356 node_paths=PackedStringArray("brushStampPreview", "collisionLayer", "editor")]
+texture_filter = 1
+anchors_preset = -1
+anchor_left = -0.5
+anchor_top = -0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("7_74j0u")
+brushStampPreview = NodePath("../brushStampPreview")
+collisionLayer = NodePath("collisionLayer")
+editor = NodePath("../../../..")
+
+[node name="transparency" type="TextureRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=1506137497]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("8_sdh1e")
+
+[node name="collisionLayer" type="ColorRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=437752899]
+visible = false
+z_index = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_xh0pi")
+color = Color(0, 0, 0, 0.39215687)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="frames/SubViewportContainer/FrameView/CanvasLayer" unique_id=606471634]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.21960784, 0.21960784, 0.21960784, 1)
+metadata/_edit_lock_ = true
+
+[node name="Camera2D" type="Camera2D" parent="frames/SubViewportContainer/FrameView" unique_id=1966488675]
+zoom = Vector2(0.9, 0.9)
+limit_enabled = false
+
+[node name="mode" type="Control" parent="frames" unique_id=812401317]
+layout_mode = 1
+anchor_left = 0.3125
+anchor_top = 0.92314816
+anchor_right = 0.52916664
+anchor_bottom = 0.98703706
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="frames/mode" unique_id=568253620]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.08791209
+anchor_right = 1.0
+anchor_bottom = 0.9120879
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+metadata/_edit_use_anchors_ = true
+
+[node name="Collisions" type="Button" parent="frames/mode/HBoxContainer" unique_id=1969890322 node_paths=PackedStringArray("enabledWithMode", "disabledWithMode")]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+toggle_mode = true
+text = "Collisions"
+script = ExtResource("9_k1sck")
+enabledWithMode = [NodePath("../../../SubViewportContainer/FrameView/bitmapFrame/collisionLayer")]
+disabledWithMode = [NodePath("../../../color"), NodePath("../../../paintTools"), NodePath("../../../paintToolSettings")]
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false
@@ -851,7 +908,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -884,7 +941,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -917,7 +974,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -950,7 +1007,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -983,7 +1040,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -1016,7 +1073,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 
@@ -1049,7 +1106,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ncklg")
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
 horizontal_scroll_mode = 3
 metadata/_edit_use_anchors_ = true
 

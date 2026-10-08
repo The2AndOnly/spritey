@@ -101,10 +101,12 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 		frameCollisions[frameNumber] = [placeholder]
 
 func collisionEntered(area: Area2D) -> void:
+	print("entered")
 	var detected: Sprite = area.get_parent().master
 	collisions[detected] = collisions.get(detected, 0) + 1
 
 func collisionExited(area: Area2D) -> void:
+	print("exited")
 	var detected: Sprite = area.get_parent().master
 	if collisions.has(detected):
 		var count: int = collisions[detected] - 1
