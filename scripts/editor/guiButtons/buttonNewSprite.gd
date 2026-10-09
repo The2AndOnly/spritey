@@ -47,7 +47,7 @@ func onPress() -> void:
 	sprite.addFrame(ORANGE_MOE_3, "orange-moe-3")
 	spriteEntry.previewTexture = sprite.frameTextures[0]
 	for i: SpriteCollisionShape in sprite.frameCollisions[0]:
-		i.scale = Vector2.ONE
+		i.disabled = false
 	
 	spriteEntryContainer.add_child(spriteEntry)
 	sprite.spritePos = Vector2.ZERO

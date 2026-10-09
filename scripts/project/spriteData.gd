@@ -63,9 +63,9 @@ var spriteFrame: int = 0:
 		frame = value
 		if spriteFrame != value:
 			for i: SpriteCollisionShape in frameCollisions[spriteFrame]:
-				i.scale = Vector2.ZERO
+				i.disabled = true
 			for i: SpriteCollisionShape in frameCollisions[value]:
-				i.scale = Vector2.ONE
+				i.disabled = false
 			spriteFrame = value
 
 func updateSize() -> void:
@@ -93,13 +93,13 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 		var collision: SpriteCollisionShape = ParseData.imageRectToCollision(usedRect)
 		get_child(0).add_child(collision)
 		collision.frameNumber = frameNumber
-		collision.scale = Vector2.ZERO
+		collision.disabled = true
 		frameCollisions[frameNumber] = [collision]
 	else:
 		var placeholder: SpriteCollisionShape = SpriteCollisionShape.new()
 		placeholder.autoShape = true
 		placeholder.frameNumber = frameNumber
-		placeholder.scale = Vector2.ZERO
+		placeholder.disabled = true
 		frameCollisions[frameNumber] = [placeholder]
 
 func collisionEntered(area: Area2D) -> void:

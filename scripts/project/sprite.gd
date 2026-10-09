@@ -32,6 +32,7 @@ var scriptsCompiled := false
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	set_physics_process(false)
 	
 	# If this sprite was cloned, copy properties from the sprite that cloned it
 	if original:

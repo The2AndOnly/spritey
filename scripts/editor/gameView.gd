@@ -78,7 +78,13 @@ func parseInput(inputs: Array) -> Array:
 			2: parsed.append(i[1])
 	return parsed
 
-func _process(delta: float) -> void:
+const USEC_TO_SEC: float = 0.000001 # Pre-computed 1.0 / 1000000.0
+var _last_time_usec: int = 0
+func _physics_process(_delta: float) -> void:
+	var current_time_usec: int = Time.get_ticks_usec()
+	var delta: float = (current_time_usec - _last_time_usec) * USEC_TO_SEC
+	_last_time_usec = current_time_usec
+	
 	# Stacks can be removed and appended while processing
 	stackIterator = 0
 	while stackIterator < activeStacks.size():
