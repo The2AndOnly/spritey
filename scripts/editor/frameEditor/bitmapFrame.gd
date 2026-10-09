@@ -39,6 +39,7 @@ var toolSelected: Tools = Tools.BRUSH:
 
 var editableImage: Image
 var brushStamp: Image
+var disabled := false
 # The queued image gets baked onto the actual image once the mouse is released
 var queuedImage: Image
 # Texture version of the queued image so a preview can be shown in the _draw() function
@@ -81,6 +82,9 @@ func showFrame(showTexture: Texture2D, id: int) -> void:
 
 # Create points and redraw if there are any new points to process
 func _process(_delta: float) -> void:
+	if disabled:
+		brushStampPreview.visible = false
+		return
 	if drawing:
 		brushStampPreview.visible = false
 		if newPoints:
@@ -88,9 +92,13 @@ func _process(_delta: float) -> void:
 			queue_redraw()
 			newPoints = false
 	else:
-		brushStampPreview.visible = true
-		brushStampPreview.global_position = get_global_mouse_position().floor()
-		brushStampPreview.global_position -= Vector2(brushRadius / 2, brushRadius / 2)
+		match toolSelected:
+			Tools.BRUSH, Tools.ERASER:
+				brushStampPreview.visible = true
+				brushStampPreview.global_position = get_global_mouse_position().floor()
+				brushStampPreview.global_position -= Vector2(brushRadius / 2, brushRadius / 2)
+			_:
+				brushStampPreview.visible = false
 
 # This creates several points between the current and last position for the brush stamp
 # Take the latest input in case mouse inputs get detected multiple times per frame
@@ -112,6 +120,7 @@ func interpolatePoints() -> void:
 		lastPosition = targetPosition
 
 func _input(event: InputEvent) -> void:
+	if disabled: return
 	if event.is_action_pressed(&"leftMouse"):
 		currentPosition = Vector2i(get_local_mouse_position())
 		drawing = true
@@ -137,10 +146,11 @@ func _draw() -> void:
 	if !drawing: return
 	# The draw function needs a texture version of the queued image
 	previewTexture.update(queuedImage)
-	if toolSelected == Tools.BRUSH:
-		draw_texture(previewTexture, Vector2.ZERO, Color(1.0, 1.0, 1.0, alpha))
-	else:
-		draw_texture(previewTexture, Vector2.ZERO)
+	match toolSelected:
+		Tools.BRUSH:
+			draw_texture(previewTexture, Vector2.ZERO, Color(1.0, 1.0, 1.0, alpha))
+		Tools.ERASER:
+			draw_texture(previewTexture, Vector2.ZERO)
 
 # Create an image and texture for the brush stamp
 func setBrushStamp() -> void:

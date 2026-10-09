@@ -1,7 +1,7 @@
 class_name DrawCollision
 extends CollisionShape2D
 
-@export var fill_color: Color = Color(0.0, 0.683, 1.0, 0.5)
+@export var fill_color: Color = Color(0.0, 0.683, 1.0, 0.2)
 @export var outline_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 
 func _draw() -> void:

@@ -60,11 +60,12 @@ var opacity: float = 100.0:
 var spriteFrame: int = 0:
 	set(value):
 		frame = value
-		for i: SpriteCollisionShape in frameCollisions[spriteFrame]:
-			i.disabled = true
-		for i: SpriteCollisionShape in frameCollisions[value]:
-			i.disabled = false
-		spriteFrame = value
+		if spriteFrame != value:
+			for i: SpriteCollisionShape in frameCollisions[spriteFrame]:
+				i.scale = Vector2.ZERO
+			for i: SpriteCollisionShape in frameCollisions[value]:
+				i.scale = Vector2.ONE
+			spriteFrame = value
 
 func updateSize() -> void:
 	var baseScale: float = size / 100.0
@@ -91,22 +92,20 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 		var collision: SpriteCollisionShape = ParseData.imageRectToCollision(usedRect)
 		get_child(0).add_child(collision)
 		collision.frameNumber = frameNumber
-		collision.disabled = true
+		collision.scale = Vector2.ZERO
 		frameCollisions[frameNumber] = [collision]
 	else:
 		var placeholder: SpriteCollisionShape = SpriteCollisionShape.new()
 		placeholder.autoShape = true
 		placeholder.frameNumber = frameNumber
-		placeholder.disabled = true
+		placeholder.scale = Vector2.ZERO
 		frameCollisions[frameNumber] = [placeholder]
 
 func collisionEntered(area: Area2D) -> void:
-	print("entered")
 	var detected: Sprite = area.get_parent().master
 	collisions[detected] = collisions.get(detected, 0) + 1
 
 func collisionExited(area: Area2D) -> void:
-	print("exited")
 	var detected: Sprite = area.get_parent().master
 	if collisions.has(detected):
 		var count: int = collisions[detected] - 1

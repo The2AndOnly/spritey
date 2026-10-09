@@ -1,5 +1,6 @@
 extends Button
 
+@export var bitmapFrame: BitmapFrame
 @export var mode: StringName = &"collisions"
 @export var enabledWithMode: Array[Control]
 @export var disabledWithMode: Array[Control]
@@ -14,4 +15,4 @@ func onPress() -> void:
 		i.visible = !button_pressed
 	match mode:
 		&"collisions":
-			pass
+			bitmapFrame.disabled = button_pressed
