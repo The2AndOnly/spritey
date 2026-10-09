@@ -51,7 +51,6 @@ var lastPosition: Vector2i = Vector2i(-1, -1)
 var queuedPoints: Array[Vector2i] = []
 var newPoints := false
 var frameID: int = -1
-var collisions: Array[DrawCollision] = []
 
 signal frameUpdated(newFrame: Texture2D)
 
@@ -65,20 +64,7 @@ func showFrame(showTexture: Texture2D, id: int) -> void:
 	frameID = id
 	editableImage = showTexture.get_image()
 	texture = showTexture
-	# Set up collisions
-	for i: DrawCollision in collisions:
-		i.queue_free()
-	collisions.clear()
-	for i: SpriteCollisionShape in editor.selectedSprite.frameCollisions[id]:
-		var collision: DrawCollision = DrawCollision.new()
-		var shape: Shape2D = i.shape
-		if shape is RectangleShape2D:
-			var rectangle: RectangleShape2D = RectangleShape2D.new()
-			rectangle.size = shape.size
-			collision.position = i.position + Vector2(CANVAS_SIZE / 2)
-			collision.shape = rectangle
-			collisionLayer.add_child(collision)
-			collisions.append(collision)
+	collisionLayer.showCollisions(editor.selectedSprite.frameCollisions)
 
 # Create points and redraw if there are any new points to process
 func _process(_delta: float) -> void:

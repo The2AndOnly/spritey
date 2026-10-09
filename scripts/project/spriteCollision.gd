@@ -21,25 +21,23 @@ func _ready() -> void:
 static func spritesTouching(sprite1: Sprite, sprite2: Sprite) -> bool:
 	# Get collision data
 	var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
-	var sprite1Rect: Rect2 = getTextureRect(sprite1Texture)
 	var sprite1Transform: Transform2D = getTransform(sprite1)
-	var globalSprite1Rect: Rect2 = sprite1Transform * sprite1Rect
+	var globalSprite1Rect: Rect2 = sprite1Transform * fullTextureRect
 	var sprite2Texture: Texture2D = sprite2.frameTextures[sprite2.frame]
-	var sprite2Rect: Rect2 = getTextureRect(sprite2Texture)
 	var sprite2Transform: Transform2D = getTransform(sprite2)
-	var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * sprite2Rect)
+	var intersection: Rect2 = globalSprite1Rect.intersection(sprite2Transform * fullTextureRect)
 	if (intersection.size.x <= 0) or intersection.size.y <= 0: return false
 	
 	# Send data to the shader
 	var inputs: PackedByteArray = PackedByteArray()
 	# Construct data for sprite1
 	inputs.append_array(transformBytes(sprite1Transform.affine_inverse()))
-	inputs.append_array(vector2Bytes(sprite1Rect.size))
-	inputs.append_array(vector2Bytes(sprite1Rect.position))
+	inputs.append_array(vector2Bytes(fullTextureRect.size))
+	inputs.append_array(vector2Bytes(fullTextureRect.position))
 	# Construct data for sprite2
 	inputs.append_array(transformBytes(sprite2Transform.affine_inverse()))
-	inputs.append_array(vector2Bytes(sprite2Rect.size))
-	inputs.append_array(vector2Bytes(sprite2Rect.position))
+	inputs.append_array(vector2Bytes(fullTextureRect.size))
+	inputs.append_array(vector2Bytes(fullTextureRect.position))
 	# Construct data for the intersection rect
 	inputs.append_array(vector4Bytes(Vector4(intersection.position.x, intersection.position.y, intersection.size.x, intersection.size.y)))
 	var inputBuffer: RID = renderer.storage_buffer_create(inputs.size(), inputs)

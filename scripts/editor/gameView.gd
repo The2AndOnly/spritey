@@ -157,6 +157,13 @@ func event(eventBlockName: StringName, eventData: Array[Variant], storeNewStacks
 			for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
 				createStackFromEvent(i, eventData)
 
+# If the event is just for one sprite
+func singleEvent(eventBlockName: StringName, eventData: Array[Variant], sprite: Sprite) -> void:
+	if !sprite.scriptsCompiled: sprite.compileAll()
+	if !sprite.topLevelBlocks.has(eventBlockName): return
+	for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
+		createStackFromEvent(i, eventData)
+
 func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> ScriptStack:
 	# The first block must be an event, so if it has inputs then pass the eventData
 	if !startBlock.inputs.is_empty():

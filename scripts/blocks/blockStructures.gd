@@ -78,6 +78,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
+	&"event_clickedCollision": {
+		&"structure": ["when", 0, "clicked collision"],
+		0: [&"options", 0, 0, ["left", "double", "right"]],
+		&"color": &"events",
+		&"shape": BlockShape.blockShapes.EVENT
+	},
 	&"event_clicked": {
 		&"structure": ["when", 0, "clicked this sprite"],
 		0: [&"options", 0, 0, ["left", "double", "right"]],
@@ -408,9 +414,15 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"inter_colliding": {
 		&"structure": ["colliding with", 0],
-		0: [&"options", 1, 0, ["this sprite"]],
+		0: [&"options", 1, 0, ["pointer", "this sprite"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"inter_collisionEnabled": {
+		&"structure": ["set collision to", 0],
+		0: [&"options", 0, 0, ["enabled", "disabled"]],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"inter_touching": {
 		&"structure": ["touching", 0],

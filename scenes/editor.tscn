@@ -20,6 +20,7 @@
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
 [ext_resource type="Script" uid="uid://c2yywh5aeypjo" path="res://scripts/editor/frameEditor/buttonNewFrame.gd" id="13_8g6du"]
+[ext_resource type="Script" uid="uid://d083706co1wkq" path="res://scripts/editor/frameEditor/collisionEditor.gd" id="15_wyx26"]
 [ext_resource type="Script" uid="uid://b3tdjcx85l7es" path="res://scripts/project/spriteCollision.gd" id="20_aa8l6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
@@ -29,16 +30,6 @@ bg_color = Color(0.22, 0.22, 0.22, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2xls0"]
 bg_color = Color(0.21960784, 0.21960784, 0.21960784, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ncklg"]
-bg_color = Color(0, 0.58766675, 0.86, 0.46666667)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-
-[sub_resource type="Theme" id="Theme_xh0pi"]
-Panel/styles/panel = SubResource("StyleBoxFlat_ncklg")
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5tm2q"]
 size = Vector2(7000, 4500)
@@ -150,6 +141,9 @@ metadata/_edit_use_anchors_ = true
 [node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI", "camera")]
 disable_3d = true
 handle_input_locally = false
+physics_object_picking = true
+physics_object_picking_sort = true
+physics_object_picking_first_only = true
 size = Vector2i(1180, 664)
 render_target_update_mode = 0
 script = ExtResource("1_ba0ut")
@@ -752,7 +746,7 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("8_sdh1e")
 
-[node name="collisionLayer" type="ColorRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=437752899]
+[node name="collisionLayer" type="ColorRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=437752899 node_paths=PackedStringArray("bitmapFrame", "editor")]
 visible = false
 z_index = 3
 layout_mode = 1
@@ -761,8 +755,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = SubResource("Theme_xh0pi")
 color = Color(0, 0, 0, 0.39215687)
+script = ExtResource("15_wyx26")
+bitmapFrame = NodePath("..")
+editor = NodePath("../../../../..")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
 layer = -1

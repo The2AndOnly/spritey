@@ -35,8 +35,12 @@ func onPress() -> void:
 	gameView.add_child(sprite)
 	var area2D: Area2D = Area2D.new()
 	sprite.add_child(area2D)
+	area2D.input_pickable = true
 	area2D.area_entered.connect(sprite.collisionEntered)
 	area2D.area_exited.connect(sprite.collisionExited)
+	area2D.input_event.connect(sprite.collisionInput)
+	area2D.mouse_entered.connect(sprite.mouseEntered)
+	area2D.mouse_exited.connect(sprite.mouseExited)
 	
 	sprite.addFrame(ORANGE_MOE_1, "orange-moe-1")
 	sprite.addFrame(ORANGE_MOE_2, "orange-moe-2")

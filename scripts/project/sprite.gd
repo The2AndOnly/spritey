@@ -54,6 +54,9 @@ func _ready() -> void:
 				frameCollisions[frameNumber] = [i]
 		area.area_entered.connect(collisionEntered)
 		area.area_exited.connect(collisionExited)
+		area.input_event.connect(collisionInput)
+		area.mouse_entered.connect(mouseEntered)
+		area.mouse_exited.connect(mouseExited)
 		
 		# Set up transform
 		spritePos = original.spritePos

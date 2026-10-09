@@ -26,6 +26,7 @@ var frameImages: Array[Image] = []
 var frameTextures: Array[Texture2D] = []
 # frame number: Array of SpriteCollisionShape
 var frameCollisions: Dictionary[int, Array] = {}
+var touchingMouse := false
 
 # master: clones touching
 var collisions: Dictionary[Sprite, int]
@@ -113,6 +114,21 @@ func collisionExited(area: Area2D) -> void:
 			collisions.erase(detected)
 		else:
 			collisions[detected] = count
+
+func collisionInput(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == 1:
+			if event.pressed:
+				gameView.singleEvent(&"event_clickedCollision", [0], self)
+				if event.double_click: gameView.singleEvent(&"event_clickedCollision", [1], self)
+		elif event.button_index == 2:
+			if event.pressed:
+				gameView.singleEvent(&"event_clickedCollision", [2], self)
+
+func mouseEntered() -> void:
+	touchingMouse = true
+func mouseExited() -> void:
+	touchingMouse = false
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)

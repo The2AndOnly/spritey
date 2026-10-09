@@ -38,6 +38,10 @@ func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
 	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position()): return false
 	return inputs == eventData
 
+# Event triggered by sprite
+func event_clickedCollision(inputs: Array, eventData: Array[Variant]) -> bool:
+	return inputs == eventData
+
 func event_signal(inputs: Array) -> float:
 	gameView.event(&"event_receive", inputs)
 	return -1.0
@@ -631,8 +635,21 @@ func inter_deltaTime() -> float:
 func inter_colliding(inputs: Array) -> bool:
 	var option: Variant = inputs[0]
 	if option is int:
-		option = master
+		if option == 0:
+			return touchingMouse
+		else:
+			option = master
 	return collisions.has(option)
+
+func inter_collisionEnabled(inputs: Array) -> float:
+	var area: Area2D = get_child(0)
+	if inputs[0] == 0:
+		area.monitorable = true
+		area.monitoring = true
+	else:
+		area.monitorable = false
+		area.monitoring = false
+	return -1.0
 
 func inter_touching(inputs: Array) -> bool:
 	if !visible: return false
