@@ -287,10 +287,12 @@ func H_clone(sprite: Sprite, cloneName: String) -> void:
 	if gameView.cloneCount >= 500: return
 	gameView.cloneCount += 1
 	var clone: Sprite
+	var targetMaster: Sprite = sprite.master
 	clone = sprite.duplicate()
 	clone.original = sprite
 	clone.spriteName = cloneName
-	sprite.master.clones.append(clone)
+	clone.spriteID = targetMaster.spriteID + targetMaster.clones.size() + 1
+	targetMaster.clones.append(clone)
 	clone.z_index -= 1
 	gameView.add_child(clone)
 	gameView.sprites.append(clone)
@@ -639,7 +641,9 @@ func inter_colliding(inputs: Array) -> bool:
 			return touchingMouse
 		else:
 			option = master
-	return collisions.has(option)
+	for i: Area2D in get_child(0).get_overlapping_areas():
+		if i.get_parent().master == option: return true
+	return false
 
 func inter_collisionEnabled(inputs: Array) -> float:
 	var area: Area2D = get_child(0)
@@ -655,9 +659,12 @@ func inter_touching(inputs: Array) -> bool:
 	if !visible: return false
 	var option: Variant = inputs[0]
 	if option is int:
-		return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+		if option == 0:
+			option = master
+		else:
+			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
 	if !option.visible: return false
-	return SpriteCollision.spritesTouching(self, option)
+	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite)
 #func inter_touchingName(inputs: Array) -> bool:
 	#if !visible: return false
 	#var option: Variant = inputs[0]

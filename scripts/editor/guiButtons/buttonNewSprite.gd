@@ -48,6 +48,10 @@ func onPress() -> void:
 	spriteEntry.previewTexture = sprite.frameTextures[0]
 	for i: SpriteCollisionShape in sprite.frameCollisions[0]:
 		i.disabled = false
+	# Each sprite has 500 free IDs ahead of it for potential clones
+	var newID: int = gameView.sprites.size() * 501
+	sprite.spriteID = newID
+	gameView.idToSprite[newID] = sprite
 	
 	spriteEntryContainer.add_child(spriteEntry)
 	sprite.spritePos = Vector2.ZERO

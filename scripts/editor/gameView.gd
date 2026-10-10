@@ -36,6 +36,9 @@ var signals: Array[String] = ["signal1"]
 var mousePosition: Vector2
 # Stores key names to their index in BlockStructures.keyOptions
 var actionToIndex: Dictionary[StringName, int] = {}
+# sprite ID: axis-aligned bounding box
+var spriteBoundingBox: Dictionary[int, Rect2]
+var idToSprite: Dictionary[int, Sprite]
 
 func _ready() -> void:
 	if editor:

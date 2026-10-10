@@ -27,6 +27,7 @@ var frameTextures: Array[Texture2D] = []
 # frame number: Array of SpriteCollisionShape
 var frameCollisions: Dictionary[int, Array] = {}
 var touchingMouse := false
+var spriteID: int
 
 # master: clones touching
 var collisions: Dictionary[Sprite, int]
@@ -37,21 +38,25 @@ var spritePos: Vector2 = Vector2.ZERO:
 		spritePos = value
 		position = gameView.toLocalCoords(value)
 		#changePos.emit(value)
+		updateBoundingBox()
 
 var direction: float = 90.0:
 	set(value):
 		direction = wrapf(value, -180.0, 180.0)
 		rotation_degrees = direction - 90.0
 		#changeDirection.emit(value)
+		updateBoundingBox()
 
 var size: float = 100.0:
 	set(value):
 		size = max(0.0, value)
 		updateSize()
+		updateBoundingBox()
 var stretch: Vector2 = Vector2.ZERO:
 	set(value):
 		stretch = Vector2(max(-100.0, value.x), max(-100.0, value.y))
 		updateSize()
+		updateBoundingBox()
 
 var opacity: float = 100.0:
 	set(value):
@@ -67,6 +72,7 @@ var spriteFrame: int = 0:
 			for i: SpriteCollisionShape in frameCollisions[value]:
 				i.disabled = false
 			spriteFrame = value
+		updateBoundingBox()
 
 func updateSize() -> void:
 	var baseScale: float = size / 100.0
@@ -74,6 +80,14 @@ func updateSize() -> void:
 		baseScale * ((stretch.x / 100.0) + 1.0),
 		baseScale * ((stretch.y / 100.0) + 1.0)
 	)
+
+func updateBoundingBox() -> void:
+	var collisionShape: SpriteCollisionShape = frameCollisions[frame][0]
+	if collisionShape.shape:
+		var rect: Rect2 = collisionShape.shape.get_rect()
+		gameView.spriteBoundingBox[spriteID] = collisionShape.global_transform * rect
+	else:
+		gameView.spriteBoundingBox[spriteID] = Rect2()
 
 # Only disable autoCollision if another script adds its own collision to the frame
 func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true) -> void:
