@@ -95,8 +95,9 @@ static func spritesTouching(sprite1: Sprite, sprite2: Sprite, rectList: Dictiona
 		if result.decode_u32(0) > 0: return true
 	return false
 
-static func spriteTouchingPoint(sprite: Sprite, point: Vector2) -> bool:
+static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictionary[int, Rect2]) -> bool:
 	if !sprite.visible: return false
+	if !rectList[sprite.spriteID].has_point(point): return false
 	
 	var image: Image = sprite.frameImages[sprite.frame]
 	var localPoint: Vector2 = getTransform(sprite).affine_inverse() * point

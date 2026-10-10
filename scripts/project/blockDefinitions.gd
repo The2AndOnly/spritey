@@ -35,7 +35,7 @@ func event_scrolled(inputs: Array, eventData: Array[Variant]) -> bool:
 	return inputs == eventData
 
 func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
-	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position()): return false
+	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteBoundingBox): return false
 	return inputs == eventData
 
 # Event triggered by sprite
@@ -183,7 +183,7 @@ func ctrl_repeat(inputs: Array) -> float:
 func ctrl_repeatSeconds(inputs: Array) -> float:
 	if gameView.currentStack.currentBlock in gameView.currentStack.loops:
 		# While looping
-		gameView.currentStack.loopData[-1] -= get_process_delta_time()
+		gameView.currentStack.loopData[-1] -= gameView.delta
 		if gameView.currentStack.loopData[-1] <= 0.0:
 			# Loop finished
 			gameView.currentStack.loops.remove_at(-1)
@@ -636,7 +636,7 @@ func inter_timeSince1970() -> float:
 	return Time.get_unix_time_from_system()
 
 func inter_deltaTime() -> float:
-	return get_process_delta_time()
+	return gameView.delta
 
 func inter_colliding(inputs: Array) -> bool:
 	var option: Variant = inputs[0]
@@ -666,7 +666,7 @@ func inter_touching(inputs: Array) -> bool:
 		if option == 0:
 			option = master
 		else:
-			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position())
+			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteBoundingBox)
 	if !option.visible: return false
 	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite)
 #func inter_touchingName(inputs: Array) -> bool:

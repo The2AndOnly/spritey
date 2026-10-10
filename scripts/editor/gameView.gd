@@ -27,6 +27,7 @@ var result: Variant
 var stackIterator: int = 0
 
 var sprites: Array[Sprite] = []
+var delta: float = 0.0
 # Used for loops that need to delete sprites
 var queueDeleteSprites: Array[Sprite] = []
 var variables: Array[Variable] = []
@@ -81,13 +82,13 @@ func parseInput(inputs: Array) -> Array:
 			2: parsed.append(i[1])
 	return parsed
 
-const USEC_TO_SEC: float = 0.000001 # Pre-computed 1.0 / 1000000.0
-var _last_time_usec: int = 0
-func _physics_process(_delta: float) -> void:
-	var current_time_usec: int = Time.get_ticks_usec()
-	var delta: float = (current_time_usec - _last_time_usec) * USEC_TO_SEC
-	_last_time_usec = current_time_usec
-	
+const TO_SECONDS: float = 0.000001 # 1.0 / 1000000.0
+var lastTime: int = 0
+func _process(_delta: float) -> void:
+	# A custom delta time is calculated since the engine is inaccurate during heavy lag
+	var currentTime: int = Time.get_ticks_usec()
+	delta = (currentTime - lastTime) * TO_SECONDS
+	lastTime = currentTime
 	# Stacks can be removed and appended while processing
 	stackIterator = 0
 	while stackIterator < activeStacks.size():
