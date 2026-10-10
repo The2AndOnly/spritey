@@ -54,6 +54,8 @@ func _ready() -> void:
 				frameCollisions[frameNumber].append(i)
 			else:
 				frameCollisions[frameNumber] = [i]
+		area.monitorable = false
+		area.monitoring = false
 		area.area_entered.connect(collisionEntered)
 		area.area_exited.connect(collisionExited)
 		area.input_event.connect(collisionInput)

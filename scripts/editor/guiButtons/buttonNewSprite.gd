@@ -36,6 +36,8 @@ func onPress() -> void:
 	var area2D: Area2D = Area2D.new()
 	sprite.add_child(area2D)
 	area2D.input_pickable = true
+	area2D.monitorable = false
+	area2D.monitoring = false
 	area2D.area_entered.connect(sprite.collisionEntered)
 	area2D.area_exited.connect(sprite.collisionExited)
 	area2D.input_event.connect(sprite.collisionInput)

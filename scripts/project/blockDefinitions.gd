@@ -224,13 +224,17 @@ func ctrl_forever() -> float:
 
 func ctrl_if(inputs: Array) -> float:
 	if inputs[0]:
-		gameView.currentStack.exitNest.append(gameView.currentStack.currentBlock.nextBlock)
+		var exitNest: CompiledBlock = gameView.currentStack.currentBlock.nextBlock
+		if exitNest:
+			gameView.currentStack.exitNest.append(exitNest)
 		return -3.0
 	else:
 		return -1.0
 
 func ctrl_ifElse(inputs: Array) -> float:
-	gameView.currentStack.exitNest.append(gameView.currentStack.currentBlock.nextBlock)
+	var exitNest: CompiledBlock = gameView.currentStack.currentBlock.nextBlock
+	if exitNest:
+		gameView.currentStack.exitNest.append(exitNest)
 	if inputs[0]:
 		return -3.0
 	else:
