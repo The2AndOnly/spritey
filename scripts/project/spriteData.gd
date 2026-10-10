@@ -97,6 +97,7 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 		frameCollisions[frameNumber] = [collision]
 	else:
 		var placeholder: SpriteCollisionShape = SpriteCollisionShape.new()
+		get_child(0).add_child(placeholder)
 		placeholder.autoShape = true
 		placeholder.frameNumber = frameNumber
 		placeholder.disabled = true

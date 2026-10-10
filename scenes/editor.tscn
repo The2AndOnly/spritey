@@ -799,7 +799,7 @@ grow_vertical = 2
 theme_override_constants/separation = 40
 metadata/_edit_use_anchors_ = true
 
-[node name="Collisions" type="Button" parent="frames/mode/HBoxContainer" unique_id=1969890322 node_paths=PackedStringArray("bitmapFrame", "enabledWithMode", "disabledWithMode")]
+[node name="Collisions" type="Button" parent="frames/mode/HBoxContainer" unique_id=1969890322 node_paths=PackedStringArray("bitmapFrame", "collisionLayer", "enabledWithMode", "disabledWithMode")]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 23
@@ -807,6 +807,7 @@ toggle_mode = true
 text = "Collisions"
 script = ExtResource("9_k1sck")
 bitmapFrame = NodePath("../../../SubViewportContainer/FrameView/bitmapFrame")
+collisionLayer = NodePath("../../../SubViewportContainer/FrameView/bitmapFrame/collisionLayer")
 enabledWithMode = [NodePath("../../../SubViewportContainer/FrameView/bitmapFrame/collisionLayer")]
 disabledWithMode = [NodePath("../../../color"), NodePath("../../../paintTools"), NodePath("../../../paintToolSettings")]
 

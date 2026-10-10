@@ -2,6 +2,7 @@ extends Button
 
 @export var bitmapFrame: BitmapFrame
 @export var mode: StringName = &"collisions"
+@export var collisionLayer: ColorRect
 @export var enabledWithMode: Array[Control]
 @export var disabledWithMode: Array[Control]
 
@@ -16,3 +17,4 @@ func onPress() -> void:
 	match mode:
 		&"collisions":
 			bitmapFrame.disabled = button_pressed
+			collisionLayer.enabled = button_pressed
