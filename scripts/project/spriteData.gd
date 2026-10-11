@@ -9,7 +9,7 @@ extends AnimatedSprite2D
 #@onready var sizeGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 #@onready var opacityGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
 
-var gameView: GameView
+@export var gameView: GameView
 var spriteScript: Dictionary[int, Dictionary] = {}
 var variables: Array[Variable] = []
 # Used only by clones
@@ -24,54 +24,50 @@ var frameNames: Array[String] = []
 var croppedFrames: Array[Texture2D] = []
 var frameImages: Array[Image] = []
 var frameTextures: Array[Texture2D] = []
-# frame number: Array of SpriteCollisionShape
-var frameCollisions: Dictionary[int, Array] = {}
+# Used to calculate the bounding box of the visible area of the texture
+var frameCollisions: Dictionary[int, CollisionShape2D] = {}
 var touchingMouse := false
 var spriteID: int
+var disableBoundsUpdate := true
 
 # master: clones touching
 var collisions: Dictionary[Sprite, int]
 
 var spriteName: String = "?"
-var spritePos: Vector2 = Vector2.ZERO:
+@export var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
 		spritePos = value
 		position = gameView.toLocalCoords(value)
 		#changePos.emit(value)
 		updateBoundingBox()
 
-var direction: float = 90.0:
+@export var direction: float = 90.0:
 	set(value):
 		direction = wrapf(value, -180.0, 180.0)
 		rotation_degrees = direction - 90.0
 		#changeDirection.emit(value)
 		updateBoundingBox()
 
-var size: float = 100.0:
+@export var size: float = 100.0:
 	set(value):
 		size = max(0.0, value)
 		updateSize()
 		updateBoundingBox()
-var stretch: Vector2 = Vector2.ZERO:
+@export var stretch: Vector2 = Vector2.ZERO:
 	set(value):
 		stretch = Vector2(max(-100.0, value.x), max(-100.0, value.y))
 		updateSize()
 		updateBoundingBox()
 
-var opacity: float = 100.0:
+@export var opacity: float = 100.0:
 	set(value):
 		opacity = clampf(value, 0.0, 100.0)
 		modulate.a = opacity / 100.0
 
-var spriteFrame: int = 0:
+@export var spriteFrame: int = 0:
 	set(value):
 		frame = value
-		if spriteFrame != value:
-			for i: SpriteCollisionShape in frameCollisions[spriteFrame]:
-				i.disabled = true
-			for i: SpriteCollisionShape in frameCollisions[value]:
-				i.disabled = false
-			spriteFrame = value
+		spriteFrame = value
 		updateBoundingBox()
 
 func updateSize() -> void:
@@ -82,7 +78,8 @@ func updateSize() -> void:
 	)
 
 func updateBoundingBox() -> void:
-	var collisionShape: SpriteCollisionShape = frameCollisions[frame][0]
+	if disableBoundsUpdate: return
+	var collisionShape: CollisionShape2D = frameCollisions[spriteFrame]
 	if collisionShape.shape:
 		var rect: Rect2 = collisionShape.shape.get_rect()
 		gameView.spriteBoundingBox[spriteID] = collisionShape.global_transform * rect
@@ -102,48 +99,14 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 	# Add a basic bounding collision to the new frame
 	if !autoCollision: return
 	var usedRect: Rect2i = image.get_used_rect()
-	var frameNumber: int = frameCollisions.size()
 	if usedRect.has_area():
-		var collision: SpriteCollisionShape = ParseData.imageRectToCollision(usedRect)
-		get_child(0).add_child(collision)
-		collision.frameNumber = frameNumber
-		collision.disabled = true
-		frameCollisions[frameNumber] = [collision]
+		var collision: CollisionShape2D = ParseData.imageRectToCollision(usedRect)
+		add_child(collision)
+		frameCollisions[frameCollisions.size()] = collision
 	else:
-		var placeholder: SpriteCollisionShape = SpriteCollisionShape.new()
-		get_child(0).add_child(placeholder)
-		placeholder.autoShape = true
-		placeholder.frameNumber = frameNumber
-		placeholder.disabled = true
-		frameCollisions[frameNumber] = [placeholder]
-
-func collisionEntered(area: Area2D) -> void:
-	var detected: Sprite = area.get_parent().master
-	collisions[detected] = collisions.get(detected, 0) + 1
-
-func collisionExited(area: Area2D) -> void:
-	var detected: Sprite = area.get_parent().master
-	if collisions.has(detected):
-		var count: int = collisions[detected] - 1
-		if count <= 0:
-			collisions.erase(detected)
-		else:
-			collisions[detected] = count
-
-func collisionInput(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == 1:
-			if event.pressed:
-				gameView.singleEvent(&"event_clickedCollision", [0], self)
-				if event.double_click: gameView.singleEvent(&"event_clickedCollision", [1], self)
-		elif event.button_index == 2:
-			if event.pressed:
-				gameView.singleEvent(&"event_clickedCollision", [2], self)
-
-func mouseEntered() -> void:
-	touchingMouse = true
-func mouseExited() -> void:
-	touchingMouse = false
+		var placeholder: CollisionShape2D = CollisionShape2D.new()
+		add_child(placeholder)
+		frameCollisions[frameCollisions.size()] = placeholder
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)

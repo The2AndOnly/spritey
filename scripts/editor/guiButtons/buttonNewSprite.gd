@@ -33,29 +33,17 @@ func onPress() -> void:
 	sprite.spriteName = ParseData.findUniqueName("sprite1", names)
 	
 	gameView.add_child(sprite)
-	var area2D: Area2D = Area2D.new()
-	sprite.add_child(area2D)
-	area2D.input_pickable = true
-	area2D.monitorable = false
-	area2D.monitoring = false
-	area2D.area_entered.connect(sprite.collisionEntered)
-	area2D.area_exited.connect(sprite.collisionExited)
-	area2D.input_event.connect(sprite.collisionInput)
-	area2D.mouse_entered.connect(sprite.mouseEntered)
-	area2D.mouse_exited.connect(sprite.mouseExited)
-	
 	sprite.addFrame(ORANGE_MOE_1, "orange-moe-1")
 	sprite.addFrame(ORANGE_MOE_2, "orange-moe-2")
 	sprite.addFrame(ORANGE_MOE_3, "orange-moe-3")
 	spriteEntry.previewTexture = sprite.frameTextures[0]
-	for i: SpriteCollisionShape in sprite.frameCollisions[0]:
-		i.disabled = false
 	# Each sprite has 500 free IDs ahead of it for potential clones
 	var newID: int = gameView.sprites.size() * 501
 	sprite.spriteID = newID
 	gameView.idToSprite[newID] = sprite
 	
 	spriteEntryContainer.add_child(spriteEntry)
+	sprite.disableBoundsUpdate = false
 	sprite.spritePos = Vector2.ZERO
 	spriteEntry.sprite = sprite
 	gameView.sprites.append(sprite)

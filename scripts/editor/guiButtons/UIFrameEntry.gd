@@ -24,6 +24,7 @@ func onPress() -> void:
 	nameField.text = nameLabel.text
 	sprite.spriteFrame = frameID
 
+# After making a change to the sprite's texture
 func updateFrame(newFrame: Texture2D) -> void:
 	if bitmapEdit.frameID != frameID: return
 	textureData = newFrame
@@ -34,6 +35,7 @@ func updateFrame(newFrame: Texture2D) -> void:
 	sprite.frameImages[frameID] = image
 	sprite.frameTextures[frameID] = newFrame
 	entryTexture.texture = cropped
+	fixSpriteBoundingBox()
 	updateInfo()
 
 func updateName(newName: String) -> void:
@@ -46,3 +48,11 @@ func updateInfo() -> void:
 	sizeLabel.text = "%d x %d" % [textureSize.x, textureSize.y]
 	nameLabel.text = sprite.frameNames[frameID]
 	idLabel.text = str(frameID + 1)
+
+func fixSpriteBoundingBox() -> void:
+	sprite.get_child(frameID).queue_free()
+	var croppedImage: Rect2i = textureData.get_image().get_used_rect()
+	var newShape: CollisionShape2D = ParseData.imageRectToCollision(croppedImage)
+	sprite.add_child(newShape)
+	sprite.move_child(newShape, frameID)
+	sprite.frameCollisions[frameID] = newShape

@@ -18,7 +18,7 @@ func _ready() -> void:
 	shader = renderer.shader_create_from_spirv(CollisionShader.get_spirv())
 	pipeline = renderer.compute_pipeline_create(shader)
 
-static func spritesTouching(sprite1: Sprite, sprite2: Sprite, rectList: Dictionary[int, Rect2], spriteList: Dictionary[int, Sprite]) -> bool:
+static func spritesTouching(sprite1: Sprite, sprite2: Sprite, rectList: Dictionary[int, Rect2], spriteList: Dictionary[int, Sprite], filterEnabled: bool = false, nameFilter: String = "") -> bool:
 	var sprite1ID: int = sprite1.spriteID
 	var sprite2ID: int = sprite2.spriteID
 	var sprite1Rect: Rect2 = rectList[sprite1ID]
@@ -27,6 +27,8 @@ static func spritesTouching(sprite1: Sprite, sprite2: Sprite, rectList: Dictiona
 		if !sprite1Rect.intersects(rectList[id]): continue
 		var clone: Sprite = spriteList[id]
 		if clone == sprite1: continue
+		if filterEnabled:
+			if clone.spriteName != nameFilter: continue
 		
 		# Get collision data
 		var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
@@ -108,10 +110,6 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictio
 		return false
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
-
-static func getTextureRect(texture: Texture2D) -> Rect2:
-	var size: Vector2 = texture.get_size()
-	return Rect2(Vector2.ZERO - (size * 0.5), size)
 
 # Fix detection with flipped sprites
 static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:

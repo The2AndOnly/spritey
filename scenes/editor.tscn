@@ -15,12 +15,10 @@
 [ext_resource type="Script" uid="uid://lskcnug2l5x6" path="res://scripts/editor/frameEditor/buttonSelectTool.gd" id="8_0u1f5"]
 [ext_resource type="Script" uid="uid://hh8jhs3mcgte" path="res://scripts/editor/frameEditor/frameToolSettingColor.gd" id="8_q8l03"]
 [ext_resource type="Texture2D" uid="uid://leeaak86ahbr" path="res://textures/UI/frameTransparency.png" id="8_sdh1e"]
-[ext_resource type="Script" uid="uid://bl8w2nh3fyqni" path="res://scripts/editor/frameEditor/buttonMode.gd" id="9_k1sck"]
 [ext_resource type="Script" uid="uid://cpkjoinbndhk1" path="res://scripts/editor/guiButtons/buttonCreateData.gd" id="10_3vi5u"]
 [ext_resource type="Script" uid="uid://bg6wx6mw24i2e" path="res://scripts/editor/guiButtons/buttonBlockGroup.gd" id="10_o435n"]
 [ext_resource type="PackedScene" uid="uid://dir76caema6d1" path="res://scenes/instances/dialogBox.tscn" id="12_78fwb"]
 [ext_resource type="Script" uid="uid://c2yywh5aeypjo" path="res://scripts/editor/frameEditor/buttonNewFrame.gd" id="13_8g6du"]
-[ext_resource type="Script" uid="uid://d083706co1wkq" path="res://scripts/editor/frameEditor/collisionEditor.gd" id="15_wyx26"]
 [ext_resource type="Script" uid="uid://b3tdjcx85l7es" path="res://scripts/project/spriteCollision.gd" id="20_aa8l6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xh0pi"]
@@ -114,7 +112,6 @@ editor = NodePath("../..")
 metadata/_edit_use_anchors_ = true
 
 [node name="sprites" type="Control" parent="." unique_id=1392272804]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -131,8 +128,10 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.020717558
 anchor_top = 0.13333334
-anchor_right = 0.63553244
-anchor_bottom = 0.74814814
+anchor_right = 0.63600004
+anchor_bottom = 0.748
+offset_right = -0.89782715
+offset_bottom = 0.15997314
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
@@ -145,7 +144,7 @@ physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1180, 664)
-render_target_update_mode = 0
+render_target_update_mode = 4
 script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 projectUI = NodePath("UI")
@@ -458,6 +457,7 @@ virtual_keyboard_enabled = false
 caret_blink = true
 
 [node name="frames" type="Control" parent="." unique_id=1330480262]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -713,7 +713,7 @@ physics_object_picking = true
 physics_object_picking_sort = true
 physics_object_picking_first_only = true
 size = Vector2i(1280, 720)
-render_target_update_mode = 4
+render_target_update_mode = 0
 script = ExtResource("7_2w0at")
 camera = NodePath("Camera2D")
 
@@ -721,7 +721,7 @@ camera = NodePath("Camera2D")
 z_index = 2
 texture_filter = 1
 
-[node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356 node_paths=PackedStringArray("brushStampPreview", "collisionLayer", "editor")]
+[node name="bitmapFrame" type="TextureRect" parent="frames/SubViewportContainer/FrameView" unique_id=225929356 node_paths=PackedStringArray("brushStampPreview", "editor")]
 texture_filter = 1
 anchors_preset = -1
 anchor_left = -0.5
@@ -732,7 +732,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("7_74j0u")
 brushStampPreview = NodePath("../brushStampPreview")
-collisionLayer = NodePath("collisionLayer")
 editor = NodePath("../../../..")
 
 [node name="transparency" type="TextureRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=1506137497]
@@ -745,20 +744,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("8_sdh1e")
-
-[node name="collisionLayer" type="ColorRect" parent="frames/SubViewportContainer/FrameView/bitmapFrame" unique_id=437752899 node_paths=PackedStringArray("bitmapFrame", "editor")]
-visible = false
-z_index = 3
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.39215687)
-script = ExtResource("15_wyx26")
-bitmapFrame = NodePath("..")
-editor = NodePath("../../../../..")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="frames/SubViewportContainer/FrameView" unique_id=541969698]
 layer = -1
@@ -776,40 +761,6 @@ metadata/_edit_lock_ = true
 [node name="Camera2D" type="Camera2D" parent="frames/SubViewportContainer/FrameView" unique_id=1966488675]
 zoom = Vector2(0.9, 0.9)
 limit_enabled = false
-
-[node name="mode" type="Control" parent="frames" unique_id=812401317]
-layout_mode = 1
-anchor_left = 0.3125
-anchor_top = 0.92314816
-anchor_right = 0.52916664
-anchor_bottom = 0.98703706
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="HBoxContainer" type="HBoxContainer" parent="frames/mode" unique_id=568253620]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.08791209
-anchor_right = 1.0
-anchor_bottom = 0.9120879
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 40
-metadata/_edit_use_anchors_ = true
-
-[node name="Collisions" type="Button" parent="frames/mode/HBoxContainer" unique_id=1969890322 node_paths=PackedStringArray("bitmapFrame", "collisionLayer", "enabledWithMode", "disabledWithMode")]
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 23
-toggle_mode = true
-text = "Collisions"
-script = ExtResource("9_k1sck")
-bitmapFrame = NodePath("../../../SubViewportContainer/FrameView/bitmapFrame")
-collisionLayer = NodePath("../../../SubViewportContainer/FrameView/bitmapFrame/collisionLayer")
-enabledWithMode = [NodePath("../../../SubViewportContainer/FrameView/bitmapFrame/collisionLayer")]
-disabledWithMode = [NodePath("../../../color"), NodePath("../../../paintTools"), NodePath("../../../paintToolSettings")]
 
 [node name="scripts" type="Control" parent="." unique_id=932710569]
 visible = false

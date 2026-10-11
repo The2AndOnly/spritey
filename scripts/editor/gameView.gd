@@ -167,12 +167,12 @@ func event(eventBlockName: StringName, eventData: Array[Variant], storeNewStacks
 			for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
 				createStackFromEvent(i, eventData)
 
-# If the event is just for one sprite
-func singleEvent(eventBlockName: StringName, eventData: Array[Variant], sprite: Sprite) -> void:
-	if !sprite.scriptsCompiled: sprite.compileAll()
-	if !sprite.topLevelBlocks.has(eventBlockName): return
-	for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
-		createStackFromEvent(i, eventData)
+## If the event is just for one sprite
+#func singleEvent(eventBlockName: StringName, eventData: Array[Variant], sprite: Sprite) -> void:
+	#if !sprite.scriptsCompiled: sprite.compileAll()
+	#if !sprite.topLevelBlocks.has(eventBlockName): return
+	#for i: CompiledBlock in sprite.topLevelBlocks[eventBlockName]:
+		#createStackFromEvent(i, eventData)
 
 func createStackFromEvent(startBlock: CompiledBlock, eventData: Array[Variant]) -> ScriptStack:
 	# The first block must be an event, so if it has inputs then pass the eventData
@@ -241,6 +241,7 @@ func deleteSpriteClones(sprite: Sprite, deletingAll: bool = false) -> void:
 	sprite.clones.clear()
 	if deletingAll: return
 	for i: Sprite in queueDeleteSprites:
+		idToSprite.erase(i.spriteID)
 		sprites.erase(i)
 	queueDeleteSprites.clear()
 
@@ -248,6 +249,7 @@ func deleteAllClones() -> void:
 	for i: Sprite in sprites:
 		deleteSpriteClones(i, true)
 	for i: Sprite in queueDeleteSprites:
+		idToSprite.erase(i.spriteID)
 		sprites.erase(i)
 	queueDeleteSprites.clear()
 

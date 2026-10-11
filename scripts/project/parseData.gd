@@ -67,8 +67,8 @@ static func cropTexture(sourceImage: Image) -> Texture2D:
 			return empty
 	return ImageTexture.create_from_image(sourceImage.get_region(usedRect))
 
-static func imageRectToCollision(sourceRect: Rect2i) -> SpriteCollisionShape:
-	var collision: SpriteCollisionShape = SpriteCollisionShape.new()
+static func imageRectToCollision(sourceRect: Rect2i) -> CollisionShape2D:
+	var collision: CollisionShape2D = CollisionShape2D.new()
 	var shape: RectangleShape2D = RectangleShape2D.new()
 	shape.size = sourceRect.size
 	collision.shape = shape
@@ -76,5 +76,4 @@ static func imageRectToCollision(sourceRect: Rect2i) -> SpriteCollisionShape:
 	collision.position = sourceRect.position - Vector2i(640, 360)
 	# Shape center origin offset
 	collision.position += shape.size / 2.0
-	collision.autoShape = true
 	return collision

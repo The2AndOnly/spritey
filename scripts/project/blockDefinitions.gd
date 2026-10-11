@@ -38,10 +38,6 @@ func event_clicked(inputs: Array, eventData: Array[Variant]) -> bool:
 	if !SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteBoundingBox): return false
 	return inputs == eventData
 
-# Event triggered by sprite
-func event_clickedCollision(inputs: Array, eventData: Array[Variant]) -> bool:
-	return inputs == eventData
-
 func event_signal(inputs: Array) -> float:
 	gameView.event(&"event_receive", inputs)
 	return -1.0
@@ -93,7 +89,7 @@ func trans_setPositionOption(inputs: Array) -> float:
 func H_getPositionFromOption(option: int) -> Vector2:
 	match option:
 		0:
-			return gameView.mousePosition
+			return gameView.mousePosition.round()
 		1:
 			return Vector2(randi_range(-640, 640), randi_range(-360, 360))
 	return spritePos
@@ -295,7 +291,9 @@ func H_clone(sprite: Sprite, cloneName: String) -> void:
 	clone = sprite.duplicate()
 	clone.original = sprite
 	clone.spriteName = cloneName
-	clone.spriteID = targetMaster.spriteID + targetMaster.clones.size() + 1
+	var cloneID: int = targetMaster.spriteID + 1
+	while gameView.idToSprite.has(cloneID): cloneID += 1
+	clone.spriteID = cloneID
 	targetMaster.clones.append(clone)
 	clone.z_index -= 1
 	gameView.add_child(clone)
@@ -589,37 +587,9 @@ func inter_distanceTo(inputs: Array) -> float:
 			return spritePos.round().distance_to(gameView.mousePosition.round())
 		else:
 			option = master
-	var roundedPos: Vector2 = spritePos.round()
-	var distance: float = 0.0
-	var shortest: float = 0.0
-	if !clones.is_empty():
-		shortest = INF
-	else:
-		shortest = roundedPos.distance_to(option.spritePos.round())
-	for i: Sprite in option.clones:
-		if i == self: continue
-		distance = roundedPos.distance_to(i.spritePos.round())
-		if distance < shortest: shortest = distance
-	return shortest
-func inter_distanceToName(inputs: Array) -> float:
-	var option: Variant = inputs[0]
-	var filterName: String = inputs[1]
-	if option is int: option = master
-	var roundedPos: Vector2 = spritePos.round()
-	var distance: float = 0.0
-	var shortest: float = 0.0
-	if !clones.is_empty():
-		shortest = INF
-	else:
-		if option.spriteName == filterName:
-			shortest = roundedPos.distance_to(option.spritePos.round())
-		else:
-			shortest = INF
-	for i: Sprite in option.clones:
-		if (i == self) or i.spriteName != filterName: continue
-		distance = roundedPos.distance_to(i.spritePos.round())
-		if distance < shortest: shortest = distance
-	return shortest
+	return spritePos.round().distance_to(option.spritePos.round())
+func inter_distanceToCoord(inputs: Array) -> float:
+	return spritePos.round().distance_to(Vector2(inputs[0], inputs[1]).round())
 
 func inter_localTime(inputs: Array) -> int:
 	var date: Dictionary = Time.get_datetime_dict_from_system(false)
@@ -638,48 +608,21 @@ func inter_timeSince1970() -> float:
 func inter_deltaTime() -> float:
 	return gameView.delta
 
-func inter_colliding(inputs: Array) -> bool:
-	var option: Variant = inputs[0]
-	if option is int:
-		if option == 0:
-			return touchingMouse
-		else:
-			option = master
-	for i: Area2D in get_child(0).get_overlapping_areas():
-		if i.get_parent().master == option: return true
-	return false
-
-func inter_collisionEnabled(inputs: Array) -> float:
-	var area: Area2D = get_child(0)
-	if inputs[0] == 0:
-		area.monitorable = true
-		area.monitoring = true
-	else:
-		area.monitorable = false
-		area.monitoring = false
-	return -1.0
-
 func inter_touching(inputs: Array) -> bool:
 	if !visible: return false
 	var option: Variant = inputs[0]
 	if option is int:
 		if option == 0:
-			option = master
-		else:
 			return SpriteCollision.spriteTouchingPoint(self, get_global_mouse_position(), gameView.spriteBoundingBox)
-	if !option.visible: return false
+		else:
+			option = master
 	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite)
-#func inter_touchingName(inputs: Array) -> bool:
-	#if !visible: return false
-	#var option: Variant = inputs[0]
-	#var filterName: String = inputs[1]
-	#if option is int: option = master
-	#var checkTouching: Array[Sprite] = []
-	#for i: Sprite in option.clones:
-		#if (i == self) or i.spriteName != filterName: continue
-		#checkTouching.append(i)
-	#if (option != self) and option.spriteName == filterName: checkTouching.append(option)
-	#return SpriteCollision.spritesTouching(self, checkTouching)
+func inter_touchingName(inputs: Array) -> bool:
+	if !visible: return false
+	var option: Variant = inputs[0]
+	if option is int:
+		option = master
+	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite, true, inputs[1])
 
 ## VARIABLES
 

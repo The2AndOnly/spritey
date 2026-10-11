@@ -36,7 +36,6 @@ func _ready() -> void:
 	
 	# If this sprite was cloned, copy properties from the sprite that cloned it
 	if original:
-		gameView = original.gameView
 		spriteScript = original.spriteScript
 		master = original.master
 		gameView.idToSprite[spriteID] = self
@@ -46,28 +45,10 @@ func _ready() -> void:
 		croppedFrames = original.croppedFrames
 		frameImages = original.frameImages
 		frameTextures = original.frameTextures
-		var area: Area2D = get_child(0)
-		var frameNumber: int = 0
-		for i: SpriteCollisionShape in area.get_children():
-			frameNumber = i.frameNumber
-			if frameCollisions.has(frameNumber):
-				frameCollisions[frameNumber].append(i)
-			else:
-				frameCollisions[frameNumber] = [i]
-		area.monitorable = false
-		area.monitoring = false
-		area.area_entered.connect(collisionEntered)
-		area.area_exited.connect(collisionExited)
-		area.input_event.connect(collisionInput)
-		area.mouse_entered.connect(mouseEntered)
-		area.mouse_exited.connect(mouseExited)
-		
-		# Set up transform
-		spritePos = original.spritePos
-		rotation = original.rotation
-		size = original.size
-		stretch = original.stretch
-		opacity = original.opacity
+		for i: int in range(get_child_count()):
+			frameCollisions[i] = get_child(i)
+		disableBoundsUpdate = false
+		updateBoundingBox()
 		
 		# Set up variables
 		variables = original.variables

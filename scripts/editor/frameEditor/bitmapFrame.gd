@@ -11,7 +11,6 @@ extends TextureRect
 
 const CANVAS_SIZE := Vector2i(1280, 720)
 @export var brushStampPreview: TextureRect
-@export var collisionLayer: ColorRect
 @export var editor: Editor
 enum Tools {
 	BRUSH,
@@ -64,7 +63,6 @@ func showFrame(showTexture: Texture2D, id: int) -> void:
 	frameID = id
 	editableImage = showTexture.get_image()
 	texture = showTexture
-	collisionLayer.showCollisions(editor.selectedSprite.frameCollisions)
 
 # Create points and redraw if there are any new points to process
 func _process(_delta: float) -> void:

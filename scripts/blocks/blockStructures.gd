@@ -2,6 +2,9 @@ class_name BlockStructures
 extends Node
 
 # TODO: Add an "in editor" boolean block
+# TODO: Add a "point x: [] y: [] is touching [sprite v]" boolean block
+# TODO: Add a "set clone name to []" stack block
+# TODO: Make the "event_clicked" block filter by the topmost sprite
 
 # INPUT DOCS:
 # Inputs are expected to start from 0 and increment by 1 from left to right
@@ -75,12 +78,6 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["when", 0, "mouse button", 1],
 		0: [&"options", 0, 0, ["left", "right"]],
 		1: [&"options", 0, 0, ["pressed", "released"]],
-		&"color": &"events",
-		&"shape": BlockShape.blockShapes.EVENT
-	},
-	&"event_clickedCollision": {
-		&"structure": ["when", 0, "clicked collision"],
-		0: [&"options", 0, 0, ["left", "double", "right"]],
 		&"color": &"events",
 		&"shape": BlockShape.blockShapes.EVENT
 	},
@@ -389,10 +386,10 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
-	&"inter_distanceToName": {
-		&"structure": ["distance to", 0, "of name", 1],
-		0: [&"options", 1, 0, ["this sprite"]],
-		1: [&"input", 2, ""],
+	&"inter_distanceToCoord": {
+		&"structure": ["distance to x:", 0, "y:", 1],
+		0: [&"input", 1, "0"],
+		1: [&"input", 1, "0"],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -412,31 +409,19 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
-	&"inter_colliding": {
-		&"structure": ["colliding with", 0],
+	&"inter_touching": {
+		&"structure": ["touching", 0],
 		0: [&"options", 1, 0, ["pointer", "this sprite"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
-	&"inter_collisionEnabled": {
-		&"structure": ["set collision to", 0],
-		0: [&"options", 0, 0, ["enabled", "disabled"]],
-		&"color": &"interaction",
-		&"shape": BlockShape.blockShapes.STACK
-	},
-	&"inter_touching": {
-		&"structure": ["touching", 0],
-		0: [&"options", 1, 0, ["this sprite", "pointer"]],
+	&"inter_touchingName": {
+		&"structure": ["touching", 0, "of name", 1],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 2, ""],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
-	#&"inter_touchingName": {
-		#&"structure": ["touching", 0, "of name", 1],
-		#0: [&"options", 1, 0, ["this sprite"]],
-		#1: [&"input", 2, ""],
-		#&"color": &"interaction",
-		#&"shape": BlockShape.blockShapes.BOOLEAN
-	#},
 	
 	## CONTROL
 	

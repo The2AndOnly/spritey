@@ -46,9 +46,7 @@ func filesSelected(paths: PackedStringArray) -> void:
 	for i: int in paths.size():
 		var path: String = paths[i]
 		var fileBytes = FileAccess.get_file_as_bytes(path)
-		if fileBytes.is_empty():
-			print("Could not read image file bytes")
-			return
+		if fileBytes.is_empty(): return
 		var uploaded: Image = Image.new()
 		var error: Error = ERR_FILE_CORRUPT
 		# Read the first four bytes to find the true file type of the image
@@ -64,4 +62,4 @@ func filesSelected(paths: PackedStringArray) -> void:
 		if error == OK:
 			addFrame(ParseData.forceTextureSize(ImageTexture.create_from_image(uploaded)), path.get_basename().get_file(), i == paths.size() - 1)
 		else:
-			print("Image upload failed: ", error)
+			print(error)
