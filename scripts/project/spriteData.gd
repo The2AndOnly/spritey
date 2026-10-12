@@ -29,6 +29,7 @@ var frameCollisions: Dictionary[int, CollisionShape2D] = {}
 var touchingMouse := false
 var spriteID: int
 var disableBoundsUpdate := true
+@export var sizeMultiplier: Vector2 = Vector2.ONE
 
 # master: clones touching
 var collisions: Dictionary[Sprite, int]
@@ -75,7 +76,7 @@ func updateSize() -> void:
 	scale = Vector2(
 		baseScale * ((stretch.x / 100.0) + 1.0),
 		baseScale * ((stretch.y / 100.0) + 1.0)
-	)
+	) * sizeMultiplier
 
 func updateBoundingBox() -> void:
 	if disableBoundsUpdate: return

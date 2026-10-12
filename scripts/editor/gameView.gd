@@ -279,13 +279,29 @@ func _input(inputEvent: InputEvent) -> void:
 		if inputEvent.button_index == 1:
 			if inputEvent.pressed:
 				event(&"event_mouse", [0, 0])
-				event(&"event_clicked", [0])
-				if inputEvent.double_click: event(&"event_clicked", [1])
+				eventClicked([0])
+				if inputEvent.double_click: eventClicked([1])
 			else:
 				event(&"event_mouse", [0, 1])
 		elif inputEvent.button_index == 2:
 			if inputEvent.pressed:
 				event(&"event_mouse", [1, 0])
-				event(&"event_clicked", [2])
+				eventClicked([2])
 			else:
 				event(&"event_mouse", [1, 1])
+
+func eventClicked(eventData: Array[Variant]) -> void:
+	var candidates: Array[Sprite] = []
+	for sprite: Sprite in sprites:
+		if SpriteCollision.spriteTouchingPoint(sprite, sprite.get_global_mouse_position(), spriteBoundingBox):
+			candidates.append(sprite)
+	# Get the topmost candidate
+	candidates.sort_custom(func(a: Sprite, b: Sprite) -> bool:
+		if a.z_index != b.z_index:
+			return a.z_index < b.z_index
+		return a.get_index() < b.get_index())
+	if candidates.is_empty(): return
+	var topmost: Sprite = candidates.back()
+	if topmost.topLevelBlocks.has(&"event_clicked"):
+		for i: CompiledBlock in topmost.topLevelBlocks[&"event_clicked"]:
+			createStackFromEvent(i, eventData)

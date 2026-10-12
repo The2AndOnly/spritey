@@ -39,6 +39,7 @@ func _ready() -> void:
 		spriteScript = original.spriteScript
 		master = original.master
 		gameView.idToSprite[spriteID] = self
+		gameView.move_child(self, original.get_index())
 		
 		# Set up frames
 		frameNames = original.frameNames

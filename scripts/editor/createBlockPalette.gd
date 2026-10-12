@@ -6,6 +6,7 @@ const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 @export var gameView: GameView
 @export var blockGroup: StringName
 @export var container: ScrollContainer
+@export var camera: Camera2D
 
 var blockOrder: Dictionary[StringName, Array] = {
 	&"events": [
@@ -39,6 +40,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"ctrl_deleteThisClone",
 		&"ctrl_deleteClones",
 		&"ctrl_deleteCloneName",
+		&"ctrl_setCloneName",
 		&"ctrl_cloneName",
 		&"ctrl_cloneCount",
 		&"ctrl_isClone"
@@ -48,6 +50,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"inter_pointerY",
 		&"inter_touching",
 		&"inter_touchingName",
+		&"inter_touchingPoint",
 		&"inter_keyPressed",
 		&"inter_mousePressed",
 		&"inter_distanceTo",
@@ -73,7 +76,11 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_flip",
 		&"vis_setOpacity",
 		&"vis_changeOpacity",
-		&"vis_opacity"
+		&"vis_opacity",
+		&"vis_setLayerOption",
+		&"vis_setZIndex",
+		&"vis_changeZIndex",
+		&"vis_ZIndex"
 	],
 	&"transform": [
 		&"trans_setPosition",
@@ -122,6 +129,10 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"var_hideVar"
 	]
 }
+# Clicked blocks are created by releasing it in the palette
+var clickedBlock: CodeBlock = null
+# Dragged blocks are created by holding it and moving the mouse outside the palette
+var draggedBlock: CodeBlock = null
 
 # Negative: Spacing before
 # Position: Spacing after
@@ -135,6 +146,7 @@ func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 func _ready() -> void:
 	editor.switchBlockGroup.connect(switchBlockGroup)
 	editor.updateBlockOptions.connect(updateList)
+	mouse_exited.connect(mouseExit)
 	for i: StringName in blockOrder[blockGroup]:
 		createBlock(i)
 
@@ -152,7 +164,9 @@ func createBlock(blockName: StringName, checkBox: VarGraphicCheckbox = null, atF
 	block.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	block.editor = editor
 	block.gameView = gameView
-	block.clicked.connect(blockClicked.bind(block.blockName))
+	block.clicked.connect(blockClicked.bind(block))
+	block.mouseReleased.connect(blockReleased.bind(block))
+	block.grabArea.mouse_exited.connect(blockMouseExit)
 	if checkBox:
 		var hbox: HBoxContainer = HBoxContainer.new()
 		hbox.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -183,20 +197,54 @@ func createSpacing(amount: float) -> void:
 	spacing.custom_minimum_size.y = amount
 	add_child(spacing)
 
-func blockClicked(clicked: StringName) -> void:
+func blockClicked(block: CodeBlock) -> void:
+	clickedBlock = block
+	draggedBlock = block
+
+func blockReleased(block: CodeBlock) -> void:
+	if block != clickedBlock: return
+	instantiateBlock(block.blockName, camera.global_position - Vector2(400.0, 200.0))
+
+func mouseExit() -> void:
+	# Fix bug where the block stays highlighted when moving mouse out of palette
+	for i: Control in get_children():
+		if i is CodeBlock:
+			i.mouseExited()
+	if draggedBlock:
+		var initialOffset: Vector2 = Vector2(-60.0, -35.0)
+		var newBlock: CodeBlock = instantiateBlock(draggedBlock.blockName, camera.get_global_mouse_position() + initialOffset)
+		newBlock.mouseEntered()
+		newBlock.initialMousePos = newBlock.get_global_mouse_position()
+		newBlock.initialOffset = initialOffset
+		newBlock.mouseTouching = false
+	clickedBlock = null
+	draggedBlock = null
+
+# Make it so if the mouse leaves any block then it can't create one by releasing again
+func blockMouseExit() -> void:
+	clickedBlock = null
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_released(&"leftMouse"):
+		draggedBlock = null
+
+func instantiateBlock(blockName: StringName, blockPosition: Vector2) -> CodeBlock:
 	# Create a new block in the script area
-	var block: CodeBlock = CODE_BLOCK.instantiate()
-	block.blockName = clicked
-	block.editor = editor
-	block.gameView = gameView
-	block.sprite = editor.selectedSprite
+	var newBlock: CodeBlock = CODE_BLOCK.instantiate()
+	newBlock.blockName = blockName
+	newBlock.editor = editor
+	newBlock.gameView = gameView
+	newBlock.sprite = editor.selectedSprite
 	# Assign this new block an ID
 	var i: int = 0
 	var spriteScript: Dictionary[int, Dictionary] = editor.selectedSprite.spriteScript
 	while spriteScript.has(i):
 		i += 1
-	block.blockID = i
-	editor.scriptView.add_child(block)
+	newBlock.blockID = i
+	# Setting position has to go after adding child
+	editor.scriptView.add_child(newBlock)
+	newBlock.global_position = blockPosition
+	return newBlock
 
 func switchBlockGroup(newGroup: StringName) -> void:
 	container.visible = newGroup == blockGroup

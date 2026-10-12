@@ -295,7 +295,6 @@ func H_clone(sprite: Sprite, cloneName: String) -> void:
 	while gameView.idToSprite.has(cloneID): cloneID += 1
 	clone.spriteID = cloneID
 	targetMaster.clones.append(clone)
-	clone.z_index -= 1
 	gameView.add_child(clone)
 	gameView.sprites.append(clone)
 	gameView.triggerCloneEvent(clone)
@@ -303,9 +302,10 @@ func H_clone(sprite: Sprite, cloneName: String) -> void:
 func ctrl_deleteThisClone() -> float:
 	# Checking if "original" exists
 	if original:
-		queue_free()
 		master.clones.erase(self)
 		gameView.sprites.erase(self)
+		gameView.idToSprite.erase(spriteID)
+		queue_free()
 		gameView.cloneCount -= 1
 	return -1.0
 
@@ -334,11 +334,16 @@ func ctrl_deleteCloneName(inputs: Array) -> float:
 				targetClones.remove_at(j)
 				queueDelete.append(clone)
 	for i: Sprite in queueDelete:
-		sprites.erase(i)
+		gameView.idToSprite.erase(i.spriteID)
+		gameView.sprites.erase(i)
 	return -1.0
 
+func ctrl_setCloneName(inputs: Array) -> float:
+	if original: spriteName = inputs[0]
+	return -1.0
 func ctrl_cloneName() -> String:
 	return spriteName
+
 func ctrl_cloneCount(inputs: Array) -> int:
 	var option: Variant = inputs[0]
 	if option is int:
@@ -516,15 +521,17 @@ func vis_stretch(inputs: Array) -> float:
 
 func vis_setFlip(inputs: Array) -> float:
 	if inputs[0] == 0:
-		flip_h = inputs[1] == 0
+		sizeMultiplier.x = -1.0 if inputs[1] == 0 else 1.0
 	else:
-		flip_v = inputs[1] == 0
+		sizeMultiplier.y = -1.0 if inputs[1] == 0 else 1.0
+	updateSize()
+	updateBoundingBox()
 	return -1.0
 func vis_flip(inputs: Array) -> bool:
 	if inputs[0] == 0:
-		return flip_h
+		return sizeMultiplier.x == -1.0
 	else:
-		return flip_v
+		return sizeMultiplier.y == -1.0
 
 func vis_setOpacity(inputs: Array) -> float:
 	opacity = inputs[0]
@@ -548,7 +555,6 @@ func vis_setFrame(inputs: Array) -> float:
 	else:
 		spriteFrame = inputs[0]
 	return -1.0
-
 func vis_frame(inputs: Array) -> Variant:
 	match inputs[0]:
 		0:
@@ -560,6 +566,22 @@ func vis_frame(inputs: Array) -> Variant:
 		3:
 			return int(croppedFrames[spriteFrame].get_size().y)
 	return ""
+
+func vis_setLayerOption(inputs: Array) -> float:
+	if inputs[0] == 0:
+		gameView.move_child(self, -1)
+	else:
+		gameView.move_child(self, 0)
+	return -1.0
+
+func vis_setZIndex(inputs: Array) -> float:
+	z_index = inputs[0]
+	return -1.0
+func vis_changeZIndex(inputs: Array) -> float:
+	z_index += inputs[0]
+	return -1.0
+func vis_ZIndex() -> int:
+	return z_index
 
 ## INTERACTION
 
@@ -623,6 +645,12 @@ func inter_touchingName(inputs: Array) -> bool:
 	if option is int:
 		option = master
 	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite, true, inputs[1])
+func inter_touchingPoint(inputs: Array) -> bool:
+	var option: Variant = inputs[0]
+	if option is int:
+		option = self
+	if !option.visible: return false
+	return SpriteCollision.spriteTouchingPoint(option, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])), gameView.spriteBoundingBox)
 
 ## VARIABLES
 

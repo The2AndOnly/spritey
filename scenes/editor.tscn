@@ -801,7 +801,6 @@ camera = NodePath("Camera2D")
 dragDetector = NodePath("Camera2D/drag")
 
 [node name="Camera2D" type="Camera2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1134382404]
-position = Vector2(400, 200)
 zoom = Vector2(0.8, 0.8)
 
 [node name="drag" type="Area2D" parent="scripts/SubViewportContainer/ScriptView/Camera2D" unique_id=1812885411]
@@ -816,7 +815,6 @@ shape = SubResource("RectangleShape2D_5tm2q")
 [node name="grid" type="Sprite2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1974338185]
 z_index = -999
 texture_repeat = 2
-position = Vector2(679.5, 433)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("7_5tm2q")
 region_enabled = true
@@ -870,7 +868,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/events/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/events/MarginContainer" unique_id=830582796 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -880,6 +878,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"events"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="transform" type="ScrollContainer" parent="scripts/blockSelector" unique_id=256951964]
 visible = false
@@ -903,7 +902,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/transform/MarginContainer" unique_id=598220014 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/transform/MarginContainer" unique_id=598220014 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -913,6 +912,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"transform"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="visuals" type="ScrollContainer" parent="scripts/blockSelector" unique_id=733336699]
 visible = false
@@ -936,7 +936,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/visuals/MarginContainer" unique_id=1268512487 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/visuals/MarginContainer" unique_id=1268512487 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -946,6 +946,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"visuals"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="control" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1550488444]
 visible = false
@@ -969,7 +970,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/control/MarginContainer" unique_id=1813781468 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/control/MarginContainer" unique_id=1813781468 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -979,6 +980,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"control"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="expressions" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1683316889]
 visible = false
@@ -1002,7 +1004,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/expressions/MarginContainer" unique_id=1846168618 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/expressions/MarginContainer" unique_id=1846168618 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -1012,6 +1014,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"expressions"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="interaction" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1018388765]
 visible = false
@@ -1035,7 +1038,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/interaction/MarginContainer" unique_id=1475807083 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/interaction/MarginContainer" unique_id=1475807083 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -1045,6 +1048,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"interaction"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="variables" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1588330394]
 visible = false
@@ -1068,7 +1072,7 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 
-[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/variables/MarginContainer" unique_id=758168936 node_paths=PackedStringArray("editor", "gameView", "container")]
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/variables/MarginContainer" unique_id=758168936 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -1078,6 +1082,7 @@ editor = NodePath("../../../../..")
 gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
 blockGroup = &"variables"
 container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
 [node name="createSignal" type="Button" parent="scripts/blockSelector" unique_id=1786838654 node_paths=PackedStringArray("dialogBox", "gameView", "editor")]
 z_index = 1

@@ -32,10 +32,10 @@ static func spritesTouching(sprite1: Sprite, sprite2: Sprite, rectList: Dictiona
 		
 		# Get collision data
 		var sprite1Texture: Texture2D = sprite1.frameTextures[sprite1.frame]
-		var sprite1Transform: Transform2D = getTransform(sprite1)
+		var sprite1Transform: Transform2D = sprite1.global_transform
 		var globalSprite1Rect: Rect2 = sprite1Transform * fullTextureRect
 		var cloneTexture: Texture2D = clone.frameTextures[clone.frame]
-		var cloneTransform: Transform2D = getTransform(clone)
+		var cloneTransform: Transform2D = clone.global_transform
 		var intersection: Rect2 = globalSprite1Rect.intersection(cloneTransform * fullTextureRect)
 		
 		# Send data to the shader
@@ -102,7 +102,7 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictio
 	if !rectList[sprite.spriteID].has_point(point): return false
 	
 	var image: Image = sprite.frameImages[sprite.frame]
-	var localPoint: Vector2 = getTransform(sprite).affine_inverse() * point
+	var localPoint: Vector2 = sprite.global_transform.affine_inverse() * point
 	var pixelPosition: Vector2i = Vector2i(localPoint - fullTextureRect.position)
 	# All sprite frames are always 1280 x 720
 	if (pixelPosition.x < 0) or (pixelPosition.x >= 1280) or\
@@ -111,25 +111,14 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictio
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
 
-# Fix detection with flipped sprites
-static func getTransform(sprite: AnimatedSprite2D) -> Transform2D:
-	var transform: Transform2D = sprite.get_global_transform()
-	if sprite.flip_h:
-		transform = transform.scaled_local(Vector2(-1, 1))
-	if sprite.flip_v:
-		transform = transform.scaled_local(Vector2(1, -1))
-	return transform
-
-static func getCroppedRect(sprite: Sprite) -> Rect2:
-	var frameRect: Rect2 = sprite.frameRects[sprite.frame]
-	var pos := sprite.global_position
-	var scl := sprite.scale
-	
-	# Shift top-left back to node origin center (-640, -360), then scale
-	var local_center_offset := frameRect.position - Vector2(640.0, 360.0)
-	var world_origin := pos + (local_center_offset * scl)
-	
-	return Rect2(world_origin, frameRect.size * scl)
+## Fix detection with flipped sprites
+#static func getTransform(sprite: Sprite) -> Transform2D:
+	#var transform: Transform2D = sprite.global_transform
+	#if sprite.flip_h:
+		#transform = transform.scaled_local(Vector2(-1, 1))
+	#if sprite.flip_v:
+		#transform = transform.scaled_local(Vector2(1, -1))
+	#return transform
 
 static func transformBytes(transform: Transform2D) -> PackedByteArray:
 	# glsl uses mat4 to represent transform

@@ -2,7 +2,6 @@ class_name BlockStructures
 extends Node
 
 # TODO: Add an "in editor" boolean block
-# TODO: Add a "point x: [] y: [] is touching [sprite v]" boolean block
 # TODO: Add a "set clone name to []" stack block
 # TODO: Make the "event_clicked" block filter by the topmost sprite
 
@@ -382,7 +381,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"inter_distanceTo": {
 		&"structure": ["distance to", 0],
-		0: [&"options", 1, 0, ["pointer", "this sprite"]],
+		0: [&"options", 1, 0, ["pointer", "original"]],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -419,6 +418,14 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"structure": ["touching", 0, "of name", 1],
 		0: [&"options", 1, 0, ["this sprite"]],
 		1: [&"input", 2, ""],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"inter_touchingPoint": {
+		&"structure": [0, "is touching x:", 1, "y:", 2],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 1, "0"],
+		2: [&"input", 1, "0"],
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
@@ -551,6 +558,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"control",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
+	&"ctrl_setCloneName": {
+		&"structure": ["set clone name to", 0],
+		0: [&"input", 2, ""],
+		&"color": &"control",
+		&"shape": BlockShape.blockShapes.STACK
+	},
 	
 	## VISUALS
 	
@@ -651,6 +664,29 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	&"vis_frame": {
 		&"structure": ["frame", 0],
 		0: [&"options", 0, 0, ["number", "name", "width", "height"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"vis_setLayerOption": {
+		&"structure": ["set layer to", 0],
+		0: [&"options", 0, 0, ["front", "back"]],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_setZIndex": {
+		&"structure": ["set Z index to", 0],
+		0: [&"input", 0, "0"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_changeZIndex": {
+		&"structure": ["change Z index by", 0],
+		0: [&"input", 0, "1"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_ZIndex": {
+		&"structure": ["Z index"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
 	},

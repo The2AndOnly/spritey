@@ -82,6 +82,7 @@ var loadPosition: Vector2 = Vector2.ZERO
 var valuesToLoad: Array[Variant] = []
 
 signal clicked()
+signal mouseReleased()
 
 func _ready() -> void:
 	grabArea.mouse_entered.connect(mouseEntered)
@@ -915,6 +916,8 @@ func inputEvent(_viewport: Node, event: InputEvent, _shapeIdx: int) -> void:
 	if event.is_action_pressed(&"leftMouse"):
 		if !mouseTouching: mouseEntered()
 		clicked.emit()
+	elif event.is_action_released(&"leftMouse"):
+		mouseReleased.emit()
 
 func hoveringChildValue() -> bool:
 	for i: CodeBlock in childValueBlocks:
