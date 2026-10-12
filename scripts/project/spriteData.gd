@@ -99,7 +99,7 @@ func positionMessage() -> void:
 	var topCenter: Vector2 = Vector2(canvasBounds.position.x + (canvasBounds.size.x * 0.5), canvasBounds.position.y)
 	messageBox.global_position = topCenter - Vector2(
 		(messageBox.size.x * 0.5) * messageBox.scale.x,
-		(messageBox.size.y + 50.0) * messageBox.scale.y)
+		(messageBox.size.y + 90.0) * messageBox.scale.y)
 
 # Only disable autoCollision if another script adds its own collision to the frame
 func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true) -> void:

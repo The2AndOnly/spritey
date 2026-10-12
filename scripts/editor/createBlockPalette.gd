@@ -261,7 +261,7 @@ func updateList() -> void:
 			# Clear previous
 			for i: Node in find_children("*", "CodeBlock", true, false):
 				if i.blockName.contains(&"var_value:"):
-					i.queue_free()
+					i.get_parent().queue_free()
 			# Sort global and local variables
 			var sortedVars: Array[Variable] = gameView.variables.duplicate()
 			# TODO: remove check since there should always be selected sprite in the future

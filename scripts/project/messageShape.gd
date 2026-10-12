@@ -1,19 +1,12 @@
-@tool
 class_name MessageShape
 extends Control
 
-@export var color: Color = Color("fffce0ff"):
+var color: Color = Color("fffce0ff"):
 	set(value):
 		color = value
 		queue_redraw()
-@export var tailWidth: float = 35.0:
-	set(value):
-		tailWidth = value
-		queue_redraw()
-@export var tailHeight: float = 35.0:
-	set(value):
-		tailHeight = value
-		queue_redraw()
+var tailWidth: float = 60.0
+var tailHeight: float = 60.0
 var points: PackedVector2Array = PackedVector2Array()
 
 func _draw() -> void:

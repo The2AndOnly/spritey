@@ -16,9 +16,9 @@ var minimumSizes: Dictionary[blockShapes, float] = {
 	blockShapes.STACK: 145.0,
 	blockShapes.STOP: 145.0,
 	blockShapes.EVENT: 250.0,
-	blockShapes.VALUE: 100.0,
+	blockShapes.VALUE: 70.0,
 	blockShapes.NEST: 250.0,
-	blockShapes.BOOLEAN: 100.0,
+	blockShapes.BOOLEAN: 70.0,
 	blockShapes.DOUBLE_NEST: 250.0
 }
 # Determines which parts of the block can connect
