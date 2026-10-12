@@ -31,6 +31,7 @@ corner_radius_bottom_left = 4
 corner_detail = 3
 
 [node name="varGraphic" type="Control" unique_id=1375513703 node_paths=PackedStringArray("nameLabel", "valueLabel", "dragArea")]
+z_index = 1
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_25p0y")

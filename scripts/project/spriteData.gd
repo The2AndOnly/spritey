@@ -1,6 +1,7 @@
 class_name SpriteData
 extends AnimatedSprite2D
 
+const MESSAGE_BOX: PackedScene = preload("uid://btk72m2rs22ex")
 #const VAR_GRAPHIC: PackedScene = preload("uid://bawekqtjf8tpg")
 
 #@onready var directionGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
@@ -29,6 +30,7 @@ var frameCollisions: Dictionary[int, CollisionShape2D] = {}
 var touchingMouse := false
 var spriteID: int
 var disableBoundsUpdate := true
+var messageBox: MessageBox = null
 @export var sizeMultiplier: Vector2 = Vector2.ONE
 
 # master: clones touching
@@ -81,11 +83,23 @@ func updateSize() -> void:
 func updateBoundingBox() -> void:
 	if disableBoundsUpdate: return
 	var collisionShape: CollisionShape2D = frameCollisions[spriteFrame]
+	var boundingBox: Rect2
 	if collisionShape.shape:
 		var rect: Rect2 = collisionShape.shape.get_rect()
-		gameView.spriteBoundingBox[spriteID] = collisionShape.global_transform * rect
+		boundingBox = collisionShape.global_transform * rect
 	else:
-		gameView.spriteBoundingBox[spriteID] = Rect2()
+		boundingBox = Rect2()
+		boundingBox.position = position
+	gameView.spriteBoundingBox[spriteID] = boundingBox
+	if messageBox.visible: positionMessage()
+
+func positionMessage() -> void:
+	var boundingBox: Rect2 = gameView.spriteBoundingBox[spriteID]
+	var canvasBounds: Rect2 = get_viewport().get_canvas_transform() * boundingBox
+	var topCenter: Vector2 = Vector2(canvasBounds.position.x + (canvasBounds.size.x * 0.5), canvasBounds.position.y)
+	messageBox.global_position = topCenter - Vector2(
+		(messageBox.size.x * 0.5) * messageBox.scale.x,
+		(messageBox.size.y + 50.0) * messageBox.scale.y)
 
 # Only disable autoCollision if another script adds its own collision to the frame
 func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true) -> void:
@@ -108,6 +122,10 @@ func addFrame(newFrame: Texture2D, frameName: String, autoCollision: bool = true
 		var placeholder: CollisionShape2D = CollisionShape2D.new()
 		add_child(placeholder)
 		frameCollisions[frameCollisions.size()] = placeholder
+	updateBoundingBox.call_deferred()
+
+func _exit_tree() -> void:
+	messageBox.queue_free()
 
 #func _ready() -> void:
 	#gameView.projectUI.add_child(directionGraphic)

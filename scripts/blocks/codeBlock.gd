@@ -498,9 +498,11 @@ func released(topToBottom: bool) -> void:
 				if !getLowestInStack().bottomDetection:
 					parentNest2.shapeNode.drawSecondNestEndIndent = false
 	# Layering
-	getHighestInStack().setToFront()
+	var highest: CodeBlock = getHighestInStack()
+	highest.setToFront()
 	# Fix any offset from preview if dropping in middle of stack
-	getHighestInStack().processOffset(null)
+	highest.processOffset(null)
+	#highest.makeSpace()
 	detectedBlock = null
 	detectedSnapPos = 0
 	if snapPreview: snapPreview.queue_free()
@@ -924,6 +926,16 @@ func hoveringChildValue() -> bool:
 		if i.get_global_rect().has_point(get_global_mouse_position()):
 			return true
 	return false
+
+func makeSpace() -> void:
+	var overlap: CodeBlock
+	for i: Area2D in grabArea.get_overlapping_areas():
+		overlap = i.get_parent()
+		if (!overlap.parentBlock) and (!overlap.parentNest) and !overlap.parentNest2:
+			if overlap.global_position.distance_to(global_position) > 50.0: continue
+			overlap.global_position += Vector2(50.0, 50.0)
+			overlap.moveWithParent()
+			overlap.makeSpace()
 
 func onResize() -> void:
 	height = size.y + nestEnd + nest2End

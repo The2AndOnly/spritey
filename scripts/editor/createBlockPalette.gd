@@ -69,6 +69,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_changeFrame",
 		&"vis_setFrame",
 		&"vis_frame",
+		&"vis_showMessage",
 		&"vis_setStretch",
 		&"vis_changeStretch",
 		&"vis_stretch",
@@ -203,7 +204,9 @@ func blockClicked(block: CodeBlock) -> void:
 
 func blockReleased(block: CodeBlock) -> void:
 	if block != clickedBlock: return
-	instantiateBlock(block.blockName, camera.global_position - Vector2(400.0, 200.0))
+	var newBlock: CodeBlock = instantiateBlock(block.blockName, camera.global_position - Vector2(400.0, 200.0))
+	await get_tree().physics_frame
+	newBlock.makeSpace()
 
 func mouseExit() -> void:
 	# Fix bug where the block stays highlighted when moving mouse out of palette

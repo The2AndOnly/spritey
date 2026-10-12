@@ -86,9 +86,7 @@ shape = SubResource("RectangleShape2D_cp11l")
 
 [node name="grabArea" type="Area2D" parent="." unique_id=776635314]
 collision_layer = 2
-collision_mask = 0
-monitoring = false
-monitorable = false
+collision_mask = 2
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="grabArea" unique_id=359035348]
 

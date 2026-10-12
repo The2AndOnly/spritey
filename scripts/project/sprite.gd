@@ -33,6 +33,8 @@ var scriptsCompiled := false
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_physics_process(false)
+	messageBox = MESSAGE_BOX.instantiate()
+	gameView.projectUI.add_child(messageBox)
 	
 	# If this sprite was cloned, copy properties from the sprite that cloned it
 	if original:

@@ -56,3 +56,4 @@ func fixSpriteBoundingBox() -> void:
 	sprite.add_child(newShape)
 	sprite.move_child(newShape, frameID)
 	sprite.frameCollisions[frameID] = newShape
+	sprite.updateBoundingBox()

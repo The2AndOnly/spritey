@@ -111,15 +111,6 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictio
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
 
-## Fix detection with flipped sprites
-#static func getTransform(sprite: Sprite) -> Transform2D:
-	#var transform: Transform2D = sprite.global_transform
-	#if sprite.flip_h:
-		#transform = transform.scaled_local(Vector2(-1, 1))
-	#if sprite.flip_v:
-		#transform = transform.scaled_local(Vector2(1, -1))
-	#return transform
-
 static func transformBytes(transform: Transform2D) -> PackedByteArray:
 	# glsl uses mat4 to represent transform
 	return PackedFloat32Array([

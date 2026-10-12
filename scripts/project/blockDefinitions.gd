@@ -583,6 +583,22 @@ func vis_changeZIndex(inputs: Array) -> float:
 func vis_ZIndex() -> int:
 	return z_index
 
+func vis_showMessage(inputs: Array) -> float:
+	var text: String = inputs[0]
+	if text.strip_edges() == "":
+		messageBox.visible = false
+	else:
+		messageBox.visible = true
+		messageBox.text = text
+		H_fixMessageMinimumSize.call_deferred()
+		positionMessage.call_deferred()
+	return -1.0
+func H_fixMessageMinimumSize() -> void:
+	if messageBox.size.x < 400.0:
+		messageBox.size.x = 400.0
+	if messageBox.size.y < 258.0:
+		messageBox.size.y = 258.0
+
 ## INTERACTION
 
 func inter_pointerX() -> float:

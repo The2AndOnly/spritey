@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://btk72m2rs22ex"]
+
+[ext_resource type="Script" uid="uid://bwfed3o3dhw4q" path="res://scripts/project/messageShape.gd" id="1_i8m3y"]
+[ext_resource type="Script" uid="uid://db6ssrrbe7d3t" path="res://scripts/project/messageBox.gd" id="1_m2edr"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i8m3y"]
+content_margin_left = 40.0
+content_margin_top = 40.0
+content_margin_right = 40.0
+content_margin_bottom = 40.0
+
+[node name="MessageBox" type="Label" unique_id=862527613 node_paths=PackedStringArray("shape")]
+visible = false
+custom_maximum_size = Vector2(2000, -1)
+anchors_preset = -1
+anchor_right = 0.22691669
+anchor_bottom = 0.239
+offset_right = -35.680023
+offset_bottom = -0.11999512
+scale = Vector2(0.25, 0.25)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 130
+theme_override_styles/normal = SubResource("StyleBoxEmpty_i8m3y")
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+script = ExtResource("1_m2edr")
+shape = NodePath("messageShape")
+metadata/_edit_use_anchors_ = true
+
+[node name="messageShape" type="Control" parent="." unique_id=336973552]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_i8m3y")
+metadata/_edit_use_anchors_ = true
+metadata/_edit_lock_ = true

@@ -690,6 +690,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
+	&"vis_showMessage": {
+		&"structure": ["show message", 0],
+		0: [&"input", 2, "Hello"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
 	
 	## VARIABLES
 	
