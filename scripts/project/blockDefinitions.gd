@@ -5,7 +5,7 @@ extends SpriteData
 
 ## INPUTS ARRAY:
 # The items are in the order that the inputs are listed in blockStructures.gd
-# If a block has execute wait functions, it CAN NOT access these inputs again
+# If a block has execute wait functions, it can NOT access these inputs again
 # Execute wait blocks should store needed inputs in gameView.currentStack.blockData
 
 ## BLOCK RETURNS:
@@ -584,15 +584,33 @@ func vis_ZIndex() -> int:
 	return z_index
 
 func vis_showMessage(inputs: Array) -> float:
-	var text: String = inputs[0]
+	H_showMessage(inputs[0])
+	return -1.0
+func vis_showMessageSeconds(inputs: Array) -> float:
+	var currentStack: ScriptStack = gameView.currentStack
+	if currentStack.waitTime == -1.0:
+		if currentStack.executeWait:
+			messageBox.hideAfterTwoFrames(currentStack.blockData[-1])
+			return -1.0
+		else:
+			var time: float = inputs[1]
+			if time <= 0.0:
+				messageBox.visible = false
+				return -1.0
+			H_showMessage(inputs[0])
+			currentStack.executeWait = true
+			currentStack.blockData.append(messageBox.currentCall)
+			return time
+	else: return currentStack.waitTime
+func H_showMessage(text: String) -> void:
 	if text.strip_edges() == "":
 		messageBox.visible = false
 	else:
 		messageBox.visible = true
+		messageBox.currentCall += 1
 		messageBox.text = text
 		H_fixMessageMinimumSize.call_deferred()
 		positionMessage.call_deferred()
-	return -1.0
 func H_fixMessageMinimumSize() -> void:
 	if messageBox.size.x < 400.0:
 		messageBox.size.x = 400.0

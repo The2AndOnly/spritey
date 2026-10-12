@@ -927,15 +927,16 @@ func hoveringChildValue() -> bool:
 			return true
 	return false
 
-func makeSpace() -> void:
+func makeSpace(ignore: CodeBlock) -> void:
 	var overlap: CodeBlock
 	for i: Area2D in grabArea.get_overlapping_areas():
 		overlap = i.get_parent()
+		if overlap == ignore: continue
 		if (!overlap.parentBlock) and (!overlap.parentNest) and !overlap.parentNest2:
 			if overlap.global_position.distance_to(global_position) > 50.0: continue
 			overlap.global_position += Vector2(50.0, 50.0)
 			overlap.moveWithParent()
-			overlap.makeSpace()
+			overlap.makeSpace(self)
 
 func onResize() -> void:
 	height = size.y + nestEnd + nest2End

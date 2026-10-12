@@ -70,6 +70,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_setFrame",
 		&"vis_frame",
 		&"vis_showMessage",
+		&"vis_showMessageSeconds",
 		&"vis_setStretch",
 		&"vis_changeStretch",
 		&"vis_stretch",
@@ -136,18 +137,19 @@ var clickedBlock: CodeBlock = null
 var draggedBlock: CodeBlock = null
 
 # Negative: Spacing before
-# Position: Spacing after
+# Positive: Spacing after
 func shapeExtraSpacing(shape: BlockShape.blockShapes) -> float:
 	match shape:
-		BlockShape.blockShapes.EVENT: return -28.0
-		BlockShape.blockShapes.NEST: return 80.0
-		BlockShape.blockShapes.DOUBLE_NEST: return 150.0
+		BlockShape.blockShapes.EVENT: return -35.0
+		BlockShape.blockShapes.NEST: return 70.0
+		BlockShape.blockShapes.DOUBLE_NEST: return 130.0
 		_: return 0.0
 
 func _ready() -> void:
 	editor.switchBlockGroup.connect(switchBlockGroup)
 	editor.updateBlockOptions.connect(updateList)
 	mouse_exited.connect(mouseExit)
+	add_theme_constant_override(&"separation", -9)
 	for i: StringName in blockOrder[blockGroup]:
 		createBlock(i)
 
@@ -172,7 +174,7 @@ func createBlock(blockName: StringName, checkBox: VarGraphicCheckbox = null, atF
 		var hbox: HBoxContainer = HBoxContainer.new()
 		hbox.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		hbox.offset_transform_enabled = true
-		hbox.offset_transform_scale = Vector2(0.7, 0.7)
+		hbox.offset_transform_scale = Vector2(0.6, 0.6)
 		hbox.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
 		hbox.offset_transform_visual_only = false
 		hbox.add_theme_constant_override(&"separation", 15)
@@ -183,7 +185,7 @@ func createBlock(blockName: StringName, checkBox: VarGraphicCheckbox = null, atF
 		if atFront:
 			move_child(hbox, 0)
 	else:
-		block.offset_transform_scale = Vector2(0.7, 0.7)
+		block.offset_transform_scale = Vector2(0.6, 0.6)
 		block.offset_transform_pivot_ratio = Vector2(0.0, 0.0)
 		block.offset_transform_visual_only = false
 		add_child(block)
@@ -204,9 +206,10 @@ func blockClicked(block: CodeBlock) -> void:
 
 func blockReleased(block: CodeBlock) -> void:
 	if block != clickedBlock: return
-	var newBlock: CodeBlock = instantiateBlock(block.blockName, camera.global_position - Vector2(400.0, 200.0))
+	var offset: Vector2 = Vector2(200.0, 100.0) / (camera.zoom * 0.8)
+	var newBlock: CodeBlock = instantiateBlock(block.blockName, camera.global_position - offset)
 	await get_tree().physics_frame
-	newBlock.makeSpace()
+	newBlock.makeSpace(newBlock)
 
 func mouseExit() -> void:
 	# Fix bug where the block stays highlighted when moving mouse out of palette

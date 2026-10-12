@@ -801,7 +801,7 @@ camera = NodePath("Camera2D")
 dragDetector = NodePath("Camera2D/drag")
 
 [node name="Camera2D" type="Camera2D" parent="scripts/SubViewportContainer/ScriptView" unique_id=1134382404]
-zoom = Vector2(0.8, 0.8)
+zoom = Vector2(0.6, 0.6)
 
 [node name="drag" type="Area2D" parent="scripts/SubViewportContainer/ScriptView/Camera2D" unique_id=1812885411]
 collision_layer = 16
