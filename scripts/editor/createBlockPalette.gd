@@ -118,6 +118,8 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"exp_charOf",
 		&"exp_substring",
 		&"exp_textLength",
+		&"exp_textContains",
+		&"exp_inCase",
 		&"exp_mod",
 		&"exp_abs",
 		&"exp_round",

@@ -2,8 +2,7 @@ class_name BlockStructures
 extends Node
 
 # TODO: Add an "in editor" boolean block
-# TODO: Add a "set clone name to []" stack block
-# TODO: Make the "event_clicked" block filter by the topmost sprite
+# TODO: Make option inputs that say "enabled/disabled" allow insertion of bool blocks
 
 # INPUT DOCS:
 # Inputs are expected to start from 0 and increment by 1 from left to right
@@ -351,6 +350,20 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		0: [&"options", 0, 0, ["max", "min", "power", "atan2", "hypotenuse"]],
 		1: [&"input", 1, "1"],
 		2: [&"input", 1, "5"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.VALUE
+	},
+	&"exp_textContains": {
+		&"structure": [0, "contains", 1],
+		0: [&"input", 2, "text"],
+		1: [&"input", 2, "e"],
+		&"color": &"expressions",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
+	&"exp_inCase": {
+		&"structure": [0, "in", 1],
+		0: [&"input", 2, "text"],
+		1: [&"options", 0, 0, ["uppercase", "lowercase"]],
 		&"color": &"expressions",
 		&"shape": BlockShape.blockShapes.VALUE
 	},

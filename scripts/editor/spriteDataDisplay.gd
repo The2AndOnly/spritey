@@ -95,6 +95,7 @@ func sizeFocusExit() -> void:
 
 func visibleChanged(visibility: bool) -> void:
 	currentSprite.visible = visibility
+	currentSprite.messageBox.modulate.a = 1.0 if visibility else 0.0
 
 func nameSubmitted(newText: String) -> void:
 	if newText.strip_edges() == "":

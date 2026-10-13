@@ -424,6 +424,7 @@ func exp_substring(inputs: Array) -> String:
 		index = maxi(index, 0)
 	elif index > 0:
 		index -= 1
+		index = mini(index, text.length() - 1)
 	else:
 		return ""
 	if lastIndex < 0:
@@ -440,6 +441,16 @@ func exp_substring(inputs: Array) -> String:
 
 func exp_textLength(inputs: Array) -> int:
 	return inputs[0].length()
+
+func exp_textContains(inputs: Array) -> bool:
+	var contains: String = inputs[1]
+	if contains == "": return true
+	return inputs[0].contains(contains)
+
+func exp_inCase(inputs: Array) -> String:
+	if inputs[1] == 0:
+		return inputs[0].to_upper()
+	return inputs[0].to_lower()
 
 func exp_ternary(inputs: Array) -> String:
 	return inputs[0] if inputs[1] else inputs[2]
@@ -485,9 +496,11 @@ func exp_doubleMath(inputs: Array) -> float:
 
 func vis_show() -> float:
 	visible = true
+	messageBox.modulate.a = 1.0
 	return -1.0
 func vis_hide() -> float:
 	visible = false
+	messageBox.modulate.a = 0.0
 	return -1.0
 
 func vis_visible() -> bool:
@@ -612,8 +625,8 @@ func H_showMessage(text: String) -> void:
 		H_fixMessageMinimumSize.call_deferred()
 		positionMessage.call_deferred()
 func H_fixMessageMinimumSize() -> void:
-	if messageBox.size.x < 400.0:
-		messageBox.size.x = 400.0
+	if messageBox.size.x < 320.0:
+		messageBox.size.x = 320.0
 	if messageBox.size.y < 258.0:
 		messageBox.size.y = 258.0
 
