@@ -716,6 +716,13 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	&"vis_setEffect": {
+		&"structure": ["set", 0, "effect to", 1, "%"],
+		0: [&"options", 0, 0, ["brightness", "hue shift", "saturation"]],
+		1: [&"input", 1, "50"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
 	
 	## VARIABLES
 	

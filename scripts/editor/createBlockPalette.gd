@@ -82,7 +82,8 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"vis_setLayerOption",
 		&"vis_setZIndex",
 		&"vis_changeZIndex",
-		&"vis_ZIndex"
+		&"vis_ZIndex",
+		&"vis_setEffect"
 	],
 	&"transform": [
 		&"trans_setPosition",
