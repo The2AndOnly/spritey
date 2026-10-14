@@ -1,24 +1,43 @@
 shader_type canvas_item;
 
 uniform float brightness = 0.0f;
-uniform float hueShift = 0.5f;
+uniform float hueShift = 0.0f;
 uniform float saturation = 0.0f;
-uniform float fisheye = 70.0f;
+uniform float fisheye = 0.0f;
 uniform vec4 effect_rect = vec4(0.25, 0.25, 0.5, 0.5);
 
-vec3 rgb2hsv(vec3 c) {
-    vec4 K = vec4(0.0f, -1.0f / 3.0f, 2.0f / 3.0f, -1.0f);
-    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10f;
-    return vec3(abs(q.z + (q.w - q.y) / (6.0f * d + e)), d / (q.x + e), q.x);
+vec3 rgb2hsl(vec3 c) {
+    float cmin = min(c.r, min(c.g, c.b));
+    float cmax = max(c.r, max(c.g, c.b));
+    float delta = cmax - cmin;
+    
+    vec3 hsl = vec3(0.0);
+    hsl.z = (cmax + cmin) * 0.5; // Lightness
+    
+    if (delta > 0.0) {
+        if (hsl.z < 0.5) {
+            hsl.y = delta / (cmax + cmin);
+        } else {
+            hsl.y = delta / (2.0 - cmax - cmin);
+        }
+        
+        if (cmax == c.r) {
+            hsl.x = (c.g - c.b) / delta + (c.g < c.b ? 6.0 : 0.0);
+        } else if (cmax == c.g) {
+            hsl.x = (c.b - c.r) / delta + 2.0;
+        } else {
+            hsl.x = (c.r - c.g) / delta + 4.0;
+        }
+        hsl.x /= 6.0;
+    }
+    return hsl;
 }
 
-vec3 hsv2rgb(vec3 c) {
-    vec4 K = vec4(1.0f, 2.0f / 3.0f, 1.0f / 3.0f, 3.0f);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0f - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0f, 1.0f), c.y);
+// HSL to RGB conversion
+vec3 hsl2rgb(vec3 c) {
+    vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+    float c_val = (1.0 - abs(2.0 * c.z - 1.0)) * c.y;
+    return (rgb - 0.5) * c_val + c.z;
 }
 
 mat3 saturationMatrix(float sat) {
@@ -56,14 +75,12 @@ void fragment() {
 			uv = effect_rect.xy + local_uv * effect_rect.zw;
 		}
 		vec4 color = texture(TEXTURE, uv);
-		vec3 final_rgb = color.rgb + brightness;
-		if (saturation != 0.0) {
-			final_rgb = saturationMatrix(saturation + 1.0f) * final_rgb;
-		}
-		if (hueShift != 0.0) {
-			vec3 hsv = rgb2hsv(final_rgb);
-			hsv.x += hueShift;
-			final_rgb = hsv2rgb(hsv);
+		vec3 final_rgb = color.rgb + (brightness / 100.0f);
+		if ((saturation != 0.0f) || (hueShift != 0.0f)) {
+			vec3 hsl = rgb2hsl(final_rgb);
+			hsl.x = fract(hsl.x + (hueShift / 100.0f));
+			hsl.y *= max(0.0f, ((saturation / 100.0f) + 1.0f));
+			final_rgb = hsl2rgb(hsl);
 		}
 		COLOR = vec4(final_rgb, color.a);
 	}

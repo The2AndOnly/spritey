@@ -2,6 +2,7 @@ class_name SpriteData
 extends AnimatedSprite2D
 
 const MESSAGE_BOX: PackedScene = preload("uid://btk72m2rs22ex")
+const SPRITE_EFFECTS_MATERIAL: ShaderMaterial = preload("uid://binelk1vnjcyy")
 #const VAR_GRAPHIC: PackedScene = preload("uid://bawekqtjf8tpg")
 
 #@onready var directionGraphic: VarGraphic = VAR_GRAPHIC.instantiate()
@@ -37,6 +38,18 @@ var messageBox: MessageBox = null
 var collisions: Dictionary[Sprite, int]
 
 var spriteName: String = "?"
+var spriteVisible: bool = true:
+	set(value):
+		if visible == value: return
+		visible = value
+		if value:
+			messageBox.modulate.a = 1.0
+			disableBoundsUpdate = false
+			updateBoundingBox()
+		else:
+			messageBox.modulate.a = 0.0
+			disableBoundsUpdate = true
+
 @export var spritePos: Vector2 = Vector2.ZERO:
 	set(value):
 		spritePos = value
@@ -73,6 +86,78 @@ var spriteName: String = "?"
 		spriteFrame = value
 		updateBoundingBox()
 
+@export var effectsActive: int = 0:
+	set(value):
+		effectsActive = value
+		if effectsActive == 0:
+			if material:
+				material = null
+		else:
+			if !material:
+				material = SPRITE_EFFECTS_MATERIAL.duplicate()
+				updateBoundingBox()
+
+@export var effectBrightness: float = 0.0:
+	set(value):
+		if effectBrightness == 0.0:
+			if value == 0.0:
+				return
+			else:
+				effectsActive += 1
+		else:
+			if value == 0.0:
+				material.set_shader_parameter(&"brightness", 0.0)
+				effectBrightness = 0.0
+				effectsActive -= 1
+				return
+		effectBrightness = value
+		material.set_shader_parameter(&"brightness", value)
+@export var effectHueShift: float = 0.0:
+	set(value):
+		if effectHueShift == 0.0:
+			if value == 0.0:
+				return
+			else:
+				effectsActive += 1
+		else:
+			if value == 0.0:
+				material.set_shader_parameter(&"hueShift", 0.0)
+				effectHueShift = 0.0
+				effectsActive -= 1
+				return
+		effectHueShift = value
+		material.set_shader_parameter(&"hueShift", value)
+@export var effectSaturation: float = 0.0:
+	set(value):
+		if effectSaturation == 0.0:
+			if value == 0.0:
+				return
+			else:
+				effectsActive += 1
+		else:
+			if value == 0.0:
+				material.set_shader_parameter(&"saturation", 0.0)
+				effectSaturation = 0.0
+				effectsActive -= 1
+				return
+		effectSaturation = value
+		material.set_shader_parameter(&"saturation", value)
+@export var effectFisheye: float = 0.0:
+	set(value):
+		if effectFisheye == 0.0:
+			if value == 0.0:
+				return
+			else:
+				effectsActive += 1
+		else:
+			if value == 0.0:
+				material.set_shader_parameter(&"fisheye", 0.0)
+				effectFisheye = 0.0
+				effectsActive -= 1
+				return
+		effectFisheye = value
+		material.set_shader_parameter(&"fisheye", value)
+
 func updateSize() -> void:
 	var baseScale: float = size / 100.0
 	scale = Vector2(
@@ -92,6 +177,27 @@ func updateBoundingBox() -> void:
 		boundingBox.position = position
 	gameView.spriteBoundingBox[spriteID] = boundingBox
 	if messageBox.visible: positionMessage()
+	# Effects need a local bounding box
+	if material and collisionShape.shape:
+		# Get the rect in the collision shape's local space
+		var shape_rect: Rect2 = collisionShape.shape.get_rect()
+		
+		# Transform it into the sprite's local space (using local transform, not global)
+		var local_rect: Rect2 = collisionShape.transform * shape_rect
+		
+		# Since the sprite is centered, its local origin (0,0) is at the center (640, 360).
+		# Shift the position so (0,0) matches the top-left of the 1280x720 texture.
+		var top_left_x = local_rect.position.x + (1280.0 * 0.5)
+		var top_left_y = local_rect.position.y + (720.0 * 0.5)
+		
+		# Normalize directly into 0.0 to 1.0 UV space
+		var uv_rect = Vector4(
+			top_left_x / 1280.0,
+			top_left_y / 720.0,
+			local_rect.size.x / 1280.0,
+			local_rect.size.y / 720.0
+		)
+		material.set_shader_parameter(&"effect_rect", uv_rect)
 
 func positionMessage() -> void:
 	var boundingBox: Rect2 = gameView.spriteBoundingBox[spriteID]

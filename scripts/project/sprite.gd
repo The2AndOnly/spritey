@@ -50,8 +50,9 @@ func _ready() -> void:
 		frameTextures = original.frameTextures
 		for i: int in range(get_child_count()):
 			frameCollisions[i] = get_child(i)
-		disableBoundsUpdate = false
-		updateBoundingBox()
+		# Do this after setting the message box
+		# This will update the bounding box if visible
+		spriteVisible = original.spriteVisible
 		
 		# Set up variables
 		variables = original.variables

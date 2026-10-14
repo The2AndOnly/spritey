@@ -2,7 +2,6 @@ extends Button
 
 const SPRITE_ENTRY: PackedScene = preload("uid://b4g1hm5dt1b7m")
 const SPRITE_SELECTOR_GROUP: ButtonGroup = preload("uid://g30w58c26scg")
-const SPRITE_EFFECTS: Shader = preload("uid://brg6xpl45kto")
 const ORANGE_MOE_1: Texture2D = preload("uid://dhmontm0rmbj8")
 const ORANGE_MOE_2: Texture2D = preload("uid://duqpnvqse6a60")
 const ORANGE_MOE_3: Texture2D = preload("uid://nwlo51p3pbda")
@@ -49,29 +48,3 @@ func onPress() -> void:
 	spriteEntry.sprite = sprite
 	gameView.sprites.append(sprite)
 	editor.selectedSprite = sprite
-	
-	var shaderMaterial: ShaderMaterial = ShaderMaterial.new()
-	sprite.material = shaderMaterial
-	shaderMaterial.shader = SPRITE_EFFECTS
-	var collision_shape: CollisionShape2D = sprite.frameCollisions[sprite.spriteFrame]
-	if collision_shape and collision_shape.shape:
-		# Get the rect in the collision shape's local space
-		var shape_rect: Rect2 = collision_shape.shape.get_rect()
-		
-		# Transform it into the sprite's local space (using local transform, not global)
-		var local_rect: Rect2 = collision_shape.transform * shape_rect
-		
-		# Since the sprite is centered, its local origin (0,0) is at the center (640, 360).
-		# Shift the position so (0,0) matches the top-left of the 1280x720 texture.
-		var top_left_x = local_rect.position.x + (1280.0 * 0.5)
-		var top_left_y = local_rect.position.y + (720.0 * 0.5)
-		
-		# Normalize directly into 0.0 to 1.0 UV space
-		var uv_rect = Vector4(
-			top_left_x / 1280.0,
-			top_left_y / 720.0,
-			local_rect.size.x / 1280.0,
-			local_rect.size.y / 720.0
-		)
-		print(uv_rect)
-		shaderMaterial.set_shader_parameter(&"effect_rect", uv_rect)

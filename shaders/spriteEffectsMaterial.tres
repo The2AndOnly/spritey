@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://binelk1vnjcyy"]
+
+[ext_resource type="Shader" uid="uid://brg6xpl45kto" path="res://shaders/spriteEffects.gdshader" id="1_8ylwn"]
+
+[resource]
+shader = ExtResource("1_8ylwn")
+shader_parameter/brightness = 0.0
+shader_parameter/hueShift = 0.0
+shader_parameter/saturation = 0.0
+shader_parameter/fisheye = 0.0
+shader_parameter/effect_rect = Vector4(0.25, 0.25, 0.5, 0.5)

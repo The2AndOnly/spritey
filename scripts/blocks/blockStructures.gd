@@ -718,8 +718,20 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_setEffect": {
 		&"structure": ["set", 0, "effect to", 1, "%"],
-		0: [&"options", 0, 0, ["brightness", "hue shift", "saturation"]],
+		0: [&"options", 0, 0, ["brightness", "hue shift", "saturation", "fisheye"]],
 		1: [&"input", 1, "50"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_changeEffect": {
+		&"structure": ["change", 0, "effect by", 1],
+		0: [&"options", 0, 0, ["brightness", "hue shift", "saturation", "fisheye"]],
+		1: [&"input", 1, "1"],
+		&"color": &"visuals",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"vis_clearEffects": {
+		&"structure": ["clear effects"],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.STACK
 	},

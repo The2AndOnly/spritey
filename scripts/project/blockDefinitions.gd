@@ -495,12 +495,10 @@ func exp_doubleMath(inputs: Array) -> float:
 ## VISUALS
 
 func vis_show() -> float:
-	visible = true
-	messageBox.modulate.a = 1.0
+	spriteVisible = true
 	return -1.0
 func vis_hide() -> float:
-	visible = false
-	messageBox.modulate.a = 0.0
+	spriteVisible = false
 	return -1.0
 
 func vis_visible() -> bool:
@@ -619,7 +617,10 @@ func H_showMessage(text: String) -> void:
 	if text.strip_edges() == "":
 		messageBox.visible = false
 	else:
-		messageBox.visible = true
+		if !messageBox.visible:
+			# Make the most recently appeared message show in the front
+			gameView.projectUI.move_child(messageBox, -1)
+			messageBox.visible = true
 		messageBox.currentCall += 1
 		messageBox.text = text
 		H_fixMessageMinimumSize.call_deferred()
@@ -629,6 +630,27 @@ func H_fixMessageMinimumSize() -> void:
 		messageBox.size.x = 320.0
 	if messageBox.size.y < 258.0:
 		messageBox.size.y = 258.0
+
+func vis_setEffect(inputs: Array) -> float:
+	match inputs[0]:
+		0: effectBrightness = inputs[1]
+		1: effectHueShift = inputs[1]
+		2: effectSaturation = inputs[1]
+		3: effectFisheye = inputs[1]
+	return -1.0
+func vis_changeEffect(inputs: Array) -> float:
+	match inputs[0]:
+		0: effectBrightness += inputs[1]
+		1: effectHueShift += inputs[1]
+		2: effectSaturation += inputs[1]
+		3: effectFisheye += inputs[1]
+	return -1.0
+func vis_clearEffects() -> float:
+	effectBrightness = 0.0
+	effectHueShift = 0.0
+	effectSaturation = 0.0
+	effectFisheye = 0.0
+	return -1.0
 
 ## INTERACTION
 
