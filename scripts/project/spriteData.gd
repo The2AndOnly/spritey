@@ -32,6 +32,7 @@ var touchingMouse := false
 var spriteID: int
 var disableBoundsUpdate := true
 var messageBox: MessageBox = null
+var drawLayer: SpriteDrawLayer = null
 @export var sizeMultiplier: Vector2 = Vector2.ONE
 
 # master: clones touching
@@ -42,6 +43,7 @@ var spriteVisible: bool = true:
 	set(value):
 		if visible == value: return
 		visible = value
+		spriteVisible = value
 		if value:
 			messageBox.modulate.a = 1.0
 			disableBoundsUpdate = false
@@ -158,6 +160,13 @@ var spriteVisible: bool = true:
 		effectFisheye = value
 		material.set_shader_parameter(&"fisheye", value)
 
+@export var strokeEnabled := false
+@export var brushStamp: Image = null
+@export var lastDrawPosition: Vector2 = Vector2.ZERO
+@export var strokeSize: int = 3
+@export var strokeColor: Color = Color(0.0, 0.68, 1.0, 1.0)
+@export var strokeTool: int = 0
+
 func updateSize() -> void:
 	var baseScale: float = size / 100.0
 	scale = Vector2(
@@ -166,6 +175,9 @@ func updateSize() -> void:
 	) * sizeMultiplier
 
 func updateBoundingBox() -> void:
+	if strokeEnabled and drawLayer:
+		drawLayer.interpolateStroke(position, lastDrawPosition, brushStamp, strokeSize, strokeTool)
+		lastDrawPosition = position
 	if disableBoundsUpdate: return
 	var collisionShape: CollisionShape2D = frameCollisions[spriteFrame]
 	var boundingBox: Rect2
@@ -178,6 +190,7 @@ func updateBoundingBox() -> void:
 	gameView.spriteBoundingBox[spriteID] = boundingBox
 	if messageBox.visible: positionMessage()
 	# Effects need a local bounding box
+	## AI GENERATED
 	if material and collisionShape.shape:
 		# Get the rect in the collision shape's local space
 		var shape_rect: Rect2 = collisionShape.shape.get_rect()

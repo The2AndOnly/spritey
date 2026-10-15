@@ -34,6 +34,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_physics_process(false)
 	messageBox = MESSAGE_BOX.instantiate()
+	drawLayer = gameView.drawLayer
 	gameView.projectUI.add_child(messageBox)
 	
 	# If this sprite was cloned, copy properties from the sprite that cloned it
@@ -51,8 +52,9 @@ func _ready() -> void:
 		for i: int in range(get_child_count()):
 			frameCollisions[i] = get_child(i)
 		# Do this after setting the message box
-		# This will update the bounding box if visible
 		spriteVisible = original.spriteVisible
+		disableBoundsUpdate = false
+		updateBoundingBox()
 		
 		# Set up variables
 		variables = original.variables

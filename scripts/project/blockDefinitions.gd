@@ -721,6 +721,49 @@ func inter_touchingPoint(inputs: Array) -> bool:
 	if !option.visible: return false
 	return SpriteCollision.spriteTouchingPoint(option, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])), gameView.spriteBoundingBox)
 
+## DRAW
+
+func draw_beginStroke() -> float:
+	strokeEnabled = true
+	lastDrawPosition = position
+	drawLayer.stampBrush(position - drawLayer.position, brushStamp, strokeSize, strokeTool)
+	return -1.0
+func draw_endStroke() -> float:
+	strokeEnabled = false
+	return -1.0
+
+func draw_setStrokeSize(inputs: Array) -> float:
+	# min stroke of 0 is already handled by positive integer input
+	var newSize: int = mini(inputs[0], 200)
+	if strokeSize == newSize: return -1.0
+	strokeSize = newSize
+	brushStamp = Strokes.setBrushStamp(strokeSize, strokeTool, strokeColor)
+	return -1.0
+func draw_changeStrokeSize(inputs: Array) -> float:
+	var newSize: int = strokeSize + inputs[0]
+	newSize = clampi(newSize, 0, 200)
+	if strokeSize == newSize: return -1.0
+	strokeSize = newSize
+	brushStamp = Strokes.setBrushStamp(strokeSize, strokeTool, strokeColor)
+	return -1.0
+
+func draw_strokeTool(inputs: Array) -> float:
+	var option: int = inputs[0]
+	if strokeTool == option: return -1.0
+	strokeTool = option
+	brushStamp = Strokes.setBrushStamp(strokeSize, strokeTool, strokeColor)
+	return -1.0
+
+func draw_clearAll() -> float:
+	drawLayer.clearAll()
+	return -1.0
+
+#func draw_stampFrame() -> float:
+	#var croppedFrame: Texture2D = croppedFrames[spriteFrame]
+	#var frameSize: Vector2i = Vector2i(croppedFrame.get_size())
+	#drawLayer.stampFrame(croppedFrame.get_image(), Rect2i(0, 0, frameSize.x, frameSize.y), position)
+	#return -1.0
+
 ## VARIABLES
 
 # Global variables and local variables on original sprites will use the variable object directly

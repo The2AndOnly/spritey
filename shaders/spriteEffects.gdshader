@@ -1,3 +1,4 @@
+// AI GENERATED
 shader_type canvas_item;
 
 uniform float brightness = 0.0f;

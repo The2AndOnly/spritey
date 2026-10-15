@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bwbrqjjnmmsge" path="res://scripts/editor/editor.gd" id="1_q68jb"]
 [ext_resource type="Script" uid="uid://jxs1kkb13lbb" path="res://scripts/editor/guiButtons/buttonNewSprite.gd" id="4_q68jb"]
 [ext_resource type="Script" uid="uid://b6lrotmsxgnnu" path="res://scripts/project/buttonProjectControls.gd" id="4_xg7d5"]
+[ext_resource type="Script" uid="uid://ov5u6ya2ke3s" path="res://scripts/project/spriteDrawLayer.gd" id="5_k1sck"]
 [ext_resource type="Script" uid="uid://bs4y7vreo54hw" path="res://scripts/editor/guiButtons/buttonEditorView.gd" id="5_xg7d5"]
 [ext_resource type="Script" uid="uid://bn26u4h5365bi" path="res://scripts/editor/createBlockPalette.gd" id="6_eqbpn"]
 [ext_resource type="Script" uid="uid://67u0vxisaah" path="res://scripts/editor/scriptView.gd" id="6_j8y2p"]
@@ -137,7 +138,7 @@ grow_vertical = 2
 stretch = true
 metadata/_edit_use_anchors_ = true
 
-[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI", "camera")]
+[node name="GameView" type="SubViewport" parent="sprites/SubViewportContainer" unique_id=868529631 node_paths=PackedStringArray("editor", "projectUI", "camera", "drawLayer")]
 disable_3d = true
 handle_input_locally = false
 physics_object_picking = true
@@ -149,6 +150,12 @@ script = ExtResource("1_ba0ut")
 editor = NodePath("../../..")
 projectUI = NodePath("UI")
 camera = NodePath("Camera2D")
+drawLayer = NodePath("SpriteDrawLayer")
+
+[node name="SpriteDrawLayer" type="Node2D" parent="sprites/SubViewportContainer/GameView" unique_id=1886750734]
+texture_filter = 1
+script = ExtResource("5_k1sck")
+metadata/_custom_type_script = "uid://ov5u6ya2ke3s"
 
 [node name="UI" type="CanvasLayer" parent="sprites/SubViewportContainer/GameView" unique_id=1355168075]
 
@@ -1050,6 +1057,40 @@ blockGroup = &"interaction"
 container = NodePath("../..")
 camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
 
+[node name="canvas" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1183054512]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.16003977
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_aa8l6")
+horizontal_scroll_mode = 3
+metadata/_edit_use_anchors_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="scripts/blockSelector/canvas" unique_id=1396241016]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="blocks" type="VBoxContainer" parent="scripts/blockSelector/canvas/MarginContainer" unique_id=816994120 node_paths=PackedStringArray("editor", "gameView", "container", "camera")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+script = ExtResource("6_eqbpn")
+editor = NodePath("../../../../..")
+gameView = NodePath("../../../../../sprites/SubViewportContainer/GameView")
+blockGroup = &"canvas"
+container = NodePath("../..")
+camera = NodePath("../../../../SubViewportContainer/ScriptView/Camera2D")
+
 [node name="variables" type="ScrollContainer" parent="scripts/blockSelector" unique_id=1588330394]
 visible = false
 layout_mode = 1
@@ -1190,6 +1231,15 @@ size_flags_vertical = 3
 theme_override_font_sizes/font_size = 22
 script = ExtResource("10_o435n")
 blockGroup = &"expressions"
+editor = NodePath("../../../..")
+
+[node name="blockGroup8" type="Button" parent="scripts/blockSelector/GridContainer" unique_id=1787769885 node_paths=PackedStringArray("editor")]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+script = ExtResource("10_o435n")
+blockGroup = &"canvas"
 editor = NodePath("../../../..")
 
 [node name="blockGroup7" type="Button" parent="scripts/blockSelector/GridContainer" unique_id=1908024272 node_paths=PackedStringArray("editor")]

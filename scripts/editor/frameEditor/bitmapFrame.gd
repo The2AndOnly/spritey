@@ -138,23 +138,7 @@ func _draw() -> void:
 
 # Create an image and texture for the brush stamp
 func setBrushStamp() -> void:
-	brushStamp = Image.create_empty(brushRadius, brushRadius, false, Image.FORMAT_RGBA8)
-	brushStamp.fill(Color(0.0, 0.0, 0.0, 0.0))
-	# The brush stamp is a pixelated circle
-	var center: float = (brushRadius - 1) / 2.0
-	# Draw the brush stamp
-	for x: int in range(brushRadius):
-		for y: int in range(brushRadius):
-			var distance: float = ((x - center) ** 2) + ((y - center) ** 2)
-			if distance <= (brushRadius / 2.0) ** 2:
-				if toolSelected == Tools.ERASER:
-					var outline: float = maxf(0.0, (brushRadius / 2.0) - 1.0) ** 2
-					if distance < outline:
-						brushStamp.set_pixel(x, y, Color(1.0, 1.0, 1.0, 0.471))
-					else:
-						brushStamp.set_pixel(x, y, Color(1.0, 1.0, 1.0, 0.784))
-				else:
-					brushStamp.set_pixel(x, y, color)
+	brushStamp = Strokes.setBrushStamp(brushRadius, toolSelected, color)
 	# Set stamp preview
 	brushStampPreview.texture = ImageTexture.create_from_image(brushStamp)
 	brushStampPreview.modulate.a = alpha if toolSelected == Tools.BRUSH else 1.0
@@ -171,8 +155,7 @@ func stampOnPreview(center: Vector2i) -> void:
 			source,
 			brushStamp,
 			Rect2i(0, 0, brushRadius, brushRadius),
-			trueCenter
-		)
+			trueCenter)
 	else:
 		# The brush tool simply blends the brush stamp onto the image
 		queuedImage.blend_rect(brushStamp, Rect2i(0, 0, brushRadius, brushRadius), trueCenter)

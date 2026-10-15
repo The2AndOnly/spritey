@@ -134,6 +134,14 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"var_changeBy",
 		&"var_showVar",
 		&"var_hideVar"
+	],
+	&"canvas": [
+		&"draw_beginStroke",
+		&"draw_endStroke",
+		&"draw_clearAll",
+		&"draw_strokeTool",
+		&"draw_setStrokeSize",
+		&"draw_changeStrokeSize"
 	]
 }
 # Clicked blocks are created by releasing it in the palette

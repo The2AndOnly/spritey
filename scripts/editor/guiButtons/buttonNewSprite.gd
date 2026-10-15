@@ -40,7 +40,7 @@ func onPress() -> void:
 	var newID: int = gameView.sprites.size() * 501
 	sprite.spriteID = newID
 	gameView.idToSprite[newID] = sprite
-	
+	sprite.brushStamp = Strokes.setBrushStamp(sprite.strokeSize, 0, sprite.strokeColor)
 	
 	spriteEntryContainer.add_child(spriteEntry)
 	sprite.disableBoundsUpdate = false

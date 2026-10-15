@@ -36,6 +36,7 @@ static var categoryColors: Dictionary[StringName, Color] = {
 	&"visuals": Color("872056ff"),
 	&"variables": Color("139094ff"),
 	&"lists": Color("0f7355ff"),
+	&"canvas": Color("63149cff"),
 	&"unknown": Color("636363ff")
 }
 
@@ -764,6 +765,47 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"variables",
 		&"shape": BlockShape.blockShapes.STACK
 	},
+	
+	## DRAW
+	
+	&"draw_beginStroke": {
+		&"structure": ["begin stroke"],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"draw_endStroke": {
+		&"structure": ["end stroke"],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"draw_setStrokeSize": {
+		&"structure": ["set stroke size to", 0],
+		0: [&"input", 3, "5"],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"draw_changeStrokeSize": {
+		&"structure": ["change stroke size by", 0],
+		0: [&"input", 0, "1"],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"draw_strokeTool": {
+		&"structure": ["set stroke tool to", 0],
+		0: [&"options", 0, 0, ["brush", "eraser"]],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	&"draw_clearAll": {
+		&"structure": ["clear canvas"],
+		&"color": &"canvas",
+		&"shape": BlockShape.blockShapes.STACK
+	},
+	#&"draw_stampFrame": {
+		#&"structure": ["stamp frame"],
+		#&"color": &"canvas",
+		#&"shape": BlockShape.blockShapes.STACK
+	#},
 	
 	## TESTS
 	

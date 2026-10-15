@@ -7,6 +7,7 @@ extends SubViewport
 @export var editor: Editor
 @export var projectUI: CanvasLayer
 @export var camera: Camera2D
+@export var drawLayer: SpriteDrawLayer
 const baseSize: Vector2 = Vector2(1280.0, 720.0)
 
 # Set the inital zoom of the camera so it fits the base size perfectly
@@ -52,6 +53,8 @@ func _ready() -> void:
 	# Set the inital zoom and position of the camera
 	camera.position = Vector2(size) / Vector2(2.0, 2.0)
 	camera.zoom = originalZoomVector
+	drawLayer.position = (Vector2(size) - baseSize) / 2.0
+	#drawLayer.scale = Vector2.ONE / camera.zoom
 
 func compileStack(sprite: Sprite, blockID: int, parentNest: CompiledBlock) -> CompiledBlock:
 	var rawBlock: Dictionary = sprite.spriteScript[blockID]
@@ -153,6 +156,8 @@ func _process(_delta: float) -> void:
 			# If no more blocks to execute, then terminate this stack
 			stackIterator -= 1
 			activeStacks.remove_at(stackIterator)
+	if drawLayer.pendingChanges:
+		drawLayer.queue_redraw()
 
 func event(eventBlockName: StringName, eventData: Array[Variant], storeNewStacks: bool = false) -> void:
 	for sprite: Sprite in sprites:
