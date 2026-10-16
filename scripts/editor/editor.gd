@@ -8,7 +8,7 @@ extends Control
 @export var frameEntryContainer: VBoxContainer
 @export var bitmapEdit: BitmapFrame
 @export var frameNameField: LineEdit
-const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) / 2.0
+const halfBaseSize: Vector2 = Vector2(1280.0, 720.0) * 0.5
 const CODE_BLOCK: PackedScene = preload("uid://pskgxv2e6pjo")
 const FRAME_ENTRY: PackedScene = preload("uid://cak3veot0rt61")
 const FRAME_SELECTOR_GROUP: ButtonGroup = preload("uid://ysu73lx0nf7n")

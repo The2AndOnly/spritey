@@ -576,6 +576,18 @@ func vis_frame(inputs: Array) -> Variant:
 			return int(croppedFrames[spriteFrame].get_size().x)
 		3:
 			return int(croppedFrames[spriteFrame].get_size().y)
+		4:
+			var boundingBox: Rect2 = gameView.spriteBoundingBox[spriteID]
+			boundingBox = get_viewport().get_canvas_transform() * boundingBox
+			return gameView.toGameCoords(boundingBox.position + (boundingBox.size * 0.5)).x
+		5:
+			var boundingBox: Rect2 = gameView.spriteBoundingBox[spriteID]
+			boundingBox = get_viewport().get_canvas_transform() * boundingBox
+			return gameView.toGameCoords(boundingBox.position + (boundingBox.size * 0.5)).y
+		6:
+			return gameView.spriteBoundingBox[spriteID].size.x
+		7:
+			return gameView.spriteBoundingBox[spriteID].size.y
 	return ""
 
 func vis_setLayerOption(inputs: Array) -> float:

@@ -172,12 +172,12 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"shape": BlockShape.blockShapes.STACK
 	},
 	&"trans_XPos": {
-		&"structure": ["x position"],
+		&"structure": ["X position"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
 	&"trans_YPos": {
-		&"structure": ["y position"],
+		&"structure": ["Y position"],
 		&"color": &"transform",
 		&"shape": BlockShape.blockShapes.VALUE
 	},
@@ -677,7 +677,7 @@ static var structures: Dictionary[StringName, Dictionary] = {
 	},
 	&"vis_frame": {
 		&"structure": ["frame", 0],
-		0: [&"options", 0, 0, ["number", "name", "width", "height"]],
+		0: [&"options", 0, 0, ["number", "name", "width", "height", "bounding box X", "bounding box Y", "bounding box width", "bounding box height"]],
 		&"color": &"visuals",
 		&"shape": BlockShape.blockShapes.VALUE
 	},

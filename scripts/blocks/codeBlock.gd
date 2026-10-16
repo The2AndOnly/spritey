@@ -943,7 +943,7 @@ func onResize() -> void:
 	height += 2.0 # For outline
 	if bottomDetection: bottomDetection.position.y = height
 	if valueDrop:
-		valueDrop.position.y = size.y / 2.0
+		valueDrop.position.y = size.y * 0.5
 		fixMinimumSize.call_deferred()
 	if nestDetection:
 		nestDetection.position.y = size.y

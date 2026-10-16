@@ -181,7 +181,7 @@ func shapeValue() -> void:
 	draw_polyline(points, blockColor.darkened(0.2), 2.0)
 
 func shapeBoolean() -> void:
-	var halfSizeY: float = size.y / 2.0
+	var halfSizeY: float = size.y * 0.5
 	points.clear()
 	
 	# Top left corner
