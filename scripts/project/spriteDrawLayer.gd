@@ -21,7 +21,7 @@ func interpolateStroke(targetPosition: Vector2, lastPosition: Vector2, brushStam
 	var trueLastPos: Vector2 = lastPosition - position
 	if trueTargetPos != trueLastPos:
 		var distance: float = Vector2(trueLastPos).distance_to(Vector2(trueTargetPos))
-		var steps: int = int(distance / maxf(1.0, float(brushRadius) * 0.05))
+		var steps: int = int(distance / maxf(1.0, float(brushRadius) * 0.1))
 		if steps == 0:
 			stampBrush(trueTargetPos, brushStamp, brushRadius, toolSelected)
 		else:

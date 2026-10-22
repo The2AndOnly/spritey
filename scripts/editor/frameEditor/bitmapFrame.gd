@@ -14,7 +14,8 @@ const CANVAS_SIZE := Vector2i(1280, 720)
 @export var editor: Editor
 enum Tools {
 	BRUSH,
-	ERASER
+	ERASER,
+	LINE
 }
 
 # Adjustable by the tool settings
@@ -33,10 +34,11 @@ var toolSelected: Tools = Tools.BRUSH:
 	set(value):
 		toolSelected = value
 		match value:
-			Tools.ERASER, Tools.BRUSH:
+			Tools.ERASER, Tools.BRUSH, Tools.LINE:
 				setBrushStamp()
 
 var editableImage: Image
+var emptyImage: Image
 var brushStamp: Image
 var disabled := false
 # The queued image gets baked onto the actual image once the mouse is released
@@ -54,9 +56,10 @@ var frameID: int = -1
 signal frameUpdated(newFrame: Texture2D)
 
 func _ready() -> void:
-	queuedImage = Image.create_empty(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
-	queuedImage.fill(Color(0.0, 0.0, 0.0, 0.0))
-	previewTexture = ImageTexture.create_from_image(queuedImage)
+	emptyImage = Image.create_empty(CANVAS_SIZE.x, CANVAS_SIZE.y, false, Image.FORMAT_RGBA8)
+	emptyImage.fill(Color(0.0, 0.0, 0.0, 0.0))
+	queuedImage = emptyImage.duplicate()
+	previewTexture = ImageTexture.create_from_image(emptyImage)
 	setBrushStamp()
 
 func showFrame(showTexture: Texture2D, id: int) -> void:
@@ -77,7 +80,7 @@ func _process(_delta: float) -> void:
 			newPoints = false
 	else:
 		match toolSelected:
-			Tools.BRUSH, Tools.ERASER:
+			Tools.BRUSH, Tools.ERASER, Tools.LINE:
 				brushStampPreview.visible = true
 				brushStampPreview.global_position = get_global_mouse_position().floor()
 				brushStampPreview.global_position -= Vector2(brushRadius / 2, brushRadius / 2)
@@ -90,10 +93,12 @@ func interpolatePoints() -> void:
 	if queuedPoints.is_empty(): return
 	var targetPosition = queuedPoints[-1]
 	queuedPoints.clear()
+	var isLine: bool = toolSelected == Tools.LINE
 	
-	if targetPosition != lastPosition:
+	if (targetPosition != lastPosition) or isLine:
 		var distance: float = Vector2(lastPosition).distance_to(Vector2(targetPosition))
 		var steps: int = int(distance / maxf(1.0, float(brushRadius) * 0.05))
+		if isLine: stampOnPreview(lastPosition)
 		if steps == 0:
 			stampOnPreview(targetPosition)
 		else:
@@ -101,7 +106,7 @@ func interpolatePoints() -> void:
 				var weight: float = i / float(steps)
 				var interpolated: Vector2 = Vector2(lastPosition).lerp(Vector2(targetPosition), weight).round()
 				stampOnPreview(Vector2i(interpolated))
-		lastPosition = targetPosition
+		if !isLine: lastPosition = targetPosition
 
 func _input(event: InputEvent) -> void:
 	if disabled: return
@@ -116,7 +121,12 @@ func _input(event: InputEvent) -> void:
 		newPoints = true
 	elif (event is InputEventMouseMotion) and drawing:
 		currentPosition = Vector2i(get_local_mouse_position())
-		if currentPosition != lastPosition:
+		if toolSelected == Tools.LINE:
+			# The line tool clears the previous frame
+			if toolSelected == Tools.LINE: queuedImage = emptyImage.duplicate()
+			queuedPoints.append(currentPosition)
+			newPoints = true
+		elif currentPosition != lastPosition:
 			queuedPoints.append(currentPosition)
 			newPoints = true
 	elif event.is_action_released(&"leftMouse") and drawing:
@@ -131,7 +141,7 @@ func _draw() -> void:
 	# The draw function needs a texture version of the queued image
 	previewTexture.update(queuedImage)
 	match toolSelected:
-		Tools.BRUSH:
+		Tools.BRUSH, Tools.LINE:
 			draw_texture(previewTexture, Vector2.ZERO, Color(1.0, 1.0, 1.0, alpha))
 		Tools.ERASER:
 			draw_texture(previewTexture, Vector2.ZERO)
