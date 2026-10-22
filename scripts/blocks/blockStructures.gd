@@ -443,6 +443,15 @@ static var structures: Dictionary[StringName, Dictionary] = {
 		&"color": &"interaction",
 		&"shape": BlockShape.blockShapes.BOOLEAN
 	},
+	&"inter_touchingPointName": {
+		&"structure": [0, "of name", 1, "is touching x:", 2, "y:", 3],
+		0: [&"options", 1, 0, ["this sprite"]],
+		1: [&"input", 2, ""],
+		2: [&"input", 1, "0"],
+		3: [&"input", 1, "0"],
+		&"color": &"interaction",
+		&"shape": BlockShape.blockShapes.BOOLEAN
+	},
 	
 	## CONTROL
 	

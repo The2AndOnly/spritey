@@ -51,6 +51,7 @@ var blockOrder: Dictionary[StringName, Array] = {
 		&"inter_touching",
 		&"inter_touchingName",
 		&"inter_touchingPoint",
+		&"inter_touchingPointName",
 		&"inter_keyPressed",
 		&"inter_mousePressed",
 		&"inter_distanceTo",

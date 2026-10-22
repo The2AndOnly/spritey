@@ -111,6 +111,26 @@ static func spriteTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictio
 	
 	return image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01
 
+static func spritesTouchingPoint(sprite: Sprite, point: Vector2, rectList: Dictionary[int, Rect2], spriteList: Dictionary[int, Sprite], filterEnabled: bool = false, nameFilter: String = "") -> bool:
+	var spriteID: int = sprite.spriteID
+	var cloneCount: int = sprite.clones.size() + 1
+	for id: int in range(spriteID, spriteID + cloneCount):
+		if !rectList[id].has_point(point): continue
+		var clone: Sprite = spriteList[id]
+		if !clone.visible: continue
+		if filterEnabled:
+			if clone.spriteName != nameFilter: continue
+		# Checks passed to run the pixel detection
+		var image: Image = clone.frameImages[clone.frame]
+		var localPoint: Vector2 = clone.global_transform.affine_inverse() * point
+		var pixelPosition: Vector2i = Vector2i(localPoint - fullTextureRect.position)
+		# All sprite frames are always 1280 x 720
+		if (pixelPosition.x < 0) or (pixelPosition.x >= 1280) or\
+		(pixelPosition.y < 0) or (pixelPosition.y >= 720):
+			continue
+		if image.get_pixel(pixelPosition.x, pixelPosition.y).a > 0.01: return true
+	return false
+
 static func transformBytes(transform: Transform2D) -> PackedByteArray:
 	# glsl uses mat4 to represent transform
 	return PackedFloat32Array([

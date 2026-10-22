@@ -726,12 +726,17 @@ func inter_touchingName(inputs: Array) -> bool:
 	if option is int:
 		option = master
 	return SpriteCollision.spritesTouching(self, option, gameView.spriteBoundingBox, gameView.idToSprite, true, inputs[1])
+
 func inter_touchingPoint(inputs: Array) -> bool:
 	var option: Variant = inputs[0]
 	if option is int:
-		option = self
-	if !option.visible: return false
-	return SpriteCollision.spriteTouchingPoint(option, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])), gameView.spriteBoundingBox)
+		option = master
+	return SpriteCollision.spritesTouchingPoint(option, gameView.toLocalCoords(Vector2(inputs[1], inputs[2])), gameView.spriteBoundingBox, gameView.idToSprite)
+func inter_touchingPointName(inputs: Array) -> bool:
+	var option: Variant = inputs[0]
+	if option is int:
+		option = master
+	return SpriteCollision.spritesTouchingPoint(option, gameView.toLocalCoords(Vector2(inputs[2], inputs[3])), gameView.spriteBoundingBox, gameView.idToSprite, true, inputs[1])
 
 ## DRAW
 
