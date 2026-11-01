@@ -44,9 +44,10 @@ func event_signal(inputs: Array) -> float:
 
 func event_signalAndWait(inputs: Array) -> float:
 	if gameView.currentStack.executeWait:
+		# Perhaps there is a more optimized way by keeping track of the number of created stacks
 		for i: ScriptStack in gameView.currentStack.createdStacks:
-			if gameView.activeStacks.has(i):
-				return 1.0
+			if gameView.activeStacks.has(i): return 1.0
+		gameView.currentStack.createdStacks.clear()
 		return -1.0
 	else:
 		gameView.event(&"event_receive", inputs, true)
