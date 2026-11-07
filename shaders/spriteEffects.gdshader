@@ -1,4 +1,4 @@
-// AI GENERATED
+// AI GENERATED PLACEHOLDER
 shader_type canvas_item;
 
 uniform float brightness = 0.0f;
@@ -60,6 +60,7 @@ void fragment() {
 	               UV.y >= effect_rect.y && UV.y <= (effect_rect.y + effect_rect.w));
 	if (inside) {
 		vec2 uv = UV;
+		// Fisheye effect taken directly from Scratch (with AI changes)
 		if (fisheye != 0.0) {
 			float newAmount = (fisheye / 100.0) + 1.0;
 			vec2 local_uv = (UV - effect_rect.xy) / effect_rect.zw;
